@@ -354,7 +354,9 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeCharacters("\n  ");
     stream.writeStartElement("tag");
     stream.writeCharacters("\n    ");
-    if (component.getDescription() != null)
+
+    // In JSP 2.1, description goes up top
+    if (_is12() && component.getDescription() != null)
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("description");
@@ -380,6 +382,15 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     }
 
     GenerateJspTaglibsMojo.this.writeCustomComponentTagDescriptorContent(stream, component);
+
+    // In JSP 2.0, description goes just before the attributes
+    if (!_is12() && component.getDescription() != null)
+    {
+      stream.writeCharacters("\n    ");
+      stream.writeStartElement("description");
+      stream.writeCData(component.getDescription());
+      stream.writeEndElement();
+    }
 
     Iterator properties = component.properties(true);
     properties = new FilteredIterator(properties, new TagAttributeFilter());
@@ -407,7 +418,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeCharacters("\n  ");
     stream.writeStartElement("tag");
     stream.writeCharacters("\n    ");
-    if (converter.getDescription() != null)
+    if (_is12() && converter.getDescription() != null)
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("description");
@@ -432,6 +443,14 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
       stream.writeEndElement();
     }
 
+    if (!_is12() && converter.getDescription() != null)
+    {
+      stream.writeCharacters("\n    ");
+      stream.writeStartElement("description");
+      stream.writeCData(converter.getDescription());
+      stream.writeEndElement();
+    }
+
     // converters need an id attribute
     writeTagAttribute(stream, "id", "the identifier for the converter", null, null);
 
@@ -451,15 +470,11 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeEndElement();
   }
 
-  protected void writeTagAttribute(
+  private void _writeTagAttributeDescription(
     XMLStreamWriter stream,
-    String          propertyName,
     String          description,
-    String[]        unsupportedAgents,
-    PropertyBean    property) throws XMLStreamException
+    String[]        unsupportedAgents) throws XMLStreamException
   {
-    stream.writeCharacters("\n    ");
-    stream.writeStartElement("attribute");
 
     if (description != null ||
         unsupportedAgents.length > 0)
@@ -485,6 +500,21 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
       stream.writeCData(description);
       stream.writeEndElement();
     }
+  }
+
+  protected void writeTagAttribute(
+    XMLStreamWriter stream,
+    String          propertyName,
+    String          description,
+    String[]        unsupportedAgents,
+    PropertyBean    property) throws XMLStreamException
+  {
+    stream.writeCharacters("\n    ");
+    stream.writeStartElement("attribute");
+
+    // In JSP 2.1, the description goes at the beginning
+    if (_is12())
+      _writeTagAttributeDescription(stream, description, unsupportedAgents);
 
     stream.writeCharacters("\n      ");
     stream.writeStartElement("name");
@@ -502,6 +532,9 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
       stream.writeStartElement("rtexprvalue");
       stream.writeCharacters("false");
       stream.writeEndElement();
+
+      // In JSP 2.0, the tag description goes at the end
+      _writeTagAttributeDescription(stream, description, unsupportedAgents);
     }
     else
     {
@@ -596,7 +629,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeCharacters("\n  ");
     stream.writeStartElement("tag");
 
-    if (validator.getDescription() != null)
+    if (_is12() && validator.getDescription() != null)
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("description");
@@ -619,6 +652,14 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
       stream.writeCharacters("\n    ");
       stream.writeStartElement("body-content");
       stream.writeCharacters("empty");
+      stream.writeEndElement();
+    }
+
+    if (!_is12() && validator.getDescription() != null)
+    {
+      stream.writeCharacters("\n    ");
+      stream.writeStartElement("description");
+      stream.writeCData(validator.getDescription());
       stream.writeEndElement();
     }
 
