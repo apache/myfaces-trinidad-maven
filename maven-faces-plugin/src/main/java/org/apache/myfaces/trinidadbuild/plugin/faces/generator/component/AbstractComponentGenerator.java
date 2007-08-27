@@ -1020,6 +1020,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     resolvableTypes.put("java.util.Locale", "Locale");
     resolvableTypes.put("long", "Long");
     resolvableTypes.put("java.lang.String", "String");
+    resolvableTypes.put("java.lang.Number", "Number");
     // TODO: put this back in
     //resolvableTypes.put("java.lang.String[]", "StringArray");
     resolvableTypes.put("java.util.TimeZone", "TimeZone");

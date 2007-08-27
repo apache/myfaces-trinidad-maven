@@ -304,6 +304,18 @@ public class Util
     {
       return "\"" + value.replaceAll("\'", "\\'") + "\"";
     }
+    else if ("Number".equals(className))
+    {
+      // Double vs. Integer.
+      if(value.indexOf(".") == -1)
+      {
+        return "Integer.valueOf(" + value + ")";
+      }
+      else
+      {
+        return "Double.valueOf(" + value + ")";
+      }
+    }
     else
     {
       return value;
