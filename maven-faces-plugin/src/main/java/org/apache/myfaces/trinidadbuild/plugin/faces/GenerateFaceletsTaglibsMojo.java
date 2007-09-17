@@ -92,13 +92,13 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
         FacesConfigBean facesConfig = getFacesConfig();
         Iterator components = facesConfig.components();
         components = new FilteredIterator(components, new SkipFilter());
-        components = new FilteredIterator(components, new ComponentTagLibraryFilter(namespaceURI));
+        components = new FilteredIterator(components, new ComponentTagLibraryFilter(namespaceURI, false));
 
         Iterator validators = facesConfig.validators();
-        validators = new FilteredIterator(validators, new ValidatorTagLibraryFilter(namespaceURI));
+        validators = new FilteredIterator(validators, new ValidatorTagLibraryFilter(namespaceURI, false));
 
         Iterator converters = facesConfig.converters();
-        converters = new FilteredIterator(converters, new ConverterTagLibraryFilter(namespaceURI));
+        converters = new FilteredIterator(converters, new ConverterTagLibraryFilter(namespaceURI, false));
 
 
         String targetPath = "META-INF/" + shortName + ".taglib.xml";

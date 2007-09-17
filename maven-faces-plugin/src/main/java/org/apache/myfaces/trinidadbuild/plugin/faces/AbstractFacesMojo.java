@@ -502,7 +502,15 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     public ComponentTagLibraryFilter(
       String namespaceURI)
     {
+      this(namespaceURI, true);
+    }
+
+    public ComponentTagLibraryFilter(
+      String namespaceURI,
+      boolean requireTagClass)
+    {
       _namespaceURI = namespaceURI;
+      _requireTagClass = requireTagClass;
     }
 
     protected boolean accept(
@@ -513,11 +521,13 @@ abstract public class AbstractFacesMojo extends AbstractMojo
 
       // accept if tagClass is present
       // and if tagName is in the desired namespaceURI
-      return (tagClass != null && tagName != null &&
+      return ((!_requireTagClass || (tagClass != null)) &&
+              tagName != null &&
               _namespaceURI.equals(tagName.getNamespaceURI()));
     }
 
     private final String _namespaceURI;
+    private final boolean _requireTagClass;
   }
 
   static final protected class ValidatorTagLibraryFilter extends ValidatorFilter
@@ -525,7 +535,15 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     public ValidatorTagLibraryFilter(
       String namespaceURI)
     {
+      this(namespaceURI, true);
+    }
+
+    public ValidatorTagLibraryFilter(
+      String namespaceURI,
+      boolean requireTagClass)
+    {
       _namespaceURI = namespaceURI;
+      _requireTagClass = requireTagClass;
     }
 
     protected boolean accept(
@@ -536,11 +554,13 @@ abstract public class AbstractFacesMojo extends AbstractMojo
 
       // accept if tagClass is present
       // and if tagName is in the desired namespaceURI
-      return (tagClass != null && tagName != null &&
+      return ((!_requireTagClass || (tagClass != null)) &&
+              tagName != null &&
               _namespaceURI.equals(tagName.getNamespaceURI()));
     }
 
     private final String _namespaceURI;
+    private final boolean _requireTagClass;
   }
 
   static final protected class ConverterTagLibraryFilter extends ConverterFilter
@@ -548,7 +568,15 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     public ConverterTagLibraryFilter(
       String namespaceURI)
     {
+      this(namespaceURI, true);
+    }
+
+    public ConverterTagLibraryFilter(
+      String namespaceURI,
+      boolean requireTagClass)
+    {
       _namespaceURI = namespaceURI;
+      _requireTagClass = requireTagClass;
     }
 
     protected boolean accept(
@@ -559,11 +587,13 @@ abstract public class AbstractFacesMojo extends AbstractMojo
 
       // accept if tagClass is present
       // and if tagName is in the desired namespaceURI
-      return (tagClass != null && tagName != null &&
+      return ((!_requireTagClass || (tagClass != null)) &&
+              tagName != null &&
               _namespaceURI.equals(tagName.getNamespaceURI()));
     }
 
     private final String _namespaceURI;
+    private final boolean _requireTagClass;
   }
 
   static protected class VirtualAttributeFilter extends AttributeFilter
