@@ -47,6 +47,11 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     _is12 = is12;
   }
 
+  protected boolean is12()
+  {
+    return _is12;
+  }
+
   protected void addSpecificImports(Set imports,
                                     ComponentBean component)
   {

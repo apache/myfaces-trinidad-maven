@@ -141,8 +141,14 @@ public class GeneratorHelper
     if (is12 && property.isMethodBinding())
       return "MethodExpression";
 
-    if (is12 && !property.isLiteralOnly())
-      return "ValueExpression";
+    if (is12)
+    {
+      if (!property.isLiteralOnly())
+        return "ValueExpression";
+      else
+        return property.getPropertyClass();
+    }
+
     return "String";
   }
 }

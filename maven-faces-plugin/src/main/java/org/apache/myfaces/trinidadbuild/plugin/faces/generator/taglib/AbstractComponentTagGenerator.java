@@ -224,7 +224,8 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
   }
 
 
-  public void writeReleaseMethod(PrettyWriter out, Collection components) throws IOException
+  public void writeReleaseMethod(
+    PrettyWriter out, Collection components) throws IOException
   {
     Collection all = new HashSet();
     boolean special = false;
@@ -255,7 +256,14 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
         PropertyBean property = (PropertyBean) properties.next();
         String propName = property.getPropertyName();
         String propVar = "_" + propName;
-        out.println(propVar + " = null;");
+        out.print(propVar + " = ");
+        String type = GeneratorHelper.getJspPropertyType(property, is12());
+        // FIXME: support all primitive types.  In practice, the only types
+        // that have come up are ValueExpression, String, and boolean
+        if ("boolean".equals(type))
+          out.println("false;");
+        else
+          out.println("null;");
       }
       out.unindent();
       out.println("}");
@@ -268,6 +276,11 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
   {
     // nothing by default
   }
+
+  /**
+   * Returns true if the method is being used for generating JSF 1.2 code.
+   */
+  protected abstract boolean is12();
 
   protected abstract void writePropertyDeclaration(PrettyWriter out,
                                                    PropertyBean property) throws IOException;
