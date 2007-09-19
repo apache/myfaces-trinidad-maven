@@ -278,6 +278,15 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
     stream.writeStartElement("component-type");
     stream.writeCharacters(component.getComponentType());
     stream.writeEndElement();
+    
+    if (component.getRendererType() != null)
+    {
+      stream.writeCharacters("\n      ");
+      stream.writeStartElement("renderer-type");
+      stream.writeCharacters(component.getRendererType());
+      stream.writeEndElement();
+    }
+    
     if (faceletHandlerClass != null)
     {
       stream.writeCharacters("\n      ");
