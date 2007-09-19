@@ -149,6 +149,8 @@ public class FacesConfigParser
                                    "tagClass");
     digester.addBeanPropertySetter("faces-config/component/component-extension/tag-superclass",
                                    "tagSuperclass");
+    digester.addBeanPropertySetter("faces-config/component/component-extension/tag-handler",
+                                   "tagHandler");
     digester.addBeanPropertySetter("faces-config/component/component-extension/implementation-type",
                                    "implementationType");
     digester.addCallMethod("faces-config/component/component-extension/tag-class-modifier",

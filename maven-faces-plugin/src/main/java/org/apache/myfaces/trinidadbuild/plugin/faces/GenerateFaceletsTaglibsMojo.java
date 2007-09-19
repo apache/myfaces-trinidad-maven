@@ -287,11 +287,16 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
       stream.writeEndElement();
     }
     
-    if (faceletHandlerClass != null)
+    String tagHandler = component.getTagHandler();
+    if (tagHandler == null)
+    {
+      tagHandler = faceletHandlerClass;
+    }
+    if (tagHandler != null)
     {
       stream.writeCharacters("\n      ");
       stream.writeStartElement("handler-class");
-      stream.writeCharacters(faceletHandlerClass);
+      stream.writeCharacters(tagHandler);
       stream.writeEndElement();
     }
 

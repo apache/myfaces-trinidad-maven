@@ -273,6 +273,27 @@ public class ComponentBean extends ObjectBean
   }
 
   /**
+  * Sets the Facelets tag handler (component handler) this component.
+  *
+  * @param tagHandler the Facelets tag handler class
+  */
+ public void setTagHandler(
+   String tagHandler)
+ {
+   _tagHandler = tagHandler;
+ }
+
+ /**
+  * Returns the Facelets tag handler for this component
+  *
+  * @return  the Facelets tag handler
+  */
+ public String getTagHandler()
+ {
+   return _tagHandler;
+ }
+
+  /**
    * Returns the JSP tag name for this component.
    *
    * @return  the JSP tag name
@@ -1032,6 +1053,7 @@ public class ComponentBean extends ObjectBean
   private String  _implementationType;
   private QName   _tagName;
   private String  _tagClass;
+  private String  _tagHandler;
   private String  _tagSuperclass;
   private String  _localName;
   private String  _nodeClass;
