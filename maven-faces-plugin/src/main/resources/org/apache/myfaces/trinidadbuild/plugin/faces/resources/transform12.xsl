@@ -377,7 +377,7 @@
     </xsl:element>
   </xsl:template>
   
-  <xsl:template match="//javaee:property-extension[mfp:property-values|mfp:group|mfp:property-editor|mfp:expert|mfp:unsupported-agents|*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']]" >
+  <xsl:template match="//javaee:property-extension[mfp:property-values|mfp:group|mfp:translatable|mfp:property-editor|mfp:expert|mfp:unsupported-agents|*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']]" >
     <xsl:element name="property-extension" >
       <xsl:element name="property-metadata" >
         <xsl:apply-templates/>
@@ -843,6 +843,11 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="//mfp:property-metadata/mfp:translatable" >
+    <xsl:element name="translatable" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
   <xsl:template match="//mfp:accepts-child-components" >
     <xsl:element name="accepts-child-components" >
       <xsl:value-of select="text()" />
