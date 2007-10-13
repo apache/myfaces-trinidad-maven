@@ -59,7 +59,20 @@ public class EventRefBean extends ObjectBean
   public void setEventDeliveryPhases(
     String[] deliveryPhases)
   {
-    _deliveryPhases = deliveryPhases;
+    if ((_deliveryPhases != null) && (_deliveryPhases.length > 0))
+    {
+      int oldLen = _deliveryPhases.length;
+      int newLen = deliveryPhases.length;
+      String[] newDeliveryPhases = new String[oldLen + newLen];
+      System.arraycopy(_deliveryPhases, 0, newDeliveryPhases, 0, oldLen);
+      System.arraycopy(deliveryPhases, 0, newDeliveryPhases, oldLen, newLen);
+      _deliveryPhases = newDeliveryPhases;
+    }
+    else
+    {
+      _deliveryPhases = deliveryPhases;
+    }
+    
   }
 
   /**

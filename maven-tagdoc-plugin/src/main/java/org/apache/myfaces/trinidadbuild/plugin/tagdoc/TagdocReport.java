@@ -967,7 +967,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       for (int i = 0; i < phases.length; i++)
       {
         if (i > 0)
-          out.write("<br/>");
+          out.write(",<br/>");
         out.write((String) phases[i]);
       }
 
