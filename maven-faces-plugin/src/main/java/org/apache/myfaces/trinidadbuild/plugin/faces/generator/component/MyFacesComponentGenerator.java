@@ -240,7 +240,6 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
                                                PropertyBean property) throws IOException
   {
     String varName = property.getFieldPropertyName();
-    String propVar = Util.getVariableFromName(property.getPropertyName());
     String propFullClass = property.getPropertyClass();
     String propClass = Util.getClassFromFullClass(propFullClass);
     if (property.isTagAttributeExcluded())
@@ -262,7 +261,7 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
       out.println("return " + property.getFieldPropertyName() + ";");
       out.unindent();
       out.println("}");
-      out.println("ValueExpression expression = getValueExpression(\"" + propVar + "\");");
+      out.println("ValueExpression expression = getValueExpression(\"" + property.getPropertyName() + "\");");
       out.println("if (expression != null)");
       out.println("{");
       out.indent();
