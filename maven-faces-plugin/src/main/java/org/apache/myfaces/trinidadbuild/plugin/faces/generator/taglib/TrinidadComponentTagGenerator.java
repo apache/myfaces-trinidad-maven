@@ -105,7 +105,8 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
           imports.add("javax.faces.el.ValueBinding");
         imports.add("org.apache.myfaces.trinidadinternal.taglib.util.VirtualAttributeUtils");
       }
-      else if (GeneratorHelper.isColorList(propertyClass, propertyClassParams))
+      else if (GeneratorHelper.isColorList(propertyClass, propertyClassParams) ||
+               GeneratorHelper.isColor(propertyClass))
       {
         if (_is12)
           imports.add("javax.el.ValueExpression");
@@ -261,7 +262,11 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     }
     else if (GeneratorHelper.isColorList(propClass, property.getPropertyClassParameters()))
     {
-      _writeSetColorList(out, componentClass, propName);
+      _writeSetColor(out, componentClass, propName, true);
+    }
+    else if (GeneratorHelper.isColor(propClass))
+    {
+      _writeSetColor(out, componentClass, propName, false);
     }
     else if (GeneratorHelper.isConverter(propClass))
     {
@@ -703,10 +708,11 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
   }
 
 
-  private void _writeSetColorList(
+  private void _writeSetColor(
       PrettyWriter out,
-      String componentClass,
-      String propName) throws IOException
+      String  componentClass,
+      String  propName,
+      boolean isList) throws IOException
   {
     String propKey = Util.getConstantNameFromProperty(propName, "_KEY");
     String propVar = "_" + propName;
@@ -733,7 +739,12 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
       out.println("{");
       out.indent();
       out.println("bean.setProperty(" + componentClass + "." + propKey + ",");
-      out.println("                 TagUtils.getColorList(s));");
+      if (isList)
+        out.println("                 TagUtils.getColorList(s));");
+      else
+      {
+        out.println("                 TagUtils.getColor(s));");
+      }
       out.unindent();
       out.println("}");
       out.println("catch (ParseException pe)");
@@ -764,7 +775,10 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
       out.println("{");
       out.indent();
       out.println("bean.setProperty(" + componentClass + "." + propKey + ",");
-      out.println("                 TagUtils.getColorList(" + propVar + "));");
+      if (isList)
+	    out.println("                 TagUtils.getColorList(" + propVar + "));");
+	  else
+        out.println("                 TagUtils.getColor(" + propVar + "));");
       out.unindent();
       out.println("}");
       out.println("catch (ParseException pe)");

@@ -72,6 +72,12 @@ public class GeneratorHelper
         "java.awt.Color".equals(propClassParams[0]));
   }
 
+  public static boolean isColor(
+      String propClass)
+  {
+    return ("java.awt.Color".equals(propClass));
+  }  
+
   public static boolean isAction(PropertyBean property)
   {
     return (property.getClass().equals("javax.el.MethodExpression")
