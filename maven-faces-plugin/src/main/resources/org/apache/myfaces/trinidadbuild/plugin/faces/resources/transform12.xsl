@@ -387,13 +387,16 @@
   
   <xsl:template match="//javaee:property-extension[mfp:property-metadata]" priority="1" >
     <xsl:element name="property-extension" >
-        <xsl:apply-templates/>
+      <!-- do not copy the property values, but instead let them be picked up in the property-metadata element -->
+      <xsl:apply-templates select="*[name() != 'mfp:property-values']" />
     </xsl:element>
   </xsl:template>
   
   <xsl:template match="//mfp:property-metadata" >
     <xsl:element name="property-metadata" >
       <xsl:apply-templates/>
+      <!-- pick up any property-values elements from the parent node -->
+      <xsl:apply-templates select="../mfp:property-values" />
     </xsl:element>
   </xsl:template>
 
