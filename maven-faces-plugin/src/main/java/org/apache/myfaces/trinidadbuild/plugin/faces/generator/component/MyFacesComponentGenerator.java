@@ -246,6 +246,10 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
     {
       out.println("return " + property.getFieldPropertyName() + ";");
     }
+    else if(property.isLiteralOnly())
+    {
+      out.println("return " + varName + ";");
+    }
     else
     {
       if (Util.isPrimitiveClass(propFullClass))

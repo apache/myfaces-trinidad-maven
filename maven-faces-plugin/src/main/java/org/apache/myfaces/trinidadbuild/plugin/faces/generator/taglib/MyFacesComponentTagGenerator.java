@@ -231,9 +231,6 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
       String componentClass,
       PropertyBean property) throws IOException
   {
-    String propName = property.getPropertyName();
-    String propClass = property.getPropertyClass();
-    String propVar = "_" + propName;
 
     if (property.isMethodBinding())
     {
@@ -243,26 +240,32 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
     {
       _writeSetMethodExpression(out, componentClass, property);
     }
-    else if (GeneratorHelper.isConverter(propClass))
+    else if (GeneratorHelper.isConverter(property.getPropertyClass()))
     {
-      _writeSetConverter(out, componentClass, propName);
+      _writeSetConverter(out, componentClass, property.getPropertyName());
     }
     else
     {
-      _writeSetProperty(out, propName, propVar);
+      _writeSetProperty(out, property);
     }
   }
 
   private void _writeSetProperty(
       PrettyWriter out,
-      String propName,
-      String propVar)
+      PropertyBean property)
   {
+    String propName = property.getPropertyName();
+    String propVar = "_" + propName;
+    
     out.println("if (" + propVar + " != null) ");
     out.println("{");
     out.indent();
 
-    if (_is12)
+    if (property.isLiteralOnly())
+    {
+      out.println("comp.getAttributes().put(\"" + propName + "\", " + propVar + ");");
+    }
+    else if (_is12)
     {
       out.println("comp.setValueExpression(\"" + propName + "\", " + propVar + ");");
     }
