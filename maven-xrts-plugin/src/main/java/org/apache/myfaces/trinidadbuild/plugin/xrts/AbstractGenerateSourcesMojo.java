@@ -64,6 +64,8 @@ abstract public class AbstractGenerateSourcesMojo extends AbstractMojo
 
   abstract protected String getTargetType();
 
+  abstract protected String[] getDefaultLocales();
+
   abstract protected String[] getExcludes();
 
   abstract protected File getSourceDirectory();
@@ -132,7 +134,7 @@ abstract public class AbstractGenerateSourcesMojo extends AbstractMojo
             params.put("outName", baseName);
             params.put("srcName", baseName);
             params.put("quietMode", Boolean.TRUE);
-
+            params.put("defaultLocales", getDefaultLocales());
             InputSource source = new InputSource(new FileInputStream(sourceFile));
             // setup relative systemId resolution for local rts.dtd files.
             source.setSystemId(sourceFile.getParentFile().toURL().toString());

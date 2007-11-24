@@ -47,6 +47,11 @@ public class GenerateSourcesMojo extends AbstractGenerateSourcesMojo
   /**
    * @parameter
    */
+  private String[] defaultLocales;
+
+  /**
+   * @parameter
+   */
   private String[] excludes;
 
   /**
@@ -60,6 +65,11 @@ public class GenerateSourcesMojo extends AbstractGenerateSourcesMojo
    * @required
    */
   private File targetDirectory;
+
+  protected String[] getDefaultLocales()
+  {
+    return defaultLocales;
+  }
 
   protected String[] getExcludes()
   {
