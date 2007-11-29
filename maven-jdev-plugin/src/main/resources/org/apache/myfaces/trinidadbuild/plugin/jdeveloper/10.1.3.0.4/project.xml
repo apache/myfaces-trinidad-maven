@@ -63,16 +63,7 @@
     </hash>
   </hash>
   <hash n="oracle.jdeveloper.compiler.OjcConfiguration">
-    <value n="assertionsEnabled" v="true"/>
-    <list n="copyRes">
-      <string v=".java"/>
-    </list>
     <value n="internalEncoding" v="Default"/>
-    <value n="reverseCopyRes" v="true"/>
-    <value n="showObjectDotStaticWarnings" v="true"/>
-    <value n="showPartialImportWarnings" v="true"/>
-    <value n="showUnusedImportWarnings" v="true"/>
-    <value n="useJavac" v="true"/>
   </hash>
   <hash n="oracle.jdeveloper.model.J2eeSettings">
     <value n="j2eeWebAppName" v="maven-generated-webapp"/>
