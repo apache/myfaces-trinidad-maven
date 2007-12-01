@@ -44,6 +44,16 @@
       </plugin>
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <version>2.1</version>
+      </plugin>
+    </plugins>
+  </reporting>
   
   <dependencies>
     <dependency>
