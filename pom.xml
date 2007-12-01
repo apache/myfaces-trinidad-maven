@@ -229,7 +229,7 @@
     </snapshotRepository>
     <site>
       <id>apache-site</id>
-      <url>scpexe://minotaur.apache.org/www/myfaces.apache.org/trindad/plugins//</url>
+      <url>scpexe://minotaur.apache.org/www/myfaces.apache.org/trindad/plugins/</url>
     </site>
   </distributionManagement>
 
