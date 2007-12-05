@@ -274,7 +274,6 @@ abstract public class AbstractFacesMojo extends AbstractMojo
   protected void processIndexEntry(
     URL entry) throws MojoExecutionException
   {
-    System.err.println("ProcessEntry " + entry.toString());
     URL old = _facesConfig.setCurrentResource(entry);
     try
     {
