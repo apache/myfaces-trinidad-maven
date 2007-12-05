@@ -92,8 +92,21 @@ abstract public class AbstractFacesMojo extends AbstractMojo
   protected List getMasterConfigs(
     MavenProject project) throws MojoExecutionException
   {
-    String resourcePath = "META-INF/maven-faces-plugin/faces-config.xml";
-    return getCompileDependencyResources(project, resourcePath);
+    if (localResource != null)
+    {
+      List urls = new ArrayList();
+      try {
+        urls.add(localResource.toURL());
+      } catch (MalformedURLException e) {
+        getLog().error("", e);
+      }
+      return urls;  
+    }
+    else
+    {
+      String resourcePath = "META-INF/maven-faces-plugin/faces-config.xml";
+      return getCompileDependencyResources(project, resourcePath);
+    }
   }
 
   protected URL[] readIndex(
@@ -261,6 +274,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
   protected void processIndexEntry(
     URL entry) throws MojoExecutionException
   {
+    System.err.println("ProcessEntry " + entry.toString());
     URL old = _facesConfig.setCurrentResource(entry);
     try
     {
@@ -614,6 +628,13 @@ abstract public class AbstractFacesMojo extends AbstractMojo
   * @parameter default-value = "true"
   */
   private boolean skipApiOrBaseClasses;
+
+  /**
+   * @parameter
+   */
+  private File localResource;
+
+
 
   private FacesConfigBean _facesConfig;
   private String _licenseHeader;

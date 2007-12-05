@@ -109,7 +109,8 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
 
         targetFile.delete();
 
-        if (components.hasNext() && configFile.exists())
+        if ((components.hasNext()||validators.hasNext()||converters.hasNext())
+            && configFile.exists())
         {
           ByteArrayOutputStream out = new ByteArrayOutputStream();
           XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
@@ -123,19 +124,7 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
           stream.writeAttribute("href", configFile.toURL().toExternalForm());
           stream.writeAttribute("xpointer", "/facelet-taglib/*");
           stream.writeEndElement();
-          while (components.hasNext())
-          {
-            ComponentBean component = (ComponentBean)components.next();
-            _writeTag(stream, component);
-          }
-          while (validators.hasNext())
-          {
-            _writeValidatorTag(stream, (ValidatorBean) validators.next());
-          }
-          while (converters.hasNext())
-          {
-            _writeConverterTag(stream, (ConverterBean) converters.next());
-          }
+          _writeTags(components, validators, converters, stream);
 
           _writeEndTagLibrary(stream);
           stream.close();
@@ -179,7 +168,7 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
 
           targetFile.setReadOnly();
         }
-        else if (components.hasNext())
+        else if (components.hasNext()||validators.hasNext()||converters.hasNext())
         {
           targetFile.getParentFile().mkdirs();
           OutputStream out = new FileOutputStream(targetFile);
@@ -192,11 +181,7 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
           stream.writeCharacters(namespaceURI);
           stream.writeEndElement();
 
-          while (components.hasNext())
-          {
-            ComponentBean component = (ComponentBean)components.next();
-            _writeTag(stream, component);
-          }
+          _writeTags(components, validators, converters, stream);
           _writeEndTagLibrary(stream);
           stream.close();
         }
@@ -234,6 +219,22 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
     catch (IOException e)
     {
       throw new MojoExecutionException("Error during generation", e);
+    }
+  }
+
+  private void _writeTags(Iterator components, Iterator validators, Iterator converters, XMLStreamWriter stream) throws XMLStreamException {
+    while (components.hasNext())
+    {
+      ComponentBean component = (ComponentBean)components.next();
+      _writeTag(stream, component);
+    }
+    while (validators.hasNext())
+    {
+      _writeValidatorTag(stream, (ValidatorBean) validators.next());
+    }
+    while (converters.hasNext())
+    {
+      _writeConverterTag(stream, (ConverterBean) converters.next());
     }
   }
 

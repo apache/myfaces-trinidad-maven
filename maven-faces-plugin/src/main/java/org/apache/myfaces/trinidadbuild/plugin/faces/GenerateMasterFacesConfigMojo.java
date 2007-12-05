@@ -130,10 +130,10 @@ public class GenerateMasterFacesConfigMojo extends AbstractFacesMojo
   private String[] excludes;
 
  /**
-   * @parameter
-   * @readonly
+   * @parameter expression="META-INF/maven-faces-plugin";
+   * @required
    */
-  private String sourcePath = "META-INF/maven-faces-plugin";
+  private String sourcePath;
 
   /**
    * @parameter expression="src/main/resources"

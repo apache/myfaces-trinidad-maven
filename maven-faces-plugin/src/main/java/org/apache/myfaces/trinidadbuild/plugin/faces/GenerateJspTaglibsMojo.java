@@ -20,13 +20,29 @@ package org.apache.myfaces.trinidadbuild.plugin.faces;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.AbstractConverterTagGenerator;
+import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.AbstractValidatorTagGenerator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.ComponentTagGenerator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.MyFacesComponentTagGenerator;
+import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.MyFacesConverterTagGenerator;
+import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.MyFacesValidatorTagGenerator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.TagAttributeFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.TrinidadComponentTagGenerator;
+import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.TrinidadConverterTagGenerator;
+import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.TrinidadValidatorTagGenerator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
-import org.apache.myfaces.trinidadbuild.plugin.faces.parse.*;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.*;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ConverterBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.MethodSignatureBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ValidatorBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.ComponentFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.ConverterFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.ValidatorFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
 import org.codehaus.plexus.util.FileUtils;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -39,12 +55,28 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @version $Id$
@@ -685,14 +717,13 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
   /**
    * Generates tag handlers for parsed component metadata.
    */
-  private void _generateTagHandlers() throws IOException
-  {
+  private void _generateTagHandlers() throws IOException, MojoExecutionException {
     // Make sure generated source directory
     // is added to compilation source path
     project.addCompileSourceRoot(generatedSourceDirectory.getCanonicalPath());
 
     FacesConfigBean facesConfig = getFacesConfig();
-    if (!facesConfig.hasComponents())
+    if (!facesConfig.hasComponents() && !facesConfig.hasConverters() && !facesConfig.hasValidators())
     {
       getLog().info("Nothing to generate - no components found");
     }
@@ -719,15 +750,22 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         validators = new FilteredIterator(validators, new IfValidatorModifiedFilter());
       }
 
-      if (!components.hasNext() && !converters.hasNext())
+      if (!components.hasNext() && !converters.hasNext() && !validators.hasNext())
       {
         getLog().info("Nothing to generate - all JSP tags are up to date");
       }
       else
       {
         ComponentTagHandlerGenerator componentGen = new ComponentTagHandlerGenerator();
-        ConverterTagGenerator converterGen = new ConverterTagGenerator();
-        ValidatorTagGenerator validatorGen = new ValidatorTagGenerator();
+        AbstractConverterTagGenerator converterGen = null;
+        AbstractValidatorTagGenerator validatorGen = null;
+        if ("trinidad".equals(type)) {
+          converterGen = new TrinidadConverterTagGenerator(is12(), getLicenseHeader(), getLog());
+          validatorGen = new TrinidadValidatorTagGenerator(is12(), getLicenseHeader(), getLog());
+        } else {
+          converterGen = new MyFacesConverterTagGenerator(is12(), getLicenseHeader(), getLog());
+          validatorGen = new MyFacesValidatorTagGenerator(is12(), getLicenseHeader(), getLog());    
+        }
         int count = 0;
         while (components.hasNext())
         {
@@ -736,835 +774,16 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         }
         while (converters.hasNext())
         {
-          converterGen.generateTagHandler((ConverterBean)converters.next());
+          converterGen.generateTagHandler((ConverterBean)converters.next(), generatedSourceDirectory);
           count++;
         }
         while (validators.hasNext())
         {
-          validatorGen.generateTagHandler((ValidatorBean)validators.next());
+          validatorGen.generateTagHandler((ValidatorBean)validators.next(), generatedSourceDirectory);
           count++;
         }
         getLog().info("Generated " + count + " JSP tag(s)");
       }
-    }
-  }
-
-  class ConverterTagGenerator
-  {
-    public void generateTagHandler(
-      ConverterBean converter)
-    {
-      String fullClassName = converter.getTagClass();
-
-      try
-      {
-        getLog().debug("Generating " + fullClassName);
-
-        String sourcePath = Util.convertClassToSourcePath(fullClassName, ".java");
-        File targetFile = new File(generatedSourceDirectory, sourcePath);
-
-        targetFile.getParentFile().mkdirs();
-        StringWriter sw = new StringWriter();
-        PrettyWriter out = new PrettyWriter(sw);
-
-        String className = Util.getClassFromFullClass(fullClassName);
-        String packageName = Util.getPackageFromFullClass(fullClassName);
-
-        // header/copyright
-        writePreamble(out);
-
-        // package
-        out.println("package " + packageName + ";");
-
-        out.println();
-        _writeImports(out, converter);
-
-        out.println("/**");
-        // TODO: remove this blank line.
-        out.println();
-        out.println(" * Auto-generated tag class.");
-        out.println(" */");
-
-        if (_is12())
-        {
-          out.println("public class " + className +
-                      " extends ConverterELTag");
-        }
-        else
-        {
-          out.println("public class " + className +
-                      " extends ConverterTag");
-        }
-
-        out.println("{");
-        out.indent();
-
-        _writeConstructor(out, converter);
-
-        _writePropertyMethods(out, converter);
-        _writeDoStartTag(out, converter);
-        _writeCreateConverter(out, converter);
-        _writeSetProperties(out, converter);
-        _writeRelease(out, converter);
-
-        out.unindent();
-        out.println("}");
-        out.close();
-
-        // delay write in case of error
-        // timestamp should not be updated when an error occurs
-        // delete target file first, because it is readonly
-        targetFile.delete();
-        FileWriter fw = new FileWriter(targetFile);
-        StringBuffer buf = sw.getBuffer();
-        fw.write(buf.toString());
-        fw.close();
-        targetFile.setReadOnly();
-      }
-      catch (Throwable e)
-      {
-        getLog().error("Error generating " + fullClassName, e);
-      }
-    }
-
-    private void _writeImports(
-      PrettyWriter   out,
-      ConverterBean  converter)
-    {
-      Set imports = new TreeSet();
-
-      if (_is12())
-      {
-        imports.add("javax.faces.webapp.ConverterELTag");
-        imports.add("javax.faces.context.FacesContext");
-        imports.add("javax.faces.application.Application");
-      }
-      else
-        imports.add("javax.faces.webapp.ConverterTag");
-        
-      imports.add("javax.servlet.jsp.JspException");
-      imports.add(converter.getConverterClass());
-
-      Iterator properties = converter.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
-      if (properties.hasNext())
-      {
-        imports.add("javax.faces.convert.Converter");
-        if (_is12())
-          imports.add("javax.el.ValueExpression");
-        else
-          imports.add("javax.faces.el.ValueBinding");
-        imports.add("org.apache.myfaces.trinidadinternal.taglib.util.TagUtils");
-      }
-
-      while (properties.hasNext())
-      {
-        PropertyBean property = (PropertyBean)properties.next();
-
-        String propertyClass = property.getPropertyClass();
-        if (propertyClass != null)
-          imports.add(propertyClass);
-
-        if ("java.lang.String[]".equals(propertyClass))
-        {
-          imports.add("java.text.ParseException");
-        }
-      }
-
-      // do not import implicit!
-      imports.removeAll(Util.PRIMITIVE_TYPES);
-
-      String tagClass = converter.getTagClass();
-      String packageName = Util.getPackageFromFullClass(tagClass);
-      writeImports(out, packageName, imports);
-    }
-
-    private void _writeConstructor(
-      PrettyWriter  out,
-      ConverterBean converter) throws IOException
-    {
-      String fullClassName = converter.getTagClass();
-      String className = Util.getClassFromFullClass(fullClassName);
-      out.println();
-      out.println("/**");
-      // TODO: restore this correctly phrased comment (tense vs. command)
-      //out.println(" * Constructs an instance of " + className + ".");
-      out.println(" * Construct an instance of the " + className + ".");
-      out.println(" */");
-      out.println("public " + className + "()");
-      out.println("{");
-      out.println("}");
-    }
-
-    private void _writePropertyMethods(
-      PrettyWriter  out,
-      ConverterBean converter) throws IOException
-    {
-      Iterator properties = converter.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
-      while (properties.hasNext())
-      {
-        PropertyBean property = (PropertyBean)properties.next();
-        out.println();
-        _writePropertyMember(out, property);
-        _writePropertySet(out, property);
-      }
-    }
-
-    private void _writePropertyMember(
-     PrettyWriter  out,
-     PropertyBean  property) throws IOException
-    {
-      String propName = property.getPropertyName();
-      String propVar = "_" + Util.getVariableFromName(propName);
-      String jspPropType = _getJspPropertyType(property);
-
-      out.println("private " + jspPropType + " " + propVar + ";");
-    }
-
-    private void _writePropertySet(
-     PrettyWriter  out,
-     PropertyBean  property) throws IOException
-    {
-      String propName = property.getPropertyName();
-      String propVar = Util.getVariableFromName(propName);
-      String setMethod = Util.getPrefixedPropertyName("set", propName);
-      String jspPropType = _getJspPropertyType(property);
-
-      // TODO: restore coding standards, and make final
-      out.println("public void " + setMethod + "(" + jspPropType + " " + propVar + ")");
-      out.println("{");
-      out.indent();
-      out.println("_" + propVar + " = " + propVar + ";");
-      out.unindent();
-      out.println("}");
-    }
-
-    private void _writeDoStartTag(
-      PrettyWriter  out,
-      ConverterBean converter) throws IOException
-    {
-      if (!_is12())
-      {
-        String converterFullClass = converter.getConverterClass();
-        String converterClass = Util.getClassFromFullClass(converterFullClass);
-        
-        out.println();
-        // TODO: restore coding standards, and make final
-        out.println("@Override");
-        out.println("public int doStartTag() throws JspException");
-        out.println("{");
-        out.indent();
-        out.println("super.setConverterId(" + converterClass + ".CONVERTER_ID);");
-        out.println("return super.doStartTag();");
-        out.unindent();
-        out.println("}");
-      }
-    }
-
-    private void _writeCreateConverter(
-      PrettyWriter  out,
-      ConverterBean converter) throws IOException
-    {
-      Iterator properties = converter.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
-      if (properties.hasNext())
-      {
-        String converterFullClass = converter.getConverterClass();
-        String converterClass = Util.getClassFromFullClass(converterFullClass);
-
-        out.println();
-        // TODO: restore coding standards, and make final
-        out.println("@Override");
-        out.println("protected Converter createConverter() throws JspException");
-        out.println("{");
-        out.indent();
-        if (_is12())
-        {
-          out.println("String converterId = " + converterClass +  ".CONVERTER_ID;");
-          out.println("Application appl = FacesContext.getCurrentInstance().getApplication();");
-          out.println(converterClass + " converter = " +
-                      "(" + converterClass + ")appl.createConverter(converterId);");
-        }
-        else
-        {
-          out.println(converterClass + " converter = " +
-                      "(" + converterClass + ")super.createConverter();");
-        }
-        out.println("_setProperties(converter);");
-        out.println("return converter;");
-        out.unindent();
-        out.println("}");
-      }
-    }
-
-    private void _writeSetProperties(
-      PrettyWriter  out,
-      ConverterBean converter) throws IOException
-    {
-      Iterator properties = converter.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
-      if (properties.hasNext())
-      {
-        String converterFullClass = converter.getConverterClass();
-        String converterClass = Util.getClassFromFullClass(converterFullClass);
-        out.println();
-        out.println("private void _setProperties(");
-        out.indent();
-        out.println(converterClass + " converter) throws JspException");
-        out.unindent();
-        out.println("{");
-        out.indent();
-        while (properties.hasNext())
-        {
-          PropertyBean property = (PropertyBean)properties.next();
-          _writeSetProperty(out, property);
-        }
-        out.unindent();
-        out.println("}");
-      }
-    }
-
-    private void _writeSetProperty(
-      PrettyWriter out,
-      PropertyBean property)
-    {
-      String propName = property.getPropertyName();
-      String propFullClass = property.getPropertyClass();
-      String propClass = Util.getClassFromFullClass(propFullClass);
-      String propVar = "_" + Util.getVariableFromName(propName);
-
-      out.println("if (" + propVar + " != null)");
-      out.println("{");
-      out.indent();
-
-      if (_is12())
-      {
-        out.println("if (!" + propVar + ".isLiteralText())");
-        out.println("{");
-        out.indent();
-        out.println("converter.setValueExpression(\"" + propName + "\", " +
-                    propVar + ");");
-        out.unindent();
-        out.println("}");
-        String propType = _resolveType(propFullClass);
-        if (propType != null)
-        {
-          out.println("else");
-          out.println("{");
-          out.indent();
-          if ("StringArray".equals(propType))
-          {
-            out.println("try");
-            out.println("{");
-          }
-          
-          out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(null));");
-          String setMethod = Util.getPrefixedPropertyName("set", propName);
-          out.println("converter." + setMethod + "(value);");
-          if ("StringArray".equals(propType))
-          {
-            out.println("}");
-            out.println("catch (ParseException pe)");
-            out.println("{");
-            out.indent();
-            out.println("throw new JspException(");
-            out.println("  pe.getMessage() + \": \" + \"Position \" + pe.getErrorOffset());");
-            out.unindent();
-            out.println("}");
-          }
-          out.unindent();
-          out.println("}");
-        }
-      }
-      else
-      {
-        out.println("if (TagUtils.isValueReference(" + propVar + "))");
-        out.println("{");
-        out.indent();
-        out.println("ValueBinding vb = TagUtils.getValueBinding(" + propVar + ");");
-        out.println("converter.setValueBinding(\"" + propName + "\", vb);");
-        out.unindent();
-        out.println("}");
-        String propType = _resolveType(propFullClass);
-        if (propType != null)
-        {
-          out.println("else");
-          out.println("{");
-          out.indent();
-          if ("StringArray".equals(propType))
-          {
-            out.println("try");
-            out.println("{");
-          }
-          out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ");");
-          String setMethod = Util.getPrefixedPropertyName("set", propName);
-          out.println("converter." + setMethod + "(value);");
-          if ("StringArray".equals(propType))
-          {
-            out.println("}");
-            out.println("catch (ParseException pe)");
-            out.println("{");
-            out.indent();
-            out.println("throw new JspException(");
-            out.println("  pe.getMessage() + \": \" + \"Position \" + pe.getErrorOffset());");
-            out.unindent();
-            out.println("}");
-          }
-          out.unindent();
-          out.println("}");
-        }
-      }
-
-      out.unindent();
-      out.println("}");
-    }
-
-    private void _writeRelease(
-      PrettyWriter  out,
-      ConverterBean converter) throws IOException
-    {
-      Iterator properties = converter.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
-      if (properties.hasNext())
-      {
-        out.println();
-        out.println("@Override");
-        out.println("public void release()");
-        out.println("{");
-        out.indent();
-        out.println("super.release();");
-        while (properties.hasNext())
-        {
-          PropertyBean property = (PropertyBean)properties.next();
-          String propName = property.getPropertyName();
-          String propVar = "_" + Util.getVariableFromName(propName);
-          out.println(propVar + " = null;");
-        }
-        out.unindent();
-        out.println("}");
-      }
-    }
-
-    private String _getJspPropertyType(PropertyBean property)
-    {
-      if (property.isMethodExpression())
-        return "MethodExpression";
-
-      if (_is12() && property.isMethodBinding())
-        return "MethodExpression";
-
-      if (_is12() && !property.isLiteralOnly())
-        return "ValueExpression";
-      return "String";
-    }
-  }
-
-  class ValidatorTagGenerator
-  {
-    public void generateTagHandler(
-      ValidatorBean validator)
-    {
-      String fullClassName = validator.getTagClass();
-
-      try
-      {
-        getLog().debug("Generating " + fullClassName);
-        String sourcePath = Util.convertClassToSourcePath(fullClassName, ".java");
-        File targetFile = new File(generatedSourceDirectory, sourcePath);
-
-        targetFile.getParentFile().mkdirs();
-        StringWriter sw = new StringWriter();
-        PrettyWriter out = new PrettyWriter(sw);
-
-        String className = Util.getClassFromFullClass(fullClassName);
-        String packageName = Util.getPackageFromFullClass(fullClassName);
-
-        // header/copyright
-        writePreamble(out);
-
-        // package
-        out.println("package " + packageName + ";");
-
-        out.println();
-        _writeImports(out, validator);
-
-        out.println("/**");
-        // TODO: remove this blank line.
-        out.println();
-        out.println(" * Auto-generated tag class.");
-        out.println(" */");
-
-        if (_is12())
-        {
-          out.println("public class " + className +
-                      " extends ValidatorELTag");
-        }
-        else
-        {
-          out.println("public class " + className +
-                      " extends ValidatorTag");
-        }
-
-        out.println("{");
-        out.indent();
-
-        _writeConstructor(out, validator);
-
-        _writePropertyMethods(out, validator);
-        _writeDoStartTag(out, validator);
-        _writeCreateValidator(out, validator);
-        _writeSetProperties(out, validator);
-        _writeRelease(out, validator);
-
-        out.unindent();
-        out.println("}");
-        out.close();
-
-        // delay write in case of error
-        // timestamp should not be updated when an error occurs
-        // delete target file first, because it is readonly
-        targetFile.delete();
-        FileWriter fw = new FileWriter(targetFile);
-        StringBuffer buf = sw.getBuffer();
-        fw.write(buf.toString());
-        fw.close();
-        targetFile.setReadOnly();
-      }
-      catch (Throwable e)
-      {
-        getLog().error("Error generating " + fullClassName, e);
-      }
-    }
-
-    private void _writeImports(
-      PrettyWriter   out,
-      ValidatorBean  validator)
-    {
-      Set imports = new TreeSet();
-
-      if (_is12())
-      {
-        imports.add("javax.faces.webapp.ValidatorELTag");
-        imports.add("javax.faces.context.FacesContext");
-        imports.add("javax.faces.application.Application");
-      }
-      else
-        imports.add("javax.faces.webapp.ValidatorTag");
-
-      imports.add("javax.servlet.jsp.JspException");
-      imports.add(validator.getValidatorClass());
-
-      Iterator properties = validator.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
-      if (properties.hasNext())
-      {
-        imports.add("javax.faces.validator.Validator");
-        if (_is12())
-          imports.add("javax.el.ValueExpression");
-        else
-          imports.add("javax.faces.el.ValueBinding");
-        imports.add("org.apache.myfaces.trinidadinternal.taglib.util.TagUtils");
-      }
-
-      while (properties.hasNext())
-      {
-        PropertyBean property = (PropertyBean)properties.next();
-
-        String propertyClass = property.getPropertyClass();
-        if (propertyClass != null)
-          imports.add(propertyClass);
-
-        if ("java.lang.String[]".equals(propertyClass))
-        {
-          imports.add("java.text.ParseException");
-        }
-      }
-
-      // do not import implicit!
-      imports.removeAll(Util.PRIMITIVE_TYPES);
-
-      String tagClass = validator.getTagClass();
-      String packageName = Util.getPackageFromFullClass(tagClass);
-      writeImports(out, packageName, imports);
-    }
-
-    private void _writeConstructor(
-      PrettyWriter  out,
-      ValidatorBean validator) throws IOException
-    {
-      String fullClassName = validator.getTagClass();
-      String className = Util.getClassFromFullClass(fullClassName);
-      out.println();
-      out.println("/**");
-      // TODO: restore this correctly phrased comment (tense vs. command)
-      //out.println(" * Constructs an instance of " + className + ".");
-      out.println(" * Construct an instance of the " + className + ".");
-      out.println(" */");
-      out.println("public " + className + "()");
-      out.println("{");
-      out.println("}");
-    }
-
-    private void _writePropertyMethods(
-      PrettyWriter  out,
-      ValidatorBean validator) throws IOException
-    {
-      Iterator properties = validator.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
-      while (properties.hasNext())
-      {
-        PropertyBean property = (PropertyBean)properties.next();
-        out.println();
-        _writePropertyMember(out, property);
-        _writePropertySet(out, property);
-      }
-    }
-
-    private void _writePropertyMember(
-     PrettyWriter  out,
-     PropertyBean  property) throws IOException
-    {
-      String propName = property.getPropertyName();
-      String propVar = "_" + Util.getVariableFromName(propName);
-      String jspPropType = _getJspPropertyType(property);
-
-      out.println("private " + jspPropType + " " + propVar + ";");
-    }
-
-    private void _writePropertySet(
-     PrettyWriter  out,
-     PropertyBean  property) throws IOException
-    {
-      String propName = property.getPropertyName();
-      String propVar = Util.getVariableFromName(propName);
-      String setMethod = Util.getPrefixedPropertyName("set", propName);
-      String jspPropType = _getJspPropertyType(property);
-
-      // TODO: restore coding standards, and make final
-      out.println("public void " + setMethod + "(" + jspPropType + " " + propVar + ")");
-      out.println("{");
-      out.indent();
-      out.println("_" + propVar + " = " + propVar + ";");
-      out.unindent();
-      out.println("}");
-    }
-
-    private void _writeDoStartTag(
-      PrettyWriter  out,
-      ValidatorBean validator) throws IOException
-    {
-      out.println();
-      if (!_is12())
-      {
-        String validatorFullClass = validator.getValidatorClass();
-        String validatorClass = Util.getClassFromFullClass(validatorFullClass);
-
-        // TODO: restore coding standards, and make final
-        out.println("@Override");
-        out.println("public int doStartTag() throws JspException");
-        out.println("{");
-        out.indent();
-        out.println("super.setValidatorId(" + validatorClass + ".VALIDATOR_ID);");
-        out.println("return super.doStartTag();");
-        out.unindent();
-        out.println("}");
-      }
-    }
-
-    private void _writeCreateValidator(
-      PrettyWriter  out,
-      ValidatorBean validator) throws IOException
-    {
-      Iterator properties = validator.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
-      if (properties.hasNext())
-      {
-        String validatorFullClass = validator.getValidatorClass();
-        String validatorClass = Util.getClassFromFullClass(validatorFullClass);
-
-        out.println();
-        // TODO: restore coding standards, and make final
-        out.println("@Override");
-        out.println("protected Validator createValidator() throws JspException");
-        out.println("{");
-        out.indent();
-        if (_is12())
-        {
-          out.println("String validatorId = " + validatorClass + ".VALIDATOR_ID;");
-          out.println("Application appl = FacesContext.getCurrentInstance().getApplication();");
-          out.println(validatorClass + " validator = " +
-                      "(" + validatorClass + ")appl.createValidator(validatorId);");
-        }
-        else
-        {
-          out.println(validatorClass + " validator = " +
-                      "(" + validatorClass + ")super.createValidator();");
-        }
-        out.println("_setProperties(validator);");
-        out.println("return validator;");
-        out.unindent();
-        out.println("}");
-      }
-    }
-
-    private void _writeSetProperties(
-      PrettyWriter  out,
-      ValidatorBean validator) throws IOException
-    {
-      Iterator properties = validator.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
-      if (properties.hasNext())
-      {
-        String validatorFullClass = validator.getValidatorClass();
-        String validatorClass = Util.getClassFromFullClass(validatorFullClass);
-        out.println();
-        out.println("private void _setProperties(");
-        out.indent();
-        out.println(validatorClass + " validator) throws JspException");
-        out.unindent();
-        out.println("{");
-        out.indent();
-        while (properties.hasNext())
-        {
-          PropertyBean property = (PropertyBean)properties.next();
-          _writeSetProperty(out, property);
-        }
-        out.unindent();
-        out.println("}");
-      }
-    }
-
-    private void _writeSetProperty(
-      PrettyWriter out,
-      PropertyBean property)
-    {
-      String propName = property.getPropertyName();
-      String propFullClass = property.getPropertyClass();
-      String propClass = Util.getClassFromFullClass(propFullClass);
-      String propVar = "_" + Util.getVariableFromName(propName);
-      out.println("if (" + propVar + " != null)");
-      out.println("{");
-      out.indent();
-      if (_is12())
-      {
-        out.println("if (!" + propVar + ".isLiteralText())");
-        out.println("{");
-        out.indent();
-        out.println("validator.setValueExpression(\"" + propName + "\", " +
-                    propVar + ");");
-        out.unindent();
-        out.println("}");
-        String propType = _resolveType(propFullClass);
-        if (propType != null)
-        {
-          out.println("else");
-          out.println("{");
-          out.indent();
-          if ("StringArray".equals(propType))
-          {
-            out.println("try");
-            out.println("{");
-          }
-          
-          out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(null));");
-          String setMethod = Util.getPrefixedPropertyName("set", propName);
-          out.println("validator." + setMethod + "(value);");
-          if ("StringArray".equals(propType))
-          {
-            out.println("}");
-            out.println("catch (ParseException pe)");
-            out.println("{");
-            out.indent();
-            out.println("throw new JspException(");
-            out.println("  pe.getMessage() + \": \" + \"Position \" + pe.getErrorOffset());");
-            out.unindent();
-            out.println("}");
-          }
-          out.unindent();
-          out.println("}");
-        }
-      }
-      else
-      {
-        out.println("if (TagUtils.isValueReference(" + propVar + "))");
-        out.println("{");
-        out.indent();
-        out.println("ValueBinding vb = TagUtils.getValueBinding(" + propVar + ");");
-        out.println("validator.setValueBinding(\"" + propName + "\", vb);");
-        out.unindent();
-        out.println("}");
-        String propType = _resolveType(propFullClass);
-        if (propType != null)
-        {
-          out.println("else");
-          out.println("{");
-          out.indent();
-          if ("StringArray".equals(propType))
-          {
-            out.println("try");
-            out.println("{");
-          }
-          out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ");");
-          String setMethod = Util.getPrefixedPropertyName("set", propName);
-          out.println("validator." + setMethod + "(value);");
-          if ("StringArray".equals(propType))
-          {
-            out.println("}");
-            out.println("catch (ParseException pe)");
-            out.println("{");
-            out.indent();
-            out.println("throw new JspException(");
-            out.println("  pe.getMessage() + \": \" + \"Position \" + pe.getErrorOffset());");
-            out.unindent();
-            out.println("}");
-          }
-          out.unindent();
-          out.println("}");
-        }
-      }
-
-      out.unindent();
-      out.println("}");
-    }
-
-    private void _writeRelease(
-      PrettyWriter  out,
-      ValidatorBean validator) throws IOException
-    {
-      Iterator properties = validator.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
-      if (properties.hasNext())
-      {
-        out.println();
-        out.println("@Override");
-        out.println("public void release()");
-        out.println("{");
-        out.indent();
-        out.println("super.release();");
-        while (properties.hasNext())
-        {
-          PropertyBean property = (PropertyBean)properties.next();
-          String propName = property.getPropertyName();
-          String propVar = "_" + Util.getVariableFromName(propName);
-          out.println(propVar + " = null;");
-        }
-        out.unindent();
-        out.println("}");
-      }
-    }
-
-    private String _getJspPropertyType(PropertyBean property)
-    {
-      if (property.isMethodExpression())
-        return "MethodExpression";
-
-      if (_is12() && property.isMethodBinding())
-        return "MethodExpression";
-
-      if (_is12() && !property.isLiteralOnly())
-        return "ValueExpression";
-      return "String";
     }
   }
 
@@ -1624,7 +843,9 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         {
           generator = new MyFacesComponentTagGenerator(_is12());
         }
-        
+
+        getLog().debug("Generating " + fullClassName+", with generator: "+generator.getClass().getName());
+
         String className = Util.getClassFromFullClass(fullClassName);
         String packageName = Util.getPackageFromFullClass(fullClassName);
         
@@ -1816,35 +1037,12 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
    */
   private String jsfVersion;
 
-  static private String _resolveType(
-    String className)
-  {
-    return (String)_RESOLVABLE_TYPES.get(className);
-  }
+  /**
+   * @parameter expression="trinidad"
+   */
+  private String type;
 
-  // TODO: for everything but Locale, String[], Date, and TimeZone,
-  // in JSF 1.2 we should already be going through coercion, and
-  // not need any of the "TagUtils" functions
-  static private Map _createResolvableTypes()
-  {
-    Map resolvableTypes = new HashMap();
 
-    resolvableTypes.put("boolean", "Boolean");
-    resolvableTypes.put("char", "Character");
-    resolvableTypes.put("java.util.Date", "Date");
-    resolvableTypes.put("int", "Integer");
-    resolvableTypes.put("float", "Float");
-    resolvableTypes.put("double", "Double");
-    resolvableTypes.put("java.util.Locale", "Locale");
-    resolvableTypes.put("long", "Long");
-    resolvableTypes.put("java.lang.String", "String");
-    resolvableTypes.put("java.lang.String[]", "StringArray");
-    resolvableTypes.put("java.util.TimeZone", "TimeZone");
-
-    return Collections.unmodifiableMap(resolvableTypes);
-  }
-
-  static final private Map _RESOLVABLE_TYPES = _createResolvableTypes();
 
   static final private String _JSP_TAG_LIBRARY_DOCTYPE_PUBLIC =
               "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN";
