@@ -24,6 +24,16 @@ package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
  */
 public class PropertyBean extends AttributeBean
 {
+    public void setUseMaxTime(boolean _useMaxTime) 
+    {
+      this._useMaxTime = _useMaxTime;
+    }
+    
+    public boolean getUseMaxTime() 
+    {
+      return _useMaxTime;
+    }
+
   /**
    * Sets the name of this property.
    *
@@ -429,9 +439,11 @@ public class PropertyBean extends AttributeBean
   private boolean _list;
   private boolean _tagAttributeExcluded;
   private boolean _enum;
+  private boolean _useMaxTime;
   private String[] _propertyValues;
   private String[] _unsupportedAgents = _EMPTY_ARRAY;
   private String[] _unsupportedRenderKits = _EMPTY_ARRAY;
 
   static private String[] _EMPTY_ARRAY = new String[0];
+
 }

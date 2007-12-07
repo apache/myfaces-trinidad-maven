@@ -228,6 +228,12 @@ public abstract class AbstractTagGenerator {
     }
   }
 
+  protected String resolveDateType(String className, boolean useMaxTime)
+  {
+    String type = (String)_RESOLVABLE_TYPES.get(className);
+    return useMaxTime ? type + "WithMaxTime" : type;
+  }
+
   protected String resolveType(String className)
   {
     return (String)_RESOLVABLE_TYPES.get(className);

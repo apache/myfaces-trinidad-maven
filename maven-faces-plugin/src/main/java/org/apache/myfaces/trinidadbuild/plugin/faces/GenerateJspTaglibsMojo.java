@@ -759,10 +759,13 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         ComponentTagHandlerGenerator componentGen = new ComponentTagHandlerGenerator();
         AbstractConverterTagGenerator converterGen = null;
         AbstractValidatorTagGenerator validatorGen = null;
-        if (type == null || "trinidad".equals(type)) {
+        if (type == null || "trinidad".equals(type))
+        {
           converterGen = new TrinidadConverterTagGenerator(is12(), getLicenseHeader(), getLog());
           validatorGen = new TrinidadValidatorTagGenerator(is12(), getLicenseHeader(), getLog());
-        } else {
+        }
+        else
+        {
           converterGen = new MyFacesConverterTagGenerator(is12(), getLicenseHeader(), getLog());
           validatorGen = new MyFacesValidatorTagGenerator(is12(), getLicenseHeader(), getLog());    
         }

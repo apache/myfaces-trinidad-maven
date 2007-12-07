@@ -235,7 +235,7 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     String propName = property.getPropertyName();
     String propClass = property.getPropertyClass();
     String propVar = "_" + propName;
-
+    
     if (property.isVirtual())
     {
       _writeVirtualSetMethod(out, componentClass, propName);
@@ -276,6 +276,10 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     {
       _writeSetLiteral(out, componentClass, propName, propClass, propVar);
     }
+    else if ("java.util.Date".equals(propClass))
+    {
+      _writeSetDate(out, componentClass, propName, propClass, propVar, property.getUseMaxTime());
+    }
     else //if (_hasPropertySetter(property))
     {
       _writeSetProperty(out, componentClass, propName, propClass, propVar);
@@ -309,6 +313,33 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
           componentClass + "." + propKey + ", " +
           propVar + ");");
     }
+  }
+
+  private void _writeSetDate(
+    PrettyWriter out,
+    String componentClass,
+    String propName,
+    String propFullClass,
+    String propVar,
+    boolean useMaxTime)
+  {
+    String propKey = Util.getConstantNameFromProperty(propName, "_KEY");
+    String propClass = Util.getClassFromFullClass(propFullClass);
+    String boxedClass = Util.getBoxedClass(propClass);
+    String setProperty = "setProperty";
+    String propType = boxedClass.replaceAll("\\[\\]", "Array");
+    if (useMaxTime)
+    {
+      setProperty = Util.getPrefixedPropertyName("setMax", propType + "Property");
+    }
+    else
+    {
+      setProperty = Util.getPrefixedPropertyName("set", propType + "Property");
+    }
+
+    out.println(setProperty + "(bean, " +
+        componentClass + "." + propKey + ", " +
+        propVar + ");");
   }
 
   private void _writeSetProperty(

@@ -86,7 +86,15 @@ public class TrinidadValidatorTagGenerator extends AbstractValidatorTagGenerator
                   propVar + ");");
       out.unindent();
       out.println("}");
-      String propType = resolveType(propFullClass);
+      String propType = null;
+      if ("Date".equals (propClass)) 
+      {
+        propType = resolveDateType(propFullClass, property.getUseMaxTime());                        
+      }
+      else 
+      {
+        propType = resolveType(propFullClass);            
+      }
       if (propType != null)
       {
         out.println("else");
@@ -125,7 +133,15 @@ public class TrinidadValidatorTagGenerator extends AbstractValidatorTagGenerator
       out.println("validator.setValueBinding(\"" + propName + "\", vb);");
       out.unindent();
       out.println("}");
-      String propType = resolveType(propFullClass);
+      String propType = null;
+      if ("Date".equals (propClass)) 
+      {
+        propType = resolveDateType(propFullClass, property.getUseMaxTime());                        
+      }
+      else 
+      {
+        propType = resolveType(propFullClass);            
+      }
       if (propType != null)
       {
         out.println("else");

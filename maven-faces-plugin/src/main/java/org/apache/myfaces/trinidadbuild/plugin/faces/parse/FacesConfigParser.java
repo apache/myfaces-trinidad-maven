@@ -118,6 +118,7 @@ public class FacesConfigParser
                                    "defaultValue");
     digester.addSetNext("faces-config/component/property", "addProperty",
                         PropertyBean.class.getName());
+    
 
     // faces-config/component/facet
     digester.addObjectCreate("faces-config/component/facet", FacetBean.class);
@@ -186,7 +187,6 @@ public class FacesConfigParser
                                    "stateHolder");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/jsp-property-name",
                                    "jspPropertyName");
-    // faces-config/component/property/property-extension
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/list",
                                    "list");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/required");
@@ -222,6 +222,9 @@ public class FacesConfigParser
     digester.addSetNext("faces-config/component/property/property-extension/method-binding-signature",
                         "setMethodBindingSignature",
                         MethodSignatureBean.class.getName());
+    // faces-config/component/property/property-extension/property-metada
+    digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/use-max-time",
+                                   "useMaxTime");        
 
 
     // XInclude rules
@@ -354,6 +357,9 @@ public class FacesConfigParser
     // faces-config/validator/property/property-extension
     digester.addBeanPropertySetter("faces-config/validator/property/property-extension/tag-attribute-excluded",
                                    "tagAttributeExcluded");
+    // faces-config/validator/property/property-extension/property-metada
+    digester.addBeanPropertySetter("faces-config/validator/property/property-extension/property-metadata/use-max-time",
+                                 "useMaxTime");
 
     // faces-config/render-kit/renderer/renderer-extension
     digester.addBeanPropertySetter("faces-config/render-kit/renderer/renderer-extension/component-type",
