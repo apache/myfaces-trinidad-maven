@@ -22,7 +22,7 @@
     <value n="oracle.adfdt.controller.struts.addin.StrutsProjectMigrator" v="10.1.3.0.2;10.1.3.0.3;10.1.3.0.4;11.1.1.0.0"/>
     <value n="oracle.adfdtinternal.dvt.datapresdt.migration.JspProjectMigrator" v="11.1.1.0.0"/>
     <value n="oracle.adfdtinternal.model.ide.migration.ProjectMigrator" v="11.1.1.0.0.1"/>
-    <value n="oracle.adfdtinternal.model.ide.xmled.migration.ADFNodeMigrator" v="11.1.1.47.57"/>
+    <value n="oracle.adfdtinternal.model.ide.xmled.migration.ADFNodeMigrator" v="11.1.1.0.0.5"/>
     <value n="oracle.adfdtinternal.view.common.migration.wizards.MigrationHelper" v="11.1.1.0.0.3"/>
     <value n="oracle.adfdtinternal.view.rich.binding.migration.JarResourceMigrator" v="11.1.1.0.0"/>
     <value n="oracle.bm.commonIde.ProjectUpgrader" v="10.1.3.0.3;10.1.3.0.4;11.1.1.0.0"/>
@@ -30,11 +30,12 @@
     <value n="oracle.ide.model.Project" v="10.1.3.0.2;10.1.3.0.3;10.1.3.0.4;11.1.1.0.0"/>
     <value n="oracle.ide.model.ResourcePathsMigrator" v="10.1.3.0.3;10.1.3.0.4;11.1.1.0.0"/>
     <value n="oracle.jbo.dt.jclient.migrator.JCProjectMigrator" v="10.1.3.0.3;10.1.3.0.4;11.1.1.0.0"/>
-    <value n="oracle.jbo.dt.jdevx.ui.appnav.APProjectMigrator" v="10.1.3.0.3;10.1.3.0.4;11.1.1.47.57"/>
+    <value n="oracle.jbo.dt.jdevx.ui.appnav.APProjectMigrator" v="10.1.3.0.3;10.1.3.0.4;11.1.1.0.0.5"/>
     <value n="oracle.jdeveloper.ejb.EjbMigrator" v="10.1.3.4.0;11.1.1.0.0"/>
     <value n="oracle.jdeveloper.library.ProjectLibraryMigrator" v="11.1.1.0.0"/>
     <value n="oracle.jdeveloper.model.OutputDirectoryMigrator" v="11.1.1.0.0"/>
     <value n="oracle.jdevimpl.deploy.DeploymentProfilesMigrator" v="11.1.1.0.0.1"/>
+    <value n="oracle.jdevimpl.deploy.jps.JpsDataMigrator" v="11.1.1.0.0"/>
     <value n="oracle.jdevimpl.jsp.JspMigrator" v="10.1.3.0.2;10.1.3.0.3;10.1.3.0.4;11.1.1.0.0"/>
     <value n="oracle.jdevimpl.junit.JUnitMigrator" v="11.1.1.0.0.1"/>
     <value n="oracle.jdevimpl.offlinedb.migration.OfflineDBProjectMigrator" v="11.1.1.0.0"/>
@@ -200,4 +201,5 @@
       </hash>
    </hash>
 </jpr:project>
+
 
