@@ -150,6 +150,26 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
     out.println("}");
   }
 
+  public void writeGetComponentType(PrettyWriter out,
+                                    ComponentBean component) throws IOException
+  {
+    String componentType = component.getComponentType();
+    if("javax.faces.HtmlColumn".equals(componentType))
+    {
+      componentType = "javax.faces.Column";
+    }
+    out.println();
+
+    // The superclass does not necessarily need to have this method
+    out.println("@Override");
+    out.println("public String getComponentType()");
+    out.println("{");
+    out.indent();
+    out.println("return \"" + componentType + "\";");
+    out.unindent();
+    out.println("}");
+  }
+
   public void writeSetPropertiesMethod(PrettyWriter out,
                                        String componentClass,
                                        ComponentBean component) throws IOException
