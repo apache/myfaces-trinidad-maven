@@ -15,6 +15,26 @@
 */
 package org.apache.myfaces.trinidadbuild.plugin.faces;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.commons.digester.AbstractObjectCreationFactory;
 import org.apache.commons.digester.Digester;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -24,24 +44,21 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.myfaces.trinidadbuild.plugin.faces.generator.GeneratorHelper;
 import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
-import org.apache.myfaces.trinidadbuild.plugin.faces.parse.*;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.*;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.AttributeBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ConverterBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigParser;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ValidatorBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.AttributeFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.ComponentFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.ConverterFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.ValidatorFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
 import org.codehaus.plexus.util.FileUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-
-import javax.xml.namespace.QName;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLConnection;
-import java.util.*;
 
 abstract public class AbstractFacesMojo extends AbstractMojo
 {
