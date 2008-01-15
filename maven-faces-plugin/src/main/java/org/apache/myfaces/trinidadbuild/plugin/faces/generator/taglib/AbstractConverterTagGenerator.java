@@ -116,36 +116,38 @@ public abstract class AbstractConverterTagGenerator extends AbstractTagGenerator
   {
     Iterator properties = converter.properties();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
+    
+    String converterFullClass = converter.getConverterClass();
+    String converterClass = Util.getClassFromFullClass(converterFullClass);
+
+    out.println();
+    // TODO: restore coding standards, and make final
+    if (is12()) {
+      out.println("@Override");
+    }
+    out.println("protected Converter createConverter() throws JspException");
+    out.println("{");
+    out.indent();
+    if (is12())
+    {
+      out.println("String converterId = " + converterClass +  ".CONVERTER_ID;");
+      out.println("Application appl = FacesContext.getCurrentInstance().getApplication();");
+      out.println(converterClass + " converter = " +
+                  "(" + converterClass + ")appl.createConverter(converterId);");
+    }
+    else
+    {
+      out.println(converterClass + " converter = " +
+                  "(" + converterClass + ")super.createConverter();");
+    }
     if (properties.hasNext())
     {
-      String converterFullClass = converter.getConverterClass();
-      String converterClass = Util.getClassFromFullClass(converterFullClass);
-
-      out.println();
-      // TODO: restore coding standards, and make final
-      if (is12()) {
-        out.println("@Override");
-      }
-      out.println("protected Converter createConverter() throws JspException");
-      out.println("{");
-      out.indent();
-      if (is12())
-      {
-        out.println("String converterId = " + converterClass +  ".CONVERTER_ID;");
-        out.println("Application appl = FacesContext.getCurrentInstance().getApplication();");
-        out.println(converterClass + " converter = " +
-                    "(" + converterClass + ")appl.createConverter(converterId);");
-      }
-      else
-      {
-        out.println(converterClass + " converter = " +
-                    "(" + converterClass + ")super.createConverter();");
-      }
       out.println("_setProperties(converter);");
-      out.println("return converter;");
-      out.unindent();
-      out.println("}");
     }
+    out.println("return converter;");
+    out.unindent();
+    out.println("}");
+    
   }
 
 
