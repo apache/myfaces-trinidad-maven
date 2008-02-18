@@ -20,7 +20,6 @@ package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
 
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.CompoundIterator;
 
-import javax.xml.namespace.QName;
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -31,13 +30,14 @@ import java.util.logging.Logger;
  * ComponentBean is a Java representation of the faces-config component
  * XML element.
  */
-public class ComponentBean extends ObjectBean
+public class ComponentBean extends AbstractTagBean
 {
   /**
    * Creates a new ComponentBean.
    */
   public ComponentBean()
   {
+    super(true);
     _properties = new LinkedHashMap();
     _facets = new LinkedHashMap();
     _events = new LinkedHashMap();
@@ -206,17 +206,6 @@ public class ComponentBean extends ObjectBean
   }
 
   /**
-   * Sets the JSP tag handler class for this component.
-   *
-   * @param tagClass  the JSP tag handler class
-   */
-  public void setTagClass(
-    String tagClass)
-  {
-    _tagClass = tagClass;
-  }
-
-  /**
    * Sets the unsupported agents for this component.
    *
    * @param unsupportedAgents  the unsupported agents
@@ -238,17 +227,6 @@ public class ComponentBean extends ObjectBean
   public String[] getUnsupportedAgents()
   {
     return _unsupportedAgents;
-  }
-
-
-  /**
-   * Returns the JSP tag handler class for this component.
-   *
-   * @return  the JSP tag handler class
-   */
-  public String getTagClass()
-  {
-    return _tagClass;
   }
 
    /**
@@ -292,27 +270,6 @@ public class ComponentBean extends ObjectBean
  {
    return _tagHandler;
  }
-
-  /**
-   * Returns the JSP tag name for this component.
-   *
-   * @return  the JSP tag name
-   */
-  public QName getTagName()
-  {
-    return _tagName;
-  }
-
-  /**
-   * Sets the JSP tag name for this component.
-   *
-   * @param tagName  the JSP tag name
-   */
-  public void setTagName(
-    QName tagName)
-  {
-    _tagName = tagName;
-  }
 
   /**
    * Sets the namingContainer flag of this property.
@@ -418,7 +375,6 @@ public class ComponentBean extends ObjectBean
   {
     _implementationType = implementationType;
   }
-
 
   /**
    * Adds a property to this component.
@@ -652,7 +608,6 @@ public class ComponentBean extends ObjectBean
     _children = children;
   }
 
-
   /**
    * Returns true if the component can have children.
    *
@@ -705,23 +660,6 @@ public class ComponentBean extends ObjectBean
     String modifier)
   {
     addTagClassModifier(_parseModifier(modifier));
-  }
-
-  private int _parseModifier(
-    String text)
-  {
-    if ("public".equals(text))
-      return Modifier.PUBLIC;
-    else if ("protected".equals(text))
-      return Modifier.PROTECTED;
-    else if ("private".equals(text))
-      return Modifier.PRIVATE;
-    else if ("abstract".equals(text))
-      return Modifier.ABSTRACT;
-    else if ("final".equals(text))
-      return Modifier.FINAL;
-
-    throw new IllegalArgumentException("Unrecognized modifier: " + text);
   }
 
   /**
@@ -1018,8 +956,9 @@ public class ComponentBean extends ObjectBean
    */
   protected String findJspTagClass()
   {
-    if (_tagClass != null)
-      return _tagClass;
+    String tagClass = getTagClass();
+    if (tagClass != null)
+      return tagClass;
 
     ComponentBean parent = resolveSupertype();
     return (parent != null) ? parent.findJspTagClass() : null;
@@ -1051,8 +990,6 @@ public class ComponentBean extends ObjectBean
   private String  _componentSuperclass;
   private String  _rendererType;
   private String  _implementationType;
-  private QName   _tagName;
-  private String  _tagClass;
   private String  _tagHandler;
   private String  _tagSuperclass;
   private String  _localName;
@@ -1065,7 +1002,7 @@ public class ComponentBean extends ObjectBean
   private int     _componentClassModifiers;
   private int     _tagClassModifiers;
   private String[] _unsupportedAgents = new String[0];
-
+  
   static private final String _TRINIDAD_COMPONENT_BASE =
                          "org.apache.myfaces.trinidad.component.UIXComponentBase";
 

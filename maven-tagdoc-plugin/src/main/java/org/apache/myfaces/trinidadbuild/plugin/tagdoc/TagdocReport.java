@@ -52,10 +52,12 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.reporting.AbstractMavenMultiPageReport;
 import org.apache.maven.reporting.MavenReportException;
 import org.apache.maven.reporting.sink.SinkFactory;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.AbstractTagBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ConverterBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.EventBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.EventRefBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ExampleBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigParser;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacetBean;
@@ -399,6 +401,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       out.write(" <p>\n");
       _writeComponentSummary(out, component);
       out.write(" </p>\n");
+      out.write(" <p>\n");
+      _writeExamples(out, component);
+      out.write(" </p>\n");
       out.write(" </section>\n");
       
       if (component.hasEvents(true))
@@ -464,6 +469,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       out.write(" <p>\n");
       _writeConverterSummary(out, converter);
       out.write(" </p>\n");
+      out.write(" <p>\n");
+      _writeExamples(out, converter);
+      out.write(" </p>\n");
       out.write(" </section>\n");
             
       out.write(" <section name=\"Attributes\">\n");
@@ -510,6 +518,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       out.write(" <section name=\"Summary\">\n");
       out.write(" <p>\n");
       _writeValidatorSummary(out, validator);
+      out.write(" </p>\n");
+      out.write(" <p>\n");
+      _writeExamples(out, validator);
       out.write(" </p>\n");
       out.write(" </section>\n");
             
@@ -629,7 +640,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     return in;
   }
-  
+
   static private final String _platformAgnosticPath(String path) {
       return path.replace('/', File.separatorChar);
   }
@@ -968,7 +979,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       {
         if (i > 0)
           out.write(",<br/>");
-        out.write((String) phases[i]);
+        out.write(phases[i]);
       }
 
       out.write("</td>");
@@ -978,9 +989,6 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     out.write("</table>\n");
   }
-
-
-
 
 
   private void _writeComponentFacets(Writer out, ComponentBean bean) throws IOException
@@ -1017,6 +1025,50 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
 
 
+  private void _writeExamples(Writer out, AbstractTagBean bean) throws IOException
+  {
+    if (!bean.hasExamples())
+      return;
+    
+    ExampleBean exBean = null;
+
+    // Write header
+    out.write("   <b>Example(s):</b> ");
+    out.write("   <br/>\n");
+    out.write("   <html>\n");
+    
+    // Go through each example, write its description
+    // followed by the example source code.
+    Iterator iter = bean.examples();
+    while (iter.hasNext())
+    {
+      exBean = (ExampleBean) iter.next();
+      String desc   = exBean.getSourceDescription();
+      String source = exBean.getSourceCode();
+      
+      if (desc != null)
+      {
+        desc = desc.replaceAll("<", "&lt;");
+        desc = desc.replaceAll(">", "&gt;");
+        
+        if (!"".equals(desc))
+          out.write("   <p>" + desc + "</p>");
+      }
+
+      if (source != null)
+      {
+        source = source.replaceAll("<", "&lt;");
+        source = source.replaceAll(">", "&gt;");
+        if (!"".equals(source))
+        {
+          out.write("    <div class=\'source\'>\n");
+          out.write("      <pre>\n" + source + "</pre>\n");
+          out.write("    </div>\n");
+        }
+      }
+    }
+    out.write("   </html>\n");
+  }
 
   protected MavenProject getProject()
   {
@@ -1178,7 +1230,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       List classpathElements = project.getCompileClasspathElements();
       if (!classpathElements.isEmpty())
       {
-        String[] entries = (String[])classpathElements.toArray(new String[0]);
+        String[] entries = (String[]) classpathElements.toArray(new String[0]);
         URL[] urls = new URL[entries.length];
         for (int i=0; i < urls.length; i++)
         {
