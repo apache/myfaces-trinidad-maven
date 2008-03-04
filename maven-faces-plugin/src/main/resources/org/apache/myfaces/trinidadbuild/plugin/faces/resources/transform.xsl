@@ -58,6 +58,8 @@
   <!ELEMENT property-editor (#PCDATA)>
   <!ELEMENT short-description (#PCDATA)>
   <!ELEMENT translatable (#PCDATA)>
+  <!ELEMENT scoped-id-holder (#PCDATA)>
+  <!ELEMENT multi-scoped-id-holder (#PCDATA)>
   <!ELEMENT unsupported-agents (#PCDATA)>
   <!ATTLIST component-metadata component-type CDATA #IMPLIED>
 ]>
@@ -395,7 +397,7 @@
     </xsl:element>
   </xsl:template>
   
-  <xsl:template match="//javaee:property-extension[mfp:property-values|mfp:group|mfp:translatable|mfp:property-editor|mfp:expert|mfp:unsupported-agents|*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']]" >
+  <xsl:template match="//javaee:property-extension[mfp:property-values|mfp:group|mfp:translatable|mfp:scoped-id-holder|mfp:multi-scoped-id-holder|mfp:property-editor|mfp:expert|mfp:unsupported-agents|*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']]" >
     <xsl:element name="property-extension" >
       <xsl:element name="property-metadata" >
         <xsl:apply-templates/>
@@ -869,6 +871,18 @@
 
   <xsl:template match="//mfp:property-metadata/mfp:translatable" >
     <xsl:element name="translatable" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//mfp:property-metadata/mfp:scoped-id-holder" >
+    <xsl:element name="scoped-id-holder" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//mfp:property-metadata/mfp:multi-scoped-id-holder" >
+    <xsl:element name="multi-scoped-id-holder" >
       <xsl:value-of select="text()" />
     </xsl:element>
   </xsl:template>
