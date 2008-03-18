@@ -935,5 +935,16 @@
       <xsl:value-of select="text()" />
     </xsl:element>
   </xsl:template>
-
+  
+  <xsl:template match="//mfp:grouping-element" >
+    <xsl:element name="grouping-element" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+  
+  <xsl:template match="//mfp:is-content-resizable" >
+    <xsl:element name="is-content-resizable" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
 </xsl:stylesheet>
