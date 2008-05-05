@@ -313,12 +313,26 @@
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="//javaee:facet-extension[mfp:facet-metadata|mfp:allowable-children|mfp:preferred-children|mfp:preferred|mfp:unsupported-agents|mfp:deprecated]" >
-    <xsl:element name="facet-extension" >
-      <xsl:element name="facet-metadata" >
-        <xsl:apply-templates/>
+  <xsl:template match="//javaee:facet-extension">
+    <!-- Make sure not empty -->
+    <xsl:if test="*">
+      <xsl:element name="facet-extension">
+        <!-- Check for possible children of the metadata -->
+        <xsl:if test="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee']">
+          <xsl:element name="facet-metadata">
+            <!-- Select metadata children -->
+            <xsl:apply-templates select="mfp:facet-metadata/*[
+              namespace-uri() != 'http://java.sun.com/xml/ns/javaee']" />
+            <!-- Add non-metadata children under the metadata -->
+            <xsl:apply-templates select="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' 
+              and (
+                namespace-uri() != 'http://myfaces.apache.org/maven-faces-plugin'
+                or name() != 'mfp:facet-metadata'
+                )]" />
+          </xsl:element>
+        </xsl:if>
       </xsl:element>
-    </xsl:element>
+    </xsl:if>
   </xsl:template>
 
   
@@ -397,27 +411,26 @@
     </xsl:element>
   </xsl:template>
   
-  <xsl:template match="//javaee:property-extension[mfp:property-values|mfp:group|mfp:translatable|mfp:scoped-id-holder|mfp:multi-scoped-id-holder|mfp:property-editor|mfp:expert|mfp:unsupported-agents|*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']]" >
-    <xsl:element name="property-extension" >
-      <xsl:element name="property-metadata" >
-        <xsl:apply-templates/>
+  <xsl:template match="//javaee:property-extension">
+    <!-- Make sure not empty -->
+    <xsl:if test="*">
+      <xsl:element name="property-extension">
+        <!-- Check for possible children of the metadata -->
+        <xsl:if test="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee']">
+          <xsl:element name="property-metadata">
+            <!-- Select metadata children -->
+            <xsl:apply-templates select="mfp:property-metadata/*[
+              namespace-uri() != 'http://java.sun.com/xml/ns/javaee']" />
+            <!-- Add non-metadata children under the metadata -->
+            <xsl:apply-templates select="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' 
+              and (
+                namespace-uri() != 'http://myfaces.apache.org/maven-faces-plugin'
+                or name() != 'mfp:property-metadata'
+                )]" />
+          </xsl:element>
+        </xsl:if>
       </xsl:element>
-    </xsl:element>
-  </xsl:template>
-  
-  <xsl:template match="//javaee:property-extension[mfp:property-metadata]" priority="1" >
-    <xsl:element name="property-extension" >
-      <!-- do not copy the property values, but instead let them be picked up in the property-metadata element -->
-      <xsl:apply-templates select="*[name() != 'mfp:property-values']" />
-    </xsl:element>
-  </xsl:template>
-  
-  <xsl:template match="//mfp:property-metadata" >
-    <xsl:element name="property-metadata" >
-      <xsl:apply-templates/>
-      <!-- pick up any property-values elements from the parent node -->
-      <xsl:apply-templates select="../mfp:property-values" />
-    </xsl:element>
+    </xsl:if>
   </xsl:template>
 
   <!-- this templates grabs the component-family from an ancestor -->
@@ -759,13 +772,14 @@
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="//javaee:property[javaee:property-extension/mfp:long-description]/javaee:description" priority="1">
+  <xsl:template
+    match="//javaee:property[javaee:property-extension/mfp:long-description]/javaee:description"
+    priority="1">
     <xsl:element name="description" >
       <xsl:apply-templates select="../javaee:property-extension/mfp:long-description/@*" />
       <xsl:value-of select="../javaee:property-extension/mfp:long-description/text()" />
     </xsl:element>
   </xsl:template>
-
 
   <xsl:template match="//javaee:description/@xml:lang" >
     <xsl:attribute name="xml:lang" ><xsl:value-of select="@xml:lang" /></xsl:attribute>
@@ -807,32 +821,9 @@
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="//mfp:component-family" >
-    <xsl:element name="component-family" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:favorite-property" >
-    <xsl:element name="favorite-property" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:renderer-type" >
-    <xsl:element name="renderer-type" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:property-values" >
-    <xsl:element name="attribute-values" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:unsupported-agents" >
-    <xsl:element name="unsupported-agents" >
+  <xsl:template match="//mfp:property-values">
+    <!-- Rename this element -->
+    <xsl:element name="attribute-values">
       <xsl:value-of select="text()" />
     </xsl:element>
   </xsl:template>
@@ -840,111 +831,58 @@
   <!-- Handle metadata we do not know about by letting it through.  Currently,
    just for property-extension and component-metadata, but should be global.
    See JIRA issues ADFFACES-358, ADFFACES-361 and ADFFACES-472 -->
-  <xsl:template match="javaee:property-extension/*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']">
+  <xsl:template match="javaee:property-extension/*[
+    namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
+    and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']">
     <xsl:copy>
       <xsl:apply-templates select="@*|node()"/>
       <xsl:value-of select="text()"/>
     </xsl:copy> 
   </xsl:template>
 
-  <xsl:template match="mfp:component-metadata/*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']">
+  <xsl:template match="mfp:component-metadata/*[
+    namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
+    and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']">
     <xsl:copy>
       <xsl:apply-templates select="@*|node()"/>
       <xsl:value-of select="text()"/>
     </xsl:copy> 
   </xsl:template>
 
-
-  <xsl:template match="//mfp:component-metadata/mfp:group" >
-<!-- Disable component groups for now
-    <xsl:element name="group" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
--->
-  </xsl:template>
-
-  <xsl:template match="//mfp:property-metadata/mfp:group" >
-    <xsl:element name="group" >
-      <xsl:value-of select="text()" />
+  <xsl:template match="//*[
+    namespace-uri() = 'http://myfaces.apache.org/maven-faces-plugin']"
+    priority="-1">
+    <xsl:element name="{local-name()}" >
+      <xsl:apply-templates select="@*|node()"/>
+      <xsl:value-of select="text()"/>
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="//mfp:property-metadata/mfp:translatable" >
-    <xsl:element name="translatable" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
+  <!-- Blacklisted mfp: that should not be copied over into the faces-config.xml: --> 
+  <xsl:template match="//mfp:alternate-class" />
+  <xsl:template match="//mfp:author" />
+  <xsl:template match="//mfp:component-metadata/mfp:group" />
+  <xsl:template match="//mfp:component-superclass" />
+  <xsl:template match="//mfp:component-supertype" />
+  <xsl:template match="//mfp:event" />
+  <xsl:template match="//mfp:example" />
+  <xsl:template match="//mfp:implementation-type" />
+  <xsl:template match="//mfp:java-constructor" />
+  <xsl:template match="//mfp:javadoc-tags" />
+  <xsl:template match="//mfp:javascript-class" />
+  <xsl:template match="//mfp:jsp-property-name" />
+  <xsl:template match="//mfp:long-description" />
+  <xsl:template match="//mfp:method-binding-signature" />
+  <xsl:template match="//mfp:short-description" />
+  <xsl:template match="//mfp:state-holder" />
+  <xsl:template match="//mfp:tag-attribute-excluded" />
+  <xsl:template match="//mfp:tag-class" />
+  <xsl:template match="//mfp:tag-class-modifier" />
+  <xsl:template match="//mfp:tag-name" />
+  <xsl:template match="//mfp:uix2-local-name" />
+  <xsl:template match="//mfp:unsupported-render-kit" />
+  <xsl:template match="//mfp:unsupported-render-kits" />
+  <xsl:template match="//mfp:use-max-time" />
+  <xsl:template match="//mfp:warn-if-not-specified" />
 
-  <xsl:template match="//mfp:property-metadata/mfp:scoped-id-holder" >
-    <xsl:element name="scoped-id-holder" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:property-metadata/mfp:multi-scoped-id-holder" >
-    <xsl:element name="multi-scoped-id-holder" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-  
-  <xsl:template match="//mfp:accepts-child-components" >
-    <xsl:element name="accepts-child-components" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-
-  <xsl:template match="//mfp:property-editor" >
-    <xsl:element name="property-editor" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:expert" >
-    <xsl:element name="expert" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:preferred-children" >
-    <xsl:element name="preferred-children" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:allowable-children" >
-    <xsl:element name="allowable-children" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:preferred" >
-    <xsl:element name="preferred" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:deprecated" >
-    <xsl:element name="deprecated" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-
-  <xsl:template match="//mfp:initial-value" >
-    <xsl:element name="initial-value" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-  
-  <xsl:template match="//mfp:grouping-element" >
-    <xsl:element name="grouping-element" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
-  
-  <xsl:template match="//mfp:is-content-resizable" >
-    <xsl:element name="is-content-resizable" >
-      <xsl:value-of select="text()" />
-    </xsl:element>
-  </xsl:template>
 </xsl:stylesheet>
