@@ -87,7 +87,26 @@ public class FacetBean extends ObjectBean
     return _required;
   }
 
+  /**
+   * If the facet should be hidden from documentation
+   * @return If the facet should be hidden
+   */
+  public boolean isHidden()
+  {
+    return _hidden;
+  }  
+
+  /**
+   * Set if this facet should be hidden from documentation
+   * @param hidden If the facet should be hidden
+   */
+  public void setHidden(boolean hidden)
+  {
+    this._hidden = hidden;
+  }
+
   private String  _description;
   private String  _facetName;
   private boolean _required;
+  private boolean _hidden;
 }
