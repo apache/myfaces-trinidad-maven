@@ -59,6 +59,7 @@
             <xsd:element name="requires-literal" type="xsd:boolean"
                          minOccurs="0"/>
             <xsd:element name="virtual" type="xsd:boolean"/>
+            <xsd:element name="hidden" type="xsd:boolean"/>
             <xsd:element name="method-binding-signature"
                          type="mfp:method-binding-signatureType" minOccurs="0"/>
         </xsd:sequence>

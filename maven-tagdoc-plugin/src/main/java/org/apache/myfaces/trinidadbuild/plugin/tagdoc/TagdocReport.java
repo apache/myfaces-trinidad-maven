@@ -806,6 +806,11 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     while (attributes.hasNext())
     {
       PropertyBean attr = (PropertyBean) attributes.next();
+      
+      if (attr.isHidden())
+      {
+        continue;
+      }
 
       /*
       if ((group == null) || "Ungrouped".equals(group))
@@ -998,7 +1003,11 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     Iterator iter = bean.facets(true);
     while (iter.hasNext())
     {
-      facetNames.add(((FacetBean) iter.next()).getFacetName());
+      FacetBean facetBean = (FacetBean)iter.next();
+      if (!facetBean.isHidden())
+      {
+        facetNames.add(facetBean.getFacetName());
+      }
     }
 
     out.write("<table>\n");

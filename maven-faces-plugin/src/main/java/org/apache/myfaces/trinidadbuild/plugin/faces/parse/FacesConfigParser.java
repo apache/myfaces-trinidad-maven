@@ -130,6 +130,9 @@ public class FacesConfigParser
 
     // Maven Faces Plugin
     digester.setRuleNamespaceURI("http://myfaces.apache.org/maven-faces-plugin");
+    
+    // faces-config/component/facet/facet-extension
+    digester.addBeanPropertySetter("faces-config/component/facet/facet-extension/hidden");
 
     // faces-config/component/facet/example
     digester.addObjectCreate("faces-config/component/facet/example",
@@ -222,6 +225,7 @@ public class FacesConfigParser
                                    "alternateClass");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/tag-attribute-excluded",
                                    "tagAttributeExcluded");
+    digester.addBeanPropertySetter("faces-config/component/property/property-extension/hidden");
     digester.addCallMethod("faces-config/component/property/property-extension/property-values",
                            "parsePropertyValues", 1);
     digester.addCallParam("faces-config/component/property/property-extension/property-values", 0);

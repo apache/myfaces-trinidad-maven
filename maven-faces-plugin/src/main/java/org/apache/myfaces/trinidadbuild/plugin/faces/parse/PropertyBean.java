@@ -428,6 +428,24 @@ public class PropertyBean extends AttributeBean
 
     return _fieldPropertyName;
   }
+  
+  /**
+   * If the property should be hidden from documentation
+   * @return If the facet should be hidden
+   */
+  public boolean isHidden()
+  {
+    return _hidden;
+  }  
+
+  /**
+   * Set if this facet should be hidden from documentation
+   * @param hidden If the facet should be hidden
+   */
+  public void setHidden(boolean hidden)
+  {
+    this._hidden = hidden;
+  }
 
   private String  _aliasOf;
   private String  _jspPropertyName;
@@ -440,6 +458,7 @@ public class PropertyBean extends AttributeBean
   private boolean _tagAttributeExcluded;
   private boolean _enum;
   private boolean _useMaxTime;
+  private boolean _hidden;
   private String[] _propertyValues;
   private String[] _unsupportedAgents = _EMPTY_ARRAY;
   private String[] _unsupportedRenderKits = _EMPTY_ARRAY;
