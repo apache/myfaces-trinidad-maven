@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -83,7 +83,7 @@ public class FacesConfigParser
     // spf.setXIncludeAware(true);
     Digester digester = new Digester(spf.newSAXParser());
     digester.setNamespaceAware(true);
-    
+
     return digester;
   }
 
@@ -118,7 +118,7 @@ public class FacesConfigParser
                                    "defaultValue");
     digester.addSetNext("faces-config/component/property", "addProperty",
                         PropertyBean.class.getName());
-    
+
 
     // faces-config/component/facet
     digester.addObjectCreate("faces-config/component/facet", FacetBean.class);
@@ -133,6 +133,16 @@ public class FacesConfigParser
     
     // faces-config/component/facet/facet-extension
     digester.addBeanPropertySetter("faces-config/component/facet/facet-extension/hidden");
+
+    // faces-config/component/facet/example
+    digester.addObjectCreate("faces-config/component/facet/example",
+                             ExampleBean.class);
+    digester.addBeanPropertySetter("faces-config/component/facet/example/source-description",
+                                   "sourceDescription");
+    digester.addBeanPropertySetter("faces-config/component/facet/example/source-code",
+                                   "sourceCode");
+    digester.addSetNext("faces-config/component/facet/example",
+                        "addExample", ExampleBean.class.getName());
 
     // faces-config/component/component-extension
     digester.addBeanPropertySetter("faces-config/component/component-extension/long-description",
@@ -173,6 +183,16 @@ public class FacesConfigParser
                                    "localName");
     digester.addBeanPropertySetter("faces-config/component/component-extension/uix2-node-class",
                                    "nodeClass");
+
+    // faces-config/component/component-extension/example
+    digester.addObjectCreate("faces-config/component/component-extension/example",
+                             ExampleBean.class);
+    digester.addBeanPropertySetter("faces-config/component/component-extension/example/source-description",
+                                   "sourceDescription");
+    digester.addBeanPropertySetter("faces-config/component/component-extension/example/source-code",
+                                   "sourceCode");
+    digester.addSetNext("faces-config/component/component-extension/example",
+                        "addExample", ExampleBean.class.getName());
 
     // faces-config/component/component-extension/event
     digester.addObjectCreate("faces-config/component/component-extension/event", EventRefBean.class);
@@ -228,7 +248,7 @@ public class FacesConfigParser
                         MethodSignatureBean.class.getName());
     // faces-config/component/property/property-extension/property-metada
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/use-max-time",
-                                   "useMaxTime");        
+                                   "useMaxTime");
 
 
     // XInclude rules
@@ -237,15 +257,9 @@ public class FacesConfigParser
                               ComponentIncludeFactory.class);
   }
 
-  protected Digester createDigester() throws ParserConfigurationException, SAXException
+  protected static void addConverterDigesterRules(Digester digester)
   {
-    Digester digester = createEmptyDigester();
-
-    addComponentDigesterRules(digester, true);
-    
-    // Java Enterprise 5.0
     digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee");
-    //digester.addObjectCreate("faces-config", FacesConfigBean.class);
 
     // faces-config/converter
     digester.addObjectCreate("faces-config/converter", ConverterBean.class);
@@ -269,6 +283,40 @@ public class FacesConfigParser
     digester.addSetNext("faces-config/converter/property", "addProperty",
                         PropertyBean.class.getName());
 
+    // Maven Faces Plugin
+    digester.setRuleNamespaceURI("http://myfaces.apache.org/maven-faces-plugin");
+
+    // faces-config/converter/converter-extension
+    digester.addBeanPropertySetter("faces-config/converter/converter-extension/long-description",
+                                   "longDescription");
+    digester.addBeanPropertySetter("faces-config/converter/converter-extension/tag-class",
+                                   "tagClass");
+    digester.addRule("faces-config/converter/converter-extension/tag-name",
+                     new BeanPropertySetterRule("tagName"));
+    digester.addCallMethod("faces-config/converter/converter-extension/tag-class-modifier",
+                           "parseTagClassModifier", 1);
+    digester.addCallParam("faces-config/converter/converter-extension/tag-class-modifier", 0);
+
+    // faces-config/converter/converter-extension/example
+    digester.addObjectCreate("faces-config/converter/converter-extension/example",
+                             ExampleBean.class);
+    digester.addBeanPropertySetter("faces-config/converter/converter-extension/example/source-description",
+                                   "sourceDescription");
+    digester.addBeanPropertySetter("faces-config/converter/converter-extension/example/source-code",
+                                   "sourceCode");
+    digester.addSetNext("faces-config/converter/converter-extension/example",
+                        "addExample", ExampleBean.class.getName());
+
+    // faces-config/converter/property/property-extension
+    digester.addBeanPropertySetter("faces-config/converter/property/property-extension/tag-attribute-excluded",
+                                   "tagAttributeExcluded");
+  }
+
+  protected static void addValidatorDigesterRules(Digester digester)
+  {
+    // Java Enterprise 5.0
+    digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee");
+
     // faces-config/validator
     digester.addObjectCreate("faces-config/validator", ValidatorBean.class);
     digester.addBeanPropertySetter("faces-config/validator/validator-id",
@@ -291,6 +339,42 @@ public class FacesConfigParser
     digester.addSetNext("faces-config/validator/property", "addProperty",
                         PropertyBean.class.getName());
 
+    // Maven Faces Plugin
+    digester.setRuleNamespaceURI("http://myfaces.apache.org/maven-faces-plugin");
+
+    // faces-config/validator/validator-extension
+    digester.addBeanPropertySetter("faces-config/validator/validator-extension/long-description",
+                                   "longDescription");
+    digester.addBeanPropertySetter("faces-config/validator/validator-extension/tag-class",
+                                   "tagClass");
+    digester.addRule("faces-config/validator/validator-extension/tag-name",
+                     new BeanPropertySetterRule("tagName"));
+    digester.addCallMethod("faces-config/validator/validator-extension/tag-class-modifier",
+                           "parseTagClassModifier", 1);
+    digester.addCallParam("faces-config/validator/validator-extension/tag-class-modifier", 0);
+
+    // faces-config/validator/validator-extension/example
+    digester.addObjectCreate("faces-config/validator/validator-extension/example",
+                             ExampleBean.class);
+    digester.addBeanPropertySetter("faces-config/validator/validator-extension/example/source-description",
+                                   "sourceDescription");
+    digester.addBeanPropertySetter("faces-config/validator/validator-extension/example/source-code",
+                                   "sourceCode");
+    digester.addSetNext("faces-config/validator/validator-extension/example",
+                        "addExample", ExampleBean.class.getName());
+
+    // faces-config/validator/property/property-extension
+    digester.addBeanPropertySetter("faces-config/validator/property/property-extension/tag-attribute-excluded",
+                                   "tagAttributeExcluded");
+    // faces-config/validator/property/property-extension/property-metada
+    digester.addBeanPropertySetter("faces-config/validator/property/property-extension/property-metadata/use-max-time",
+                                 "useMaxTime");
+  }
+
+  protected static void addRenderKitDigesterRules(Digester digester)
+  {
+    // Java Enterprise 5.0
+    digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee");
 
     // faces-config/render-kit
     digester.addObjectCreate("faces-config/render-kit", RenderKitBean.class);
@@ -311,9 +395,20 @@ public class FacesConfigParser
     digester.addSetNext("faces-config/render-kit/renderer", "addRenderer",
                         RendererBean.class.getName());
 
+    // Maven Faces Plugin
+    digester.setRuleNamespaceURI("http://myfaces.apache.org/maven-faces-plugin");
 
-    // TBD: JSR-276 metadata (ask Jeff Stephenson)
+    // faces-config/render-kit/renderer/renderer-extension
+    digester.addBeanPropertySetter("faces-config/render-kit/renderer/renderer-extension/component-type",
+                                   "componentType");
+    digester.addBeanPropertySetter("faces-config/render-kit/renderer/renderer-extension/renderer-superclass",
+                                   "rendererSuperclass");
+  }
 
+  protected static void addEventDigesterRules(Digester digester)
+  {
+    // Java Enterprise 5.0
+    // digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee");
 
     // Maven Faces Plugin
     digester.setRuleNamespaceURI("http://myfaces.apache.org/maven-faces-plugin");
@@ -331,45 +426,22 @@ public class FacesConfigParser
                                    "eventSourceInterface");
     digester.addSetNext("faces-config/faces-config-extension/event", "addEvent",
                         EventBean.class.getName());
+  }
 
-    // faces-config/converter/converter-extension
-    digester.addBeanPropertySetter("faces-config/converter/converter-extension/long-description",
-                                   "longDescription");
-    digester.addBeanPropertySetter("faces-config/converter/converter-extension/tag-class",
-                                   "tagClass");
-    digester.addRule("faces-config/converter/converter-extension/tag-name",
-                     new BeanPropertySetterRule("tagName"));
-    digester.addCallMethod("faces-config/converter/converter-extension/tag-class-modifier",
-                           "parseTagClassModifier", 1);
-    digester.addCallParam("faces-config/converter/converter-extension/tag-class-modifier", 0);
+  protected Digester createDigester() throws ParserConfigurationException, SAXException
+  {
+    Digester digester = createEmptyDigester();
 
-    // faces-config/converter/property/property-extension
-    digester.addBeanPropertySetter("faces-config/converter/property/property-extension/tag-attribute-excluded",
-                                   "tagAttributeExcluded");
+    addComponentDigesterRules(digester, true);
 
-    // faces-config/validator/validator-extension
-    digester.addBeanPropertySetter("faces-config/validator/validator-extension/long-description",
-                                   "longDescription");
-    digester.addBeanPropertySetter("faces-config/validator/validator-extension/tag-class",
-                                   "tagClass");
-    digester.addRule("faces-config/validator/validator-extension/tag-name",
-                     new BeanPropertySetterRule("tagName"));
-    digester.addCallMethod("faces-config/validator/validator-extension/tag-class-modifier",
-                           "parseTagClassModifier", 1);
-    digester.addCallParam("faces-config/validator/validator-extension/tag-class-modifier", 0);
+   //digester.addObjectCreate("faces-config", FacesConfigBean.class);
 
-    // faces-config/validator/property/property-extension
-    digester.addBeanPropertySetter("faces-config/validator/property/property-extension/tag-attribute-excluded",
-                                   "tagAttributeExcluded");
-    // faces-config/validator/property/property-extension/property-metada
-    digester.addBeanPropertySetter("faces-config/validator/property/property-extension/property-metadata/use-max-time",
-                                 "useMaxTime");
+    addConverterDigesterRules(digester);
+    addValidatorDigesterRules(digester);
+    addRenderKitDigesterRules(digester);
+    addEventDigesterRules(digester);
 
-    // faces-config/render-kit/renderer/renderer-extension
-    digester.addBeanPropertySetter("faces-config/render-kit/renderer/renderer-extension/component-type",
-                                   "componentType");
-    digester.addBeanPropertySetter("faces-config/render-kit/renderer/renderer-extension/renderer-superclass",
-                                   "rendererSuperclass");
+    // TBD: JSR-276 metadata (ask Jeff Stephenson)
 
     return digester;
   }

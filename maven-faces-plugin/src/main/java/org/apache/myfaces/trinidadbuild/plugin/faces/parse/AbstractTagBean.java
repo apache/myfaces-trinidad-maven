@@ -29,11 +29,27 @@ public class AbstractTagBean extends ObjectBean {
   private String  _longDescription;
   private QName   _tagName;
   private String  _tagClass;
-  protected Map _properties;
+  protected Map   _properties;
   private int     _tagClassModifiers;
+  private Map     _examples;
+  private int     _exampleIdx = 0;
 
-  public AbstractTagBean() {
-    _properties = new LinkedHashMap();
+  public AbstractTagBean() 
+  {
+    this(false);
+  }
+
+  public AbstractTagBean(boolean isComponentBean) 
+  {
+    // Component Bean does its own thing
+    // with properties.  The other bean
+    // types, i.e. Converters and Validators
+    // use the same properties.
+    if (!isComponentBean)
+    {
+      _properties = new LinkedHashMap();
+    }
+    _examples   = new LinkedHashMap();      
   }
 
   /**
@@ -164,6 +180,51 @@ public class AbstractTagBean extends ObjectBean {
     return _properties.values().iterator();
   }
 
+  /**
+   * Adds a Example to this component.
+   *
+   * @param example  the example to add
+   */
+  public void addExample(
+    ExampleBean example)
+  {
+    String key = _generateExampleKey();
+    example.setKey(key);
+    _examples.put(key, example);
+  }
+
+  /**
+   * Returns true if this component has any examples.
+   *
+   * @return  true   if this component has any examples,
+   *          false  otherwise
+   */
+  public boolean hasExamples()
+  {
+    return !_examples.isEmpty();
+  }
+
+  /**
+   * Returns the example for this example key.
+   *
+   * @param key  the hashmap example key
+   */
+  public ExampleBean findExample(
+    String key)
+  {
+    return (ExampleBean)_examples.get(key);
+  }
+
+  /**
+   * Returns an iterator for all examples on this component only.
+   *
+   * @return  the example iterator
+   */
+  public Iterator examples()
+  {
+    return _examples.values().iterator();
+  }
+
   public void parseTagClassModifier(
     String modifier)
   {
@@ -225,5 +286,15 @@ public class AbstractTagBean extends ObjectBean {
   public int propertiesSize()
   {
     return _properties.size();
+  }
+ 
+  /* Get a generated key to use in storing
+   * this example bean in its hashmap.
+   */
+  private String _generateExampleKey()
+  {
+    String key = "Example" + Integer.toString(_exampleIdx);
+    _exampleIdx++;
+    return key;
   }
 }
