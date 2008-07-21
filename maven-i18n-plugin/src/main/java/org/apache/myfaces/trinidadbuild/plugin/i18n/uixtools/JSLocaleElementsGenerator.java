@@ -384,23 +384,12 @@ public class JSLocaleElementsGenerator
     if (prettyPrint)
       output.write('\n');
 
-    Enumeration zoneEnumeration =
-                               new ArrayEnumeration(DATE_FORMAT_ZONE_GET_KEYS);
 
     // write the locale elements into the file
     _writeResourceContents(output,
                            _LOCALE_ELEMENTS_PATH,
                            new ArrayEnumeration(LOCALE_ELEMENTS_GET_KEYS),
                            targetLocale,
-                           zoneEnumeration.hasMoreElements(),
-                           prettyPrint);
-
-    // write the date format elements into the file
-    _writeResourceContents(output,
-                           _DATE_FORMAT_ZONE_PATH,
-                           zoneEnumeration,
-                           targetLocale,
-                           false,  // this is the last resource to write
                            prettyPrint);
 
     output.write("});");
@@ -415,15 +404,11 @@ public class JSLocaleElementsGenerator
     String      baseName,
     Enumeration keys,
     Locale      targetLocale,
-    boolean     hasMoreResources,
     boolean     prettyPrint
     ) throws IOException
   {
     try
     {
-      ResourceBundle elementsData = ResourceBundle.getBundle(baseName,
-                                                             targetLocale);
-
       while(keys.hasMoreElements())
       {
         String currKey = (String)keys.nextElement();
@@ -433,13 +418,13 @@ public class JSLocaleElementsGenerator
         if("CurrencyElements".equals(currKey))
           data = _getCurrencyData(targetLocale);
         else
-          data = _getElementData(currKey, elementsData, targetLocale);
+          data = LocaleDataResolver.getElementData(currKey, targetLocale);
 
         boolean wroteElement = _writeResourceElement(
                                     output,
                                     currKey,
                                     data,
-                                    hasMoreResources || keys.hasMoreElements(),
+                                    keys.hasMoreElements(),
                                     prettyPrint);
 
         if (wroteElement && prettyPrint)
