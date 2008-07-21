@@ -249,6 +249,8 @@ public class FacesConfigParser
     // faces-config/component/property/property-extension/property-metada
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/use-max-time",
                                    "useMaxTime");
+    digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/deprecated");
+    digester.addCallMethod("faces-config/component/property/property-extension/property-metadata/no-op", "makeNoOp");
 
 
     // XInclude rules

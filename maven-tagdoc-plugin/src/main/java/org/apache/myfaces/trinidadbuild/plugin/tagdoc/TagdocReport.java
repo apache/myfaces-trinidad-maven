@@ -910,6 +910,26 @@ public class TagdocReport extends AbstractMavenMultiPageReport
           out.write(valStr);
           out.write("<br/>");
         }
+        
+        if (attr.getDeprecated() != null) 
+        {
+          out.write("<b>");
+          out.write(attr.getDeprecated());
+          out.write("</b>");
+        }
+        
+        if (attr.isNoOp()) 
+        {
+          out.write("<b>");
+          out.write("This property has a no-op setter for both the client and server components effectively making it a read-only property.");
+          out.write("</b>");            
+        }
+        
+        if (attr.isNoOp() || attr.getDeprecated() != null) 
+        {
+          out.write("<br/><br/>");
+        }
+        
         out.write(attr.getDescription());
         if (unsupAgentsStr != null)
         {

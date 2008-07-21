@@ -447,6 +447,42 @@ public class PropertyBean extends AttributeBean
     this._hidden = hidden;
   }
 
+  /**
+   * Sets the property deprecated flag
+   * @param deprecated
+   */
+  public void setDeprecated(String deprecated) 
+  {
+    this._deprecated = deprecated;
+  }
+
+  /**
+   * Value is provided through the deprecated extended property metadata.
+   * @return deprecated description if the component property should be deprecated
+   */
+  public String getDeprecated() {
+    return _deprecated;
+  }
+
+
+  /**
+   * @return <code>true</code> if the property should be generated with a no-op
+   *    setter.
+   */
+  public boolean isNoOp()
+  {
+    return _noOp;
+  }
+  
+  /**
+   * Invoked if the no-op extended property meta-data is provided for the component 
+   * property.
+   */
+  public void makeNoOp() 
+  {
+    this._noOp = true;
+  }
+  
   private String  _aliasOf;
   private String  _jspPropertyName;
   private String  _fieldPropertyName;
@@ -462,6 +498,8 @@ public class PropertyBean extends AttributeBean
   private String[] _propertyValues;
   private String[] _unsupportedAgents = _EMPTY_ARRAY;
   private String[] _unsupportedRenderKits = _EMPTY_ARRAY;
+  private String _deprecated;
+  private boolean _noOp = false;
 
   static private String[] _EMPTY_ARRAY = new String[0];
 

@@ -57,7 +57,13 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
 
         // ComponentUtils only needed for resolvable properties
         if (resolvable.accept(property))
+        {
           imports.add("org.apache.myfaces.trinidad.util.ComponentUtils");
+        }
+        if (property.isNoOp())
+        {
+          imports.add("org.apache.myfaces.trinidad.logging.TrinidadLogger");
+        }  
       }
     }
   }
@@ -95,6 +101,11 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
       String propKey = Util.getConstantNameFromProperty(propName, "_KEY");
       String propAlias = property.getAliasOf();
 
+      if (property.getDeprecated() != null)
+      {
+        out.println("@Deprecated");
+      }
+      
       out.println("static public final PropertyKey " + propKey + " =");
       out.indent();
       if (propAlias != null)
@@ -166,15 +177,25 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     String propKey = Util.getConstantNameFromProperty(propName, "_KEY");
     String propVar = Util.getVariableFromName(propName);
 
-    if (Util.isPrimitiveClass(propertyClass))
+    if (!property.isNoOp())
     {
-      out.println("setProperty(" + propKey + ", " +
+      if (Util.isPrimitiveClass(propertyClass))
+      {
+        out.println("setProperty(" + propKey + ", " +
                   convertVariableToBoxedForm(propertyClass, propVar) +
                   ");");
+      }
+      else
+      {
+        out.println("setProperty(" + propKey + ", (" + propVar + "));");
+      }
     }
-    else
-    {
-      out.println("setProperty(" + propKey + ", (" + propVar + "));");
+    else 
+    { 
+      out.println("TrinidadLogger log = TrinidadLogger.createTrinidadLogger(this.getClass());");  
+      out.print("log.warning(\"property \\\"" + propName + "\\\" is ");
+      out.print("using a no-op implementation. Used in extreme cases when the property value, beyond the default value, results in unwanted behavior.");
+      out.println("\");");
     }
   }
 
@@ -268,6 +289,10 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
       out.println(" * Adds a " + convertMultilineComment(description));
     }
     out.println(" */");
+    if (property.getDeprecated() != null)
+    {
+      out.println("@Deprecated");
+    }
     out.println("final public void " + addMethod + "(" + propertyClass + " " +
         propVar + ")");
     out.println("{");
@@ -304,6 +329,10 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
       out.println(" * Gets all " + convertMultilineComment(description));
     }
     out.println(" */");
+    if (property.getDeprecated() != null)
+    {
+      out.println("@Deprecated");
+    }
     out.println("final public " + propertyClass + "[] " + getMethod + "()");
     out.println("{");
     out.indent();
@@ -396,4 +425,5 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     }
     return sb.toString();
   }
+    
 }

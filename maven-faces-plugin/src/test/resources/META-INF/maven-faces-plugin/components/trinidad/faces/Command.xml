@@ -32,18 +32,28 @@
     <description>
       A base abstraction for components that implement ActionSource.
     </description>
-
+    
     <xi:include href="TestInclude.xml" xpointer="/faces-config/component/*"></xi:include>
 
     <property>
       <property-name>action</property-name>
       <property-class>javax.faces.el.MethodBinding</property-class>
-      <description>
+      <description><![CDATA[
+      
           The reference to the Java method that will be invoked when
-          an ActionEvent is broadcast by this component.  The method
-          signature takes zero parameters and may return String or void.
-          If a non-null String value is returned, it will be used as
-          an outcome for navigation.
+          an ActionEvent is broadcast by this component. The method
+          signature takes a single ActionEvent parameter and returns
+          void.
+          
+          Test to make sure that markup in a pre block is escaped.
+          <pre>
+            <af:commandButton />
+          </pre>
+          <pre>
+            <af:commandButton />
+          </pre>
+
+      ]]>    
       </description>
       <property-extension>
         <mfp:state-holder>true</mfp:state-holder>
@@ -59,11 +69,13 @@
     <property>
       <property-name>actionListener</property-name>
       <property-class>javax.faces.el.MethodBinding</property-class>
-      <description>
+      <description><![CDATA[
+      
           The reference to the Java method that will be invoked when
           an ActionEvent is broadcast by this component.  The method
           signature takes a single ActionEvent parameter and returns
           void.
+      ]]>    
       </description>
       <property-extension>
         <mfp:state-holder>true</mfp:state-holder>
@@ -98,16 +110,38 @@
     <property>
       <property-name>immediate</property-name>
       <property-class>boolean</property-class>
-      <description>
-        a reference to an action method sent by the command component, 
-or the static outcome of an action.  When immediate is true, the 
-default ActionListener provided by the JavaServer Faces implementation 
-should be executed during Apply Request Values phase of the request 
-processing lifecycle, rather than waiting until the Invoke Application 
-phase.
+      <description>a reference to an action method sent by the command component, 
+           or the static outcome of an action.  When immediate is true, the 
+           default ActionListener provided by the JavaServer Faces implementation 
+           should be executed during Apply Request Values phase of the request 
+           processing lifecycle, rather than waiting until the Invoke Application 
+           phase.
       </description>
       <property-extension>
         <mfp:required>false</mfp:required>
+      </property-extension>
+    </property>
+
+    <property>
+      <description><![CDATA[the visibility of the component.  If it is "false", the component will 
+      be hidden on the client.  Unlike "rendered", this does not affect the lifecycle on the server 
+      - the component may have its bindings executed, etc. - and the visibility of the component can 
+      be toggled on and off on the client, or toggled with PPR.  When "rendered" is false, the 
+      component will not in any way be rendered, and cannot be made visible on the client. 
+      In most cases, use the "rendered" property instead of the "visible" property.]]>
+      </description>
+      <property-name>visible</property-name>
+      <property-class>boolean</property-class>
+      <default-value>true</default-value>
+      <property-extension>
+        <mfp:required>false</mfp:required>
+        <mfp:unsupported-render-kits>org.apache.myfaces.trinidad.core</mfp:unsupported-render-kits>
+        <mfp:property-metadata>
+          <mfp:deprecated>The "visible" attribute has been deprecated.  
+            Use the af:showPopupBehavior tag or the show/hide methods on the popup client component.
+          </mfp:deprecated>
+          <mfp:no-op/>
+        </mfp:property-metadata>
       </property-extension>
     </property>
 
@@ -118,6 +152,8 @@ phase.
 
       <mfp:jsp-tag-class>org.apache.myfaces.trinidadinternal.taglib.UIXCommandTag</mfp:jsp-tag-class>
       <mfp:jsp-tag-name>af:command</mfp:jsp-tag-name>
+
+      <!-- <mfp:implementation-type>trinidad</mfp:implementation-type> -->
 
       <mfp:event>
         <mfp:event-type>javax.faces.Action</mfp:event-type>

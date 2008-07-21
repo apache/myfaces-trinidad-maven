@@ -135,6 +135,11 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
       {
         imports.add(propertyClass);
       }
+      
+      if (property.isNoOp())
+      {
+        imports.add("org.apache.myfaces.trinidad.logging.TrinidadLogger");
+      }  
     }
   }
 
@@ -147,6 +152,10 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     String jspPropType = GeneratorHelper.getJspPropertyType(property, _is12);
 
     out.println();
+    if (property.getDeprecated() != null)
+    {
+      out.println("@Deprecated");
+    }
     out.println("private " + jspPropType + " " + fieldPropName + ";");
   }
 
@@ -160,11 +169,25 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     String setMethod = Util.getPrefixedPropertyName("set", jspPropName);
     String jspPropType = GeneratorHelper.getJspPropertyType(property, _is12);
 
+    if (property.getDeprecated() != null)
+    {
+      out.println("@Deprecated");
+    }
     out.print("final ");
     out.println("public void " + setMethod + "(" + jspPropType + " " + propVar + ")");
     out.println("{");
     out.indent();
-    out.println(fieldPropName + " = " + propVar + ";");
+    if (property.isNoOp())
+    {
+      out.println("TrinidadLogger log = TrinidadLogger.createTrinidadLogger(this.getClass());");  
+      out.print("log.warning(\"property \\\"" + propName + "\\\" setter is ");
+      out.print("using a no-op implementation. Used in extreme cases when the property value, beyond the default value, results in unwanted behavior.");
+      out.println("\");");  
+    }
+    else
+    {
+      out.println(fieldPropName + " = " + propVar + ";");
+    }
     out.unindent();
     out.println("}");
   }

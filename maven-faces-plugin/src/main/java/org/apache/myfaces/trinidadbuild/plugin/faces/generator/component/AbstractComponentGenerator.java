@@ -668,8 +668,20 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     {
       out.println(" * @deprecated");
     }
+    
+    if (property.getDeprecated() != null)
+    {
+      out.print(" * @deprecated ");
+      out.println(convertMultilineComment(property.getDeprecated()));      
+    }
+    
     out.println(" */");
 
+    if (property.getDeprecated() != null)
+    {
+      out.println("@Deprecated");
+    }
+ 
     if (isAccessorMethodFinal())
     {
       out.print("final ");
@@ -729,8 +741,20 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     {
       out.println(" * @deprecated");
     }
+    
+    if (property.getDeprecated() != null)
+    {
+      out.print(" * @deprecated ");
+      out.println(convertMultilineComment(property.getDeprecated()));
+    }
+    
     out.println(" */");
 
+    if (property.getDeprecated() != null)
+    {
+      out.println("@Deprecated");
+    }
+  
     if (isUnchecked)
     {
       out.println("@SuppressWarnings(\"unchecked\")");
@@ -976,7 +1000,30 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
   protected String convertMultilineComment(
       String commentBody)
   {
-    return commentBody.replaceAll("\n", "\n * ");
+   StringBuilder buff = new StringBuilder(commentBody.replaceAll("\n", "\n * "));
+   
+   
+   // escape markup within <pre> blocks.  The tag doc gen plugin escapes the ampersand
+   // making it not possible to escape causing issue with javadoc.
+   int s = 0;
+   do {
+     s = buff.indexOf("<pre>", s);
+     if (s > 0)
+     {
+       s = s + "<pre>".length();
+       int e = buff.indexOf("</pre>", s);
+       e = e - "</pre>".length();
+       String markup = buff.substring(s, e);
+       markup = markup.replaceAll("<", "&lt;");
+       markup = markup.replaceAll(">", "&gt;");
+       buff.delete(s, e);
+       buff.insert(s, markup);
+       
+       s = buff.indexOf("<pre>", s + markup.length() + "</pre>".length());
+     }
+   } while (s > 0);
+    
+   return buff.toString(); 
   }
 
   protected class ResolvableTypeFilter extends PropertyFilter
@@ -1030,4 +1077,6 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
 
   static private final Pattern _GENERIC_TYPE = Pattern.compile("([^<]+)<(.+)>");
   static final private Map _RESOLVABLE_TYPES = _createResolvableTypes();
+  
+  
 }

@@ -44,6 +44,7 @@
   <!ELEMENT attribute-values (#PCDATA)>
   <!ELEMENT base-component-type (#PCDATA)>
   <!ELEMENT deprecated (#PCDATA)>
+  <!ELEMENT no-op (#PCDATA)>
   <!ELEMENT display-order (#PCDATA)>
   <!ELEMENT expert (#PCDATA)>
   <!ELEMENT favorite-property (#PCDATA)>
