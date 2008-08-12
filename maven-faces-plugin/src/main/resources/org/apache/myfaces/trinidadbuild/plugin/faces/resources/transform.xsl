@@ -31,8 +31,8 @@
   <xsl:param name="typePrefix" />
   <xsl:param name="removeRenderers" />
 
-  <xsl:variable name="doctype" ><![CDATA[
-  <!DOCTYPE faces-config PUBLIC
+  <xsl:variable name="doctype-start"><![CDATA[
+<!DOCTYPE faces-config PUBLIC
   "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.1//EN"
   "http://java.sun.com/dtd/web-facesconfig_1_1.dtd"[
   <!ELEMENT component-metadata ANY>
@@ -40,31 +40,13 @@
   <!ELEMENT property-metadata ANY>
   <!ELEMENT facet-metadata ANY>
   <!ELEMENT renderer-metadata ANY>
-  <!ELEMENT accepts-child-components (#PCDATA)>
   <!ELEMENT attribute-values (#PCDATA)>
-  <!ELEMENT base-component-type (#PCDATA)>
-  <!ELEMENT deprecated (#PCDATA)>
-  <!ELEMENT no-op (#PCDATA)>
-  <!ELEMENT display-order (#PCDATA)>
-  <!ELEMENT expert (#PCDATA)>
-  <!ELEMENT favorite-property (#PCDATA)>
-  <!ELEMENT group (#PCDATA)>
-  <!ELEMENT help-topic (#PCDATA)>
-  <!ELEMENT hidden (#PCDATA)>
-  <!ELEMENT initial-value (#PCDATA)>
-  <!ELEMENT preferred (#PCDATA)>
-  <!ELEMENT preferred-children (#PCDATA)>
-  <!ELEMENT allowable-children (#PCDATA)>
-  <!ELEMENT preferred-component-types (#PCDATA)>
-  <!ELEMENT property-editor (#PCDATA)>
-  <!ELEMENT short-description (#PCDATA)>
-  <!ELEMENT translatable (#PCDATA)>
-  <!ELEMENT scoped-id-holder (#PCDATA)>
-  <!ELEMENT multi-scoped-id-holder (#PCDATA)>
-  <!ELEMENT unsupported-agents (#PCDATA)>
-  <!ATTLIST component-metadata component-type CDATA #IMPLIED>
-]>
-]]></xsl:variable>
+  <!ATTLIST component-metadata component-type CDATA #IMPLIED>]]></xsl:variable>
+  <xsl:variable name="doctype-end"><![CDATA[]>]]></xsl:variable>
+  
+  <xsl:variable name="entity-elem-start"><![CDATA[
+  <!ELEMENT ]]></xsl:variable>
+  <xsl:variable name="entity-elem-end"><![CDATA[ (#PCDATA)>]]></xsl:variable>
 
   <xsl:key name="component-type" 
            match="javaee:component" 
@@ -76,9 +58,146 @@
 
   <!-- switch off default text processing -->  
   <xsl:template match="//text()" />
+    
+  <xsl:template
+    match="mfp:property-metadata|mfp:facet-metadata|mfp:component-metadata"
+    mode="generate-entities"
+    priority="1">
+    <xsl:apply-templates
+      select="./*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee']"
+      mode="generate-entities-metadata"/>
+  </xsl:template>
+  
+  <xsl:template
+    match="javaee:property-extension|javaee:facet-extension|javaee:component-extension"
+    mode="generate-entities"
+    priority="1">
+    <xsl:apply-templates
+      select="./*[
+        namespace-uri() != 'http://java.sun.com/xml/ns/javaee' 
+        and (
+          namespace-uri() != 'http://myfaces.apache.org/maven-faces-plugin'
+          or (
+            name() != 'mfp:property-metadata'
+            and name() != 'mfp:facet-metadata'
+            and name() != 'mfp:component-metadata'
+          )
+        )]"
+      mode="generate-entities-metadata"/>
+  </xsl:template>
+  
+  <xsl:template match="@*|node()" mode="generate-entities" priority="-1">
+    <!-- Block matches outside this mode -->
+  </xsl:template>
+  
+  <!-- do not create elements with J2EE names -->
+  <xsl:template match="*[local-name() = 'faces-config'
+    or local-name() = 'application'
+    or local-name() = 'factory'
+    or local-name() = 'attribute'
+    or local-name() = 'attribute-extension'
+    or local-name() = 'component'
+    or local-name() = 'component-extension'
+    or local-name() = 'facet'
+    or local-name() = 'facet-extension'
+    or local-name() = 'facet-name'
+    or local-name() = 'converter'
+    or local-name() = 'icon'
+    or local-name() = 'lifecycle'
+    or local-name() = 'locale-config'
+    or local-name() = 'managed-bean'
+    or local-name() = 'managed-property'
+    or local-name() = 'map-entry'
+    or local-name() = 'map-entries'
+    or local-name() = 'message-bundle'
+    or local-name() = 'navigation-case'
+    or local-name() = 'navigation-rule'
+    or local-name() = 'property'
+    or local-name() = 'property-extension'
+    or local-name() = 'referenced-bean'
+    or local-name() = 'render-kit'
+    or local-name() = 'renderer'
+    or local-name() = 'renderer-extension'
+    or local-name() = 'validator'
+    or local-name() = 'list-entries'
+    or local-name() = 'action-listener'
+    or local-name() = 'application-factory'
+    or local-name() = 'attribute-class'
+    or local-name() = 'attribute-name'
+    or local-name() = 'component-class'
+    or local-name() = 'component-family'
+    or local-name() = 'component-type'
+    or local-name() = 'converter-class'
+    or local-name() = 'converter-for-class'
+    or local-name() = 'converter-id'
+    or local-name() = 'default-render-kit-id'
+    or local-name() = 'default-locale'
+    or local-name() = 'default-value'
+    or local-name() = 'description'
+    or local-name() = 'display-name'
+    or local-name() = 'faces-context-factory'
+    or local-name() = 'from-action'
+    or local-name() = 'from-outcome'
+    or local-name() = 'from-view-id'
+    or local-name() = 'key'
+    or local-name() = 'key-class'
+    or local-name() = 'large-icon'
+    or local-name() = 'lifecycle-factory'
+    or local-name() = 'managed-bean-class'
+    or local-name() = 'managed-bean-name'
+    or local-name() = 'managed-bean-scope'
+    or local-name() = 'navigation-handler'
+    or local-name() = 'phase-listener'
+    or local-name() = 'redirect'
+    or local-name() = 'suggested-value'
+    or local-name() = 'view-handler'
+    or local-name() = 'state-manager'
+    or local-name() = 'null-value'
+    or local-name() = 'property-class'
+    or local-name() = 'property-name'
+    or local-name() = 'property-resolver'
+    or local-name() = 'referenced-bean-class'
+    or local-name() = 'referenced-bean-name'
+    or local-name() = 'render-kit-id'
+    or local-name() = 'render-kit-class'
+    or local-name() = 'renderer-class'
+    or local-name() = 'render-kit-factory'
+    or local-name() = 'renderer-type'
+    or local-name() = 'small-icon'
+    or local-name() = 'supported-locale'
+    or local-name() = 'to-view-id'
+    or local-name() = 'validator-class'
+    or local-name() = 'validator-id'
+    or local-name() = 'value'
+    or local-name() = 'value-class'
+    or local-name() = 'variable-resolver']"
+    mode="generate-entities-metadata"
+    priority="2" />
+  
+  <xsl:template match="*"
+    mode="generate-entities-metadata"
+    priority="1">
+    <!-- Ensure unique entities -->
+    <xsl:variable name="curName" select="name()" />
+    <xsl:variable name="curId" select="generate-id()" />
+    <xsl:if test="not(local-name() = 'renderer-type')
+      and not(local-name() = 'component-family')
+      and not(preceding::*[name() = $curName])">
+      <xsl:value-of
+        disable-output-escaping="yes"
+        select="concat($entity-elem-start, local-name(), $entity-elem-end)" />
+    </xsl:if>
+  </xsl:template>
+  
+  <xsl:template match="@*|node()" mode="generate-entities-metadata" priority="-1">
+    <!-- Block matches outside this mode -->
+  </xsl:template>
 
   <xsl:template match="/javaee:faces-config" >
-    <xsl:value-of disable-output-escaping="yes" select="$doctype" />
+    <xsl:value-of disable-output-escaping="yes" select="$doctype-start" />
+    <!-- add ELEMENT declarations for any non-javaee namespaces in the metadata blocks -->
+    <xsl:apply-templates select="//*" mode="generate-entities"/>
+    <xsl:value-of disable-output-escaping="yes" select="$doctype-end" />
     <xsl:element name="faces-config"
                  namespace="http://java.sun.com/JSF/Configuration" >
       <xsl:apply-templates select="javaee:application" />
