@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,13 +18,16 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
 
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.CompoundIterator;
-
 import java.lang.reflect.Modifier;
+
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.CompoundIterator;
+
 
 /**
  * ComponentBean is a Java representation of the faces-config component
@@ -474,14 +477,35 @@ public class ComponentBean extends AbstractTagBean
   public Iterator properties(
     boolean flatten)
   {
-    Iterator properties = properties();
     if (flatten)
     {
-      ComponentBean parent = resolveSupertype();
-      if (parent != null)
-        properties = new CompoundIterator(parent.properties(true), properties);
+      return getFlattenedProperties().values().iterator();
     }
-    return properties;
+    else
+    {
+      return properties();
+    }
+  }
+
+  protected Map getFlattenedProperties()
+  {
+    Map props = new HashMap(_properties);
+    ComponentBean parent = resolveSupertype();
+    if (parent != null)
+    {
+      Map superProps = parent.getFlattenedProperties();
+      for (Iterator iter = superProps.entrySet().iterator(); iter.hasNext(); )
+      {
+        Map.Entry entry = (Map.Entry)iter.next();
+        if (!props.containsKey(entry.getKey()))
+        {
+          System.out.println("Adding super property: " + entry.getKey() +
+                             "\n  for component " + getLocalName());
+          props.put(entry.getKey(), entry.getValue());
+        }
+      }
+    }
+    return props;
   }
 
  /**
@@ -586,12 +610,31 @@ public class ComponentBean extends AbstractTagBean
   public Iterator facets(
    boolean flatten)
   {
-    Iterator facets = facets();
     if (flatten)
     {
-      ComponentBean parent = resolveSupertype();
-      if (parent != null)
-        facets = new CompoundIterator(facets, parent.facets(true));
+      return getFlattenedFacets().values().iterator();
+    }
+    else
+    {
+      return facets();
+    }
+  }
+
+  protected Map getFlattenedFacets()
+  {
+    Map facets = new HashMap(_facets);
+    ComponentBean parent = resolveSupertype();
+    if (parent != null)
+    {
+      Map superFacets = parent.getFlattenedFacets();
+      for (Iterator iter = superFacets.entrySet().iterator(); iter.hasNext(); )
+      {
+        Map.Entry entry = (Map.Entry)iter.next();
+        if (!facets.containsKey(entry.getKey()))
+        {
+          facets.put(entry.getKey(), entry.getValue());
+        }
+      }
     }
     return facets;
   }
@@ -673,7 +716,7 @@ public class ComponentBean extends AbstractTagBean
   {
     setUnsupportedAgents(unsupportedAgents.split(" "));
   }
-  
+
   /**
    * Adds a Java Language class modifier to the tag class.
    *
@@ -929,7 +972,7 @@ public class ComponentBean extends AbstractTagBean
         return componentSupertype.isTrinidadComponent();
       }
     }
-    
+
     return false;
   }
 
@@ -1002,7 +1045,7 @@ public class ComponentBean extends AbstractTagBean
   private int     _componentClassModifiers;
   private int     _tagClassModifiers;
   private String[] _unsupportedAgents = new String[0];
-  
+
   static private final String _TRINIDAD_COMPONENT_BASE =
                          "org.apache.myfaces.trinidad.component.UIXComponentBase";
 

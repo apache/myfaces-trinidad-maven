@@ -16,14 +16,14 @@
     KIND, either express or implied.  See the License for the
     specific language governing permissions and limitations
     under the License.
-	   
+
 -->
 <xsl:stylesheet xmlns="http://java.sun.com/xml/ns/javaee"
-                xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                 xmlns:javaee="http://java.sun.com/xml/ns/javaee"
-                xmlns:mfp="http://myfaces.apache.org/maven-faces-plugin" 
+                xmlns:mfp="http://myfaces.apache.org/maven-faces-plugin"
                 exclude-result-prefixes="xsl xs javaee mfp"
                 version="1.0" >
 
@@ -36,15 +36,15 @@
 
 
 
-  <xsl:key name="component-type" 
-           match="javaee:component" 
+  <xsl:key name="component-type"
+           match="javaee:component"
            use="javaee:component-type/text()" />
 
-  <xsl:key name="render-kit-id" 
-           match="javaee:render-kit" 
+  <xsl:key name="render-kit-id"
+           match="javaee:render-kit"
            use="javaee:render-kit-id/text()" />
 
-  <!-- switch off default text processing -->  
+  <!-- switch off default text processing -->
   <xsl:template match="//text()" />
 
   <xsl:template match="/javaee:faces-config" >
@@ -85,48 +85,111 @@
        for a component and all supertypes -->
   <xsl:template name="apply-property-templates" >
     <xsl:param name="component" />
+    <xsl:param name="skip"></xsl:param>
     <xsl:variable name="componentSupertype"
-                  select="$component/javaee:component-extension/mfp:component-supertype/text()" />
+      select="$component/javaee:component-extension/mfp:component-supertype/text()" />
     <xsl:if test="$componentSupertype" >
       <xsl:call-template name="apply-property-templates" >
-        <xsl:with-param name="component" 
-                        select="key('component-type', $componentSupertype)" />
+        <xsl:with-param name="component"
+          select="key('component-type', $componentSupertype)" />
+        <!-- "Recursively" build a skip set of nodes. This is created as a
+          string and appended to for every super class applied. The square
+          brackets are used for a "whole-world" type of functionality. -->
+        <xsl:with-param name="skip"><xsl:value-of select="$skip"
+          /><xsl:for-each
+            select="$component/javaee:property/javaee:property-name"
+            >[<xsl:value-of select="normalize-space(text())" />]</xsl:for-each>
+        </xsl:with-param>
       </xsl:call-template>
     </xsl:if>
-    <xsl:apply-templates select="$component/javaee:property" />
+    <!-- uncomment this code to help debug the skip functionality: -->
+    <!--xsl:comment>
+      Skip is: <xsl:value-of select="$skip" />
+    </xsl:comment-->
+    <xsl:for-each select="$component/javaee:property">
+      <xsl:variable name="searchFor">[<xsl:value-of
+        select="normalize-space(javaee:property-name/text())"/>]</xsl:variable>
+      <!-- Do not include this element if it is overridden in the sub-type -->
+      <xsl:if
+        test="not(contains($skip, $searchFor))">
+        <xsl:apply-templates select="." />
+      </xsl:if>
+    </xsl:for-each>
   </xsl:template>
-  
+
   <!-- this templates applies javaee:attribute templates
        for a component and all supertypes -->
   <xsl:template name="apply-attribute-templates" >
     <xsl:param name="component" />
+    <xsl:param name="skip"></xsl:param>
     <xsl:variable name="componentSupertype"
                   select="$component/javaee:component-extension/mfp:component-supertype/text()" />
     <xsl:if test="$componentSupertype" >
       <xsl:call-template name="apply-attribute-templates" >
         <xsl:with-param name="component"
                         select="key('component-type', $componentSupertype)" />
+        <!-- "Recursively" build a skip set of nodes. This is created as a
+          string and appended to for every super class applied. The square
+          brackets are used for a "whole-world" type of functionality. -->
+        <xsl:with-param name="skip"><xsl:value-of select="$skip"
+          /><xsl:for-each
+            select="$component/javaee:attribute/javaee:attribute-name"
+            >[<xsl:value-of select="normalize-space(text())" />]</xsl:for-each>
+        </xsl:with-param>
       </xsl:call-template>
     </xsl:if>
-    <xsl:apply-templates select="$component/javaee:attribute" />
+    <!-- uncomment this code to help debug the skip functionality: -->
+    <!--xsl:comment>
+      Skip is: <xsl:value-of select="$skip" />
+    </xsl:comment-->
+    <xsl:for-each select="$component/javaee:attribute">
+      <xsl:variable name="searchFor">[<xsl:value-of
+        select="normalize-space(javaee:attribute-name/text())"/>]</xsl:variable>
+      <!-- Do not include this element if it is overridden in the sub-type -->
+      <xsl:if
+        test="not(contains($skip, $searchFor))">
+        <xsl:apply-templates select="." />
+      </xsl:if>
+    </xsl:for-each>
   </xsl:template>
-  
+
   <!-- this templates applies javaee:facet templates
        for a component and all supertypes -->
   <xsl:template name="apply-facet-templates" >
     <xsl:param name="component" />
+    <xsl:param name="skip"></xsl:param>
     <xsl:variable name="componentSupertype"
                   select="$component/javaee:component-extension/mfp:component-supertype/text()" />
     <xsl:if test="$componentSupertype" >
       <xsl:call-template name="apply-facet-templates" >
         <xsl:with-param name="component"
                         select="key('component-type', $componentSupertype)" />
+        <!-- "Recursively" build a skip set of nodes. This is created as a
+          string and appended to for every super class applied. The square
+          brackets are used for a "whole-world" type of functionality. -->
+        <xsl:with-param name="skip"><xsl:value-of select="$skip"
+          /><xsl:for-each
+            select="$component/javaee:facet/javaee:facet-name"
+            >[<xsl:value-of select="normalize-space(text())" />]</xsl:for-each>
+        </xsl:with-param>
       </xsl:call-template>
     </xsl:if>
-    <xsl:apply-templates select="$component/javaee:facet" />
+    <!-- uncomment this code to help debug the skip functionality: -->
+    <!--xsl:comment>
+      Skip is: <xsl:value-of select="$skip" />
+    </xsl:comment-->
+    <xsl:for-each select="$component/javaee:facet">
+      <xsl:variable name="searchFor">[<xsl:value-of
+        select="normalize-space(javaee:facet-name/text())"/>]</xsl:variable>
+      <!-- Do not include this element if it is overridden in the sub-type -->
+      <xsl:if
+        test="not(contains($skip, $searchFor))">
+        <xsl:apply-templates select="." />
+      </xsl:if>
+    </xsl:for-each>
   </xsl:template>
-  
-  <xsl:template match="//javaee:component[javaee:component-extension/mfp:component-supertype]" 
+
+  <xsl:template match="//javaee:component[javaee:component-extension/mfp:component-supertype]"
                 priority="1" >
     <xsl:element name="component" >
       <xsl:apply-templates select="javaee:description" />
@@ -304,7 +367,7 @@
             <xsl:apply-templates select="mfp:facet-metadata/*[
               namespace-uri() != 'http://java.sun.com/xml/ns/javaee']" />
             <!-- Add non-metadata children under the metadata -->
-            <xsl:apply-templates select="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' 
+            <xsl:apply-templates select="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
               and (
                 namespace-uri() != 'http://myfaces.apache.org/maven-faces-plugin'
                 or name() != 'mfp:facet-metadata'
@@ -315,7 +378,7 @@
     </xsl:if>
   </xsl:template>
 
-  
+
   <xsl:template match="//javaee:component/javaee:attribute[1]" priority="1" >
     <xsl:comment><xsl:value-of select="parent::node()/javaee:component-type/text()" /> attributes</xsl:comment>
     <xsl:element name="attribute" >
@@ -390,7 +453,7 @@
       </xsl:choose>
     </xsl:element>
   </xsl:template>
-  
+
   <xsl:template match="//javaee:property-extension">
     <!-- Make sure not empty -->
     <xsl:if test="*">
@@ -402,7 +465,7 @@
             <xsl:apply-templates select="mfp:property-metadata/*[
               namespace-uri() != 'http://java.sun.com/xml/ns/javaee']" />
             <!-- Add non-metadata children under the metadata -->
-            <xsl:apply-templates select="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee' 
+            <xsl:apply-templates select="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
               and (
                 namespace-uri() != 'http://myfaces.apache.org/maven-faces-plugin'
                 or name() != 'mfp:property-metadata'
@@ -424,7 +487,7 @@
       <xsl:apply-templates/>
     </xsl:element>
   </xsl:template>
-  
+
   <xsl:template match="//javaee:component-extension[mfp:component-family]" priority="2" >
     <xsl:element name="component-extension" >
       <xsl:apply-templates/>
@@ -817,7 +880,7 @@
     <xsl:copy>
       <xsl:apply-templates select="@*|node()"/>
       <xsl:value-of select="text()"/>
-    </xsl:copy> 
+    </xsl:copy>
   </xsl:template>
 
   <xsl:template match="mfp:component-metadata/*[
@@ -826,7 +889,7 @@
     <xsl:copy>
       <xsl:apply-templates select="@*|node()"/>
       <xsl:value-of select="text()"/>
-    </xsl:copy> 
+    </xsl:copy>
   </xsl:template>
 
   <xsl:template match="//*[
@@ -838,7 +901,7 @@
     </xsl:element>
   </xsl:template>
 
-  <!-- Blacklisted mfp: that should not be copied over into the faces-config.xml: --> 
+  <!-- Blacklisted mfp: that should not be copied over into the faces-config.xml: -->
   <xsl:template match="//mfp:alternate-class" />
   <xsl:template match="//mfp:author" />
   <xsl:template match="//mfp:component-metadata/mfp:group" />
