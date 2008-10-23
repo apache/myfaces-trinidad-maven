@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,12 +24,12 @@ package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
  */
 public class PropertyBean extends AttributeBean
 {
-    public void setUseMaxTime(boolean _useMaxTime) 
+    public void setUseMaxTime(boolean _useMaxTime)
     {
       this._useMaxTime = _useMaxTime;
     }
-    
-    public boolean getUseMaxTime() 
+
+    public boolean getUseMaxTime()
     {
       return _useMaxTime;
     }
@@ -132,7 +132,7 @@ public class PropertyBean extends AttributeBean
   /**
    * Sets the transient flag of this property.
    *
-   * @param transient  the property transient flag
+   * @param transient_ the property transient flag
    */
   public void setTransient(
     boolean transient_)
@@ -154,7 +154,7 @@ public class PropertyBean extends AttributeBean
   /**
    * Sets the list flag of this property.
    *
-   * @param list  the property list flag
+   * @param list_ the property list flag
    */
   public void setList(
     boolean list_)
@@ -212,6 +212,23 @@ public class PropertyBean extends AttributeBean
   public boolean isLiteralOnly()
   {
     return _literalOnly;
+  }
+
+  /**
+   * Set the property as allowing ${} syntax
+   * @param rtexprvalue the rtexrvalue value
+   */
+  public void setRtexprvalue(boolean rtexprvalue)
+  {
+    _rtexprvalue = rtexprvalue;
+  }
+
+  /**
+   * Return the rtexrvalue flag
+   */
+  public boolean isRtexprvalue()
+  {
+    return _rtexprvalue;
   }
 
   /**
@@ -428,7 +445,7 @@ public class PropertyBean extends AttributeBean
 
     return _fieldPropertyName;
   }
-  
+
   /**
    * If the property should be hidden from documentation
    * @return If the facet should be hidden
@@ -436,7 +453,7 @@ public class PropertyBean extends AttributeBean
   public boolean isHidden()
   {
     return _hidden;
-  }  
+  }
 
   /**
    * Set if this facet should be hidden from documentation
@@ -451,7 +468,7 @@ public class PropertyBean extends AttributeBean
    * Sets the property deprecated flag
    * @param deprecated
    */
-  public void setDeprecated(String deprecated) 
+  public void setDeprecated(String deprecated)
   {
     this._deprecated = deprecated;
   }
@@ -473,21 +490,22 @@ public class PropertyBean extends AttributeBean
   {
     return _noOp;
   }
-  
+
   /**
-   * Invoked if the no-op extended property meta-data is provided for the component 
+   * Invoked if the no-op extended property meta-data is provided for the component
    * property.
    */
-  public void makeNoOp() 
+  public void makeNoOp()
   {
     this._noOp = true;
   }
-  
+
   private String  _aliasOf;
   private String  _jspPropertyName;
   private String  _fieldPropertyName;
   private boolean _required;
   private boolean _literalOnly;
+  private boolean _rtexprvalue;
   private boolean _stateHolder;
   private boolean _transient;
   private boolean _list;

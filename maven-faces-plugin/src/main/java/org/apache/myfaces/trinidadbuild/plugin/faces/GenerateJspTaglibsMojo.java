@@ -18,6 +18,38 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
+
+import java.lang.reflect.Modifier;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.AbstractConverterTagGenerator;
@@ -43,40 +75,14 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.ValidatorFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
+
 import org.codehaus.plexus.util.FileUtils;
+
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.lang.reflect.Modifier;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @version $Id$
@@ -550,7 +556,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
     stream.writeCharacters("\n      ");
     stream.writeStartElement("name");
-    
+
     if (property != null)
       stream.writeCharacters(property.getJspPropertyName());
     else
@@ -579,7 +585,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
           stream.writeCharacters("true");
           stream.writeEndElement();
         }
-        
+
         if (property.isMethodExpression() || property.isMethodBinding())
         {
           stream.writeCharacters("\n    ");
@@ -638,7 +644,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
           // As of JSF 1.2, "id" can be set via an rtexprvalue (but
           // *not* by a ValueExpression) - it has to be evaluated
           // in the JSP
-          if ("id".equals(propertyName) && !disableIdExpressions)
+          if (property.isRtexprvalue() || ("id".equals(propertyName) && !disableIdExpressions))
             stream.writeCharacters("true");
           else
             stream.writeCharacters("false");
@@ -767,7 +773,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         else
         {
           converterGen = new MyFacesConverterTagGenerator(is12(), getLicenseHeader(), getLog());
-          validatorGen = new MyFacesValidatorTagGenerator(is12(), getLicenseHeader(), getLog());    
+          validatorGen = new MyFacesValidatorTagGenerator(is12(), getLicenseHeader(), getLog());
         }
         int count = 0;
         while (components.hasNext())
@@ -792,7 +798,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
   class ComponentTagHandlerGenerator
   {
-    
+
     private Set initComponentList(ComponentBean component,
                                   String fullSuperclassName)
     {
@@ -815,7 +821,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     {
       ComponentTagGenerator generator;
       Set componentList;
-      
+
       String fullSuperclassName = component.findJspTagSuperclass();
       if (fullSuperclassName == null)
       {
@@ -823,21 +829,21 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
                       + ", generation of this Tag is skipped");
         return;
       }
-      
+
       componentList = initComponentList(component, fullSuperclassName);
-      
+
       String fullClassName = component.getTagClass();
       try
       {
         getLog().debug("Generating " + fullClassName);
-        
+
         String sourcePath = Util.convertClassToSourcePath(fullClassName, ".java");
         File targetFile = new File(generatedSourceDirectory, sourcePath);
-        
+
         targetFile.getParentFile().mkdirs();
         StringWriter sw = new StringWriter();
         PrettyWriter out = new PrettyWriter(sw);
-        
+
         if (component.isTrinidadComponent())
         {
           generator = new TrinidadComponentTagGenerator(_is12());
@@ -851,15 +857,15 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
         String className = Util.getClassFromFullClass(fullClassName);
         String packageName = Util.getPackageFromFullClass(fullClassName);
-        
+
         // header/copyright
         writePreamble(out);
-        
+
         // package
         out.println("package " + packageName + ";");
-        
+
         out.println();
-        
+
         String superclassName = Util.getClassFromFullClass(fullSuperclassName);
         if (superclassName.equals(className))
         {
@@ -867,15 +873,15 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         }
         String componentFullClass = component.getComponentClass();
         String componentClass = Util.getClassFromFullClass(componentFullClass);
-        
+
         generator.writeImports(out, null, packageName, fullSuperclassName, superclassName, componentList);
-        
+
         generator.writeClassBegin(out, className, superclassName, component, null);
-        
+
         int modifiers = component.getTagClassModifiers();
         generator.writeConstructor(out, component, modifiers);
-        
-        
+
+
         if (!Modifier.isAbstract(modifiers))
         {
           generator.writeGetComponentType(out, component);
@@ -887,10 +893,10 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         generator.writePropertyMembers(out, componentList);
         generator.writeSetPropertiesMethod(out, componentClass, componentList);
         generator.writeReleaseMethod(out, componentList);
-        
+
         generator.writeClassEnd(out);
         out.close();
-        
+
         // delay write in case of error
         // timestamp should not be updated when an error occurs
         // delete target file first, because it is readonly
@@ -1026,6 +1032,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
   /**
    * @parameter
+   * @deprecated
    */
   protected boolean disableIdExpressions;
 
@@ -1034,7 +1041,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
    */
   protected boolean coerceStrings;
 
-  
+
   /**
    * @parameter
    */
