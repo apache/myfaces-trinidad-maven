@@ -41,8 +41,15 @@
           <source>1.4</source>
           <target>1.4</target>
         </configuration>
+      </plugin>      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <preparationGoals>clean verify install</preparationGoals>
+         </configuration>
       </plugin>
-    </plugins>
+    </plugins>    
   </build>
 
   <reporting>
