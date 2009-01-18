@@ -415,8 +415,10 @@ public class JSLocaleElementsGenerator
 
         Object data = null;
 
-        if("CurrencyElements".equals(currKey))
+        if ("CurrencyElements".equals(currKey))
           data = _getCurrencyData(targetLocale);
+        else if ("PercentElements".equals(currKey))
+          data = _getPercentData(targetLocale);
         else
           data = LocaleDataResolver.getElementData(currKey, targetLocale);
 
@@ -453,6 +455,19 @@ public class JSLocaleElementsGenerator
     currencyData[5] = df.getNegativeSuffix();
 
     return currencyData;
+  }
+  
+  private static Object _getPercentData(
+    Locale targetLocale)
+  {
+    DecimalFormat df = (DecimalFormat)NumberFormat.getPercentInstance(targetLocale);
+    Object[] percentData = new Object[2];
+    percentData[0] = df.getPositiveSuffix();
+    percentData[1] = df.getNegativeSuffix();
+    //percentData[2] = df.getPositivePrefix();
+    //percentData[3] = df.getNegativePrefix();  
+
+    return percentData;
   }
 
   private static Object _getElementData(
@@ -713,6 +728,7 @@ public class JSLocaleElementsGenerator
     "DateTimeElements",
     "NumberElements",
     "CurrencyElements",
+    "PercentElements"
   };
 
   //
