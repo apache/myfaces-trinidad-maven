@@ -499,8 +499,6 @@ public class ComponentBean extends AbstractTagBean
         Map.Entry entry = (Map.Entry)iter.next();
         if (!props.containsKey(entry.getKey()))
         {
-          System.out.println("Adding super property: " + entry.getKey() +
-                             "\n  for component " + getLocalName());
           props.put(entry.getKey(), entry.getValue());
         }
       }
