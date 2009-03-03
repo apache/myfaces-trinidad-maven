@@ -168,6 +168,13 @@ public class JDeveloperMojo
   private File[] sourceRoots;
 
   /**
+   * Does project have tests? Used to determine if the
+   * maven-jdev-plugin needs to create a <project name>-test.jpr
+   * @parameter expression="${jdev.project.has.tests}" default-value="false"
+   */
+  private boolean projectHasTests;
+  
+  /**
    * List of source root directories for the test project
    * @parameter
    */
@@ -241,10 +248,9 @@ public class JDeveloperMojo
   private List reactorProjects;
 
   /**
-   * Tag library directory used by each distributed tag library
+   * Tag library directory used by each distributed jsf tag library
    *
    * @parameter expression="${jdev.tag.lib.dir}"
-   *            default-value="@oracle.home@lib/java/shared/oracle.jsf/1.2/jsf-ri.jar!/META-INF"
    */
   private String tagLibDirectory;
 
@@ -261,6 +267,18 @@ public class JDeveloperMojo
     throws MojoExecutionException
   {
     _parseRelease();
+
+    if (_releaseMajor >= 11)
+    {
+      tagLibDirectory = 
+        "@oracle.home@/modules/oracle.jsf_1.2.9/glassfish.jsf_1.2.9.0.jar!/META-INF";
+    }
+    else
+    {
+      tagLibDirectory =
+        "@oracle.home@lib/java/shared/oracle.jsf/1.2/jsf-ri.jar!/META-INF";
+    }
+    
     try
     {
       generateWorkspace();
@@ -364,7 +382,7 @@ public class JDeveloperMojo
   private void generateTestProject()
     throws IOException, MojoExecutionException
   {
-    if (!"pom".equals(project.getPackaging()))
+    if (!"pom".equals(project.getPackaging()) && projectHasTests)
     {
       File projectFile = getJProjectTestFile(project);
 
@@ -394,12 +412,9 @@ public class JDeveloperMojo
       List compileSourceRoots =
         executionProject.getTestCompileSourceRoots();
 
-      if (testSourceRoots != null)
+      for (int i = 0; i < testSourceRoots.length; i++)
       {
-        for (int i = 0; i < testSourceRoots.length; i++)
-        {
-          compileSourceRoots.add(testSourceRoots[i].getAbsolutePath());
-        }
+        compileSourceRoots.add(testSourceRoots[i].getAbsolutePath());
       }
 
       List compileResourceRoots = executionProject.getTestResources();
@@ -449,8 +464,12 @@ public class JDeveloperMojo
       replaceParameters(projectName, projectDOM);
       writeDOM(projectFile, projectDOM);
 
-      if ("war".equals(packaging))
+      /* Not needed in release 11 where .tld files are obtained
+      ** From jar's META-INF dir, not in WEB-INF dir as in v10
+      */
+      if ( (_releaseMajor < 11) && ("war".equals(packaging)) )
         copyTagLibraries(projectDir, dependencies, artifacts);
+
     }
     catch (XmlPullParserException e)
     {
@@ -474,6 +493,17 @@ public class JDeveloperMojo
     for (Iterator i = project.getCollectedProjects().iterator(); i.hasNext(); )
     {
       MavenProject collectedProject = (MavenProject) i.next();
+      boolean projHasTests = false;
+
+      // Added in V11
+      if (_releaseMajor >= 11)
+      {
+        Properties props = collectedProject.getProperties();
+        String hasTests = (String)props.get(_PROPERTY_HAS_TESTS);
+        projHasTests = "true".equalsIgnoreCase(hasTests);
+      }
+
+      getLog().info("projHasTests is " + Boolean.valueOf(projHasTests).toString());
 
       // if a child project is also a workspace, then don't 
       // put it in the .jws file.  It will have its own .jws
@@ -486,8 +516,24 @@ public class JDeveloperMojo
                                                      projectFile));
   
         File testProjectFile = getJProjectTestFile(collectedProject);
-        targetDOM.addChild(createProjectReferenceDOM(workspaceDir,
-                                                     testProjectFile));
+
+        /*
+        ** In V11, we don't create a <projname>-test.jpr if 
+        ** a project does not have any tests.
+        */
+        if (_releaseMajor >= 11)
+        {
+          if (projHasTests)
+          {
+            targetDOM.addChild(createProjectReferenceDOM(workspaceDir, 
+                                                         testProjectFile));
+          }
+        }
+        else
+        {
+          targetDOM.addChild(createProjectReferenceDOM(workspaceDir, 
+                                                       testProjectFile));
+        }      
       }
     }
 
@@ -1000,7 +1046,6 @@ public class JDeveloperMojo
     }
   }
 
-
   private void replaceTagLibraries(Xpp3Dom projectDOM)
     throws XmlPullParserException
   {
@@ -1032,7 +1077,7 @@ public class JDeveloperMojo
     //  <value n="jspVersion" v="2.1"></value>
     //  <value n="name" v="JSF HTML"></value>
     //
-    //  <value n="tldURL" v="@oracle.home@lib/java/shared/oracle.jsf/1.2/jsf-ri.jar!/META-INF/html_basic.tld"></value>
+    //  <value n="tldURL" v="@oracle.home@/jdeveloper/modules/oracle.jsf_1.2.9/glassfish.jsf_1.2.9.0.jar!/META-INF"></value>        
     //  <value n="URI" v="http://java.sun.com/jsf/html"></value>
     //  <value n="version" v="1.2"></value>
     //</hash>
@@ -1145,6 +1190,8 @@ public class JDeveloperMojo
       replaceDefaultTagLibraries(projectDOM, targetLibsDOM);
     }
 
+    // Generate .jpr entries from the .tld files in the project's
+    // src/main/webapp/WEB-INF directory.
     replaceLocalTagLibraries(targetLibsDOM);
 
     // First, add JSP Runtime dependency if src/main/webapp exists
@@ -1776,6 +1823,7 @@ public class JDeveloperMojo
       // Default release is currently 10.x
       _releaseMajor = 10;
     }
+    getLog().info("releaseMajor is " + Integer.valueOf(_releaseMajor).toString());
   }
 
   private int     _releaseMajor = 0;
@@ -1785,4 +1833,6 @@ public class JDeveloperMojo
   private static final String _PROPERTY_ADD_LIBRARY = "jdev.plugin.add.libraries";
   private static final String _PROPERTY_ADD_TAGLIBS = "jdev.plugin.add.taglibs";
 
+  // Does nothing in v10.1.3
+  private static final String _PROPERTY_HAS_TESTS   = "jdev.project.has.tests";
 }
