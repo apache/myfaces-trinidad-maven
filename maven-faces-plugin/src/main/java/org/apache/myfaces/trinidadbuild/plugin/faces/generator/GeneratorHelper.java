@@ -72,6 +72,17 @@ public class GeneratorHelper
         "java.awt.Color".equals(propClassParams[0]));
   }
 
+  // Allows List of known types, kept in sync
+  // with UIXComponentELTag's set*List methods.
+  public static boolean isKnownTypeList (
+      String propClass,
+      String[] propClassParams)
+  {
+    return ("java.util.List".equals(propClass) &&
+        propClassParams.length == 1 &&
+        "java.lang.String".equals(propClassParams[0]));
+  }
+
   public static boolean isColor(
       String propClass)
   {

@@ -291,6 +291,12 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     {
       _writeSetColor(out, componentClass, propName, false);
     }
+    else if (GeneratorHelper.isKnownTypeList(propClass,  
+                                    property.getPropertyClassParameters()))
+    {
+      _writeSetKnownTypeList (out, componentClass, propName, 
+                     property.getPropertyClassParameters()[0]);
+    }
     else if (GeneratorHelper.isConverter(propClass))
     {
       _writeSetConverter(out, componentClass, propName);
@@ -847,6 +853,63 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     }
     out.unindent();
     out.println("}");
+  }
+
+  private void _writeSetKnownTypeList(
+      PrettyWriter out,
+      String  componentClass,
+      String  propName,
+      String  propFullClass) throws IOException
+  {
+    String propKey = Util.getConstantNameFromProperty(propName, "_KEY");
+    String propVar = "_" + propName;
+    
+    String propClass = Util.getClassFromFullClass(propFullClass);
+    String boxedClass = Util.getBoxedClass(propClass);
+
+    System.out.println ("_writeSetList: propFullClass = " + propFullClass +
+                        " propClass= " + propClass + 
+                        " boxedClass=" + boxedClass);
+    if (_is12)
+    {
+      out.println("set" + boxedClass + "ListProperty" + 
+                  "(bean, " + componentClass + "." + propKey + 
+                  ", " + propVar + ");");
+    }
+    else
+    {
+      out.println("if (" + propVar + " != null)");
+      out.println("{");
+      out.indent();
+      out.println("if (isValueReference(" + propVar + "))");
+      out.println("{");
+      out.indent();
+      out.println("ValueBinding vb = createValueBinding(" + propVar + ");");
+      out.println("bean.setValueBinding(" + componentClass + "." + propKey + ", vb);");
+      out.unindent();
+      out.println("}");
+      out.println("else");
+      out.println("{");
+      out.indent();
+      out.println("try");
+      out.println("{");
+      out.indent();
+      out.println("bean.setProperty(" + componentClass + "." + propKey + ",");
+      out.println("                 TagUtils.getStringList(" + propVar + "));");
+      out.unindent();
+      out.println("}");
+      out.println("catch (ParseException pe)");
+      out.println("{");
+      out.indent();
+      out.println("setValidationError(");
+      out.println("  pe.getMessage() + \": \" + \"Position \" + pe.getErrorOffset());");
+      out.unindent();
+      out.println("}");
+      out.unindent();
+      out.println("}");
+      out.unindent();
+      out.println("}");
+    }
   }
 
 
