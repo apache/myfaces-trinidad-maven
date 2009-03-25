@@ -289,6 +289,8 @@ public class FacesConfigParser
     digester.setRuleNamespaceURI("http://myfaces.apache.org/maven-faces-plugin");
 
     // faces-config/converter/converter-extension
+    digester.addBeanPropertySetter("faces-config/converter/converter-extension/root-converter-id",
+                                   "rootConverterId");
     digester.addBeanPropertySetter("faces-config/converter/converter-extension/long-description",
                                    "longDescription");
     digester.addBeanPropertySetter("faces-config/converter/converter-extension/tag-class",
@@ -345,6 +347,8 @@ public class FacesConfigParser
     digester.setRuleNamespaceURI("http://myfaces.apache.org/maven-faces-plugin");
 
     // faces-config/validator/validator-extension
+    digester.addBeanPropertySetter("faces-config/validator/validator-extension/root-validator-id",
+                                   "rootValidatorId");
     digester.addBeanPropertySetter("faces-config/validator/validator-extension/long-description",
                                    "longDescription");
     digester.addBeanPropertySetter("faces-config/validator/validator-extension/tag-class",
