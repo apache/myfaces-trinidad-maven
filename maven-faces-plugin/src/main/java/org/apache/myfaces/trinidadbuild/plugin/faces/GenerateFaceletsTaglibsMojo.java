@@ -324,7 +324,9 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
     stream.writeStartElement("validator");
     stream.writeCharacters("\n      ");
     stream.writeStartElement("validator-id");
-    stream.writeCharacters(validator.getValidatorId());
+    String id = validator.getRootValidatorId() == null ? 
+                validator.getValidatorId() : validator.getRootValidatorId();
+    stream.writeCharacters(id);
     stream.writeEndElement();
 
     stream.writeCharacters("\n    ");
@@ -350,7 +352,9 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
     stream.writeStartElement("converter");
     stream.writeCharacters("\n      ");
     stream.writeStartElement("converter-id");
-    stream.writeCharacters(converter.getConverterId());
+    String id = converter.getRootConverterId() == null ? 
+                converter.getConverterId() : converter.getRootConverterId();
+    stream.writeCharacters(id);
     stream.writeEndElement();
 
     stream.writeCharacters("\n    ");

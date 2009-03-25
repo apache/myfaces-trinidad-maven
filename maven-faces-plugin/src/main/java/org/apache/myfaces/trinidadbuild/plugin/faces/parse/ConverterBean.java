@@ -58,6 +58,27 @@ public class ConverterBean extends AbstractTagBean {
   {
     return _converterId;
   }
+  
+  /**
+   * Sets the "root" converter Id representing the ID defined in faces-config
+   * The root id will be used while the tag definition is written out,
+   * while the regular Id is used for the lookup of existing converters.
+   * This allows us to define new tags for the existing converter IDs
+   * @param id root converter id
+   */
+  public void setRootConverterId(String id)
+  {
+    _rootConverterId = id;
+  }
+  
+  /**
+   * Returns the root converter id
+   * @return root converter id
+   */
+  public String getRootConverterId()
+  {
+    return _rootConverterId;
+  }
 
   /**
    * Sets the converter class for this component.
@@ -141,6 +162,7 @@ public class ConverterBean extends AbstractTagBean {
 
 
   private String  _converterId;
+  private String  _rootConverterId;
   private String  _converterClass;
   private String  _converterSuperClass;
   private int     _converterClassModifiers;

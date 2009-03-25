@@ -37,6 +37,27 @@ public class ValidatorBean extends AbstractTagBean {
   {
     _validatorId = validatorId;
   }
+  
+  /**
+   * Sets the "root" validator Id representing the ID defined in faces-config
+   * The root id will be used while the tag definition is written out,
+   * while the regular Id is used for the lookup of existing validators.
+   * This allows us to define new tags for the existing validator IDs
+   * @param id root validator id
+   */
+  public void setRootValidatorId(String id)
+  {
+    _rootValidatorId = id;
+  }
+  
+  /**
+   * Returns the root validator id
+   * @return root validator id
+   */
+  public String getRootValidatorId()
+  {
+    return _rootValidatorId;
+  }
 
   /**
    * Returns true if the validator identifier is specified, otherwise false.
@@ -139,6 +160,7 @@ public class ValidatorBean extends AbstractTagBean {
   }
 
   private String  _validatorId;
+  private String  _rootValidatorId;
   private String  _validatorClass;
   private String  _validatorSuperClass;
   private int     _validatorClassModifiers;
