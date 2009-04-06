@@ -328,6 +328,16 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
                 validator.getValidatorId() : validator.getRootValidatorId();
     stream.writeCharacters(id);
     stream.writeEndElement();
+    
+    String tagHandler = faceletValidatorHandlerClass;
+    
+    if (tagHandler != null)
+    {
+      stream.writeCharacters("\n      ");
+      stream.writeStartElement("handler-class");
+      stream.writeCharacters(tagHandler);
+      stream.writeEndElement();
+    }
 
     stream.writeCharacters("\n    ");
     stream.writeEndElement();
@@ -356,6 +366,16 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
                 converter.getConverterId() : converter.getRootConverterId();
     stream.writeCharacters(id);
     stream.writeEndElement();
+    
+    String tagHandler = faceletConverterHandlerClass;
+        
+    if (tagHandler != null)
+    {
+      stream.writeCharacters("\n      ");
+      stream.writeStartElement("handler-class");
+      stream.writeCharacters(tagHandler);
+      stream.writeEndElement();
+    }
 
     stream.writeCharacters("\n    ");
     stream.writeEndElement();
@@ -389,6 +409,16 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
    *@parameter
    */
   private String faceletHandlerClass;
+  
+  /**
+   *@parameter
+   */
+  private String faceletConverterHandlerClass;
+  
+  /**
+   *@parameter
+   */
+  private String faceletValidatorHandlerClass;
 
   /**
    * @parameter expression="src/main/conf"
