@@ -500,6 +500,24 @@ public class PropertyBean extends AttributeBean
     this._noOp = true;
   }
 
+  /**
+   * Sets the property valueExpression
+   * @param valueExpression
+   */
+  public void setValueExpression(String valueExpression)
+  {
+    this._valueExpression = valueExpression;
+  }
+
+  /**
+   * Value is provided through the valueExpression property metadata.
+   * @return valueExpression of the property
+   */
+  public String getValueExpression()
+  {
+    return _valueExpression;
+  }
+
   private String  _aliasOf;
   private String  _jspPropertyName;
   private String  _fieldPropertyName;
@@ -518,6 +536,7 @@ public class PropertyBean extends AttributeBean
   private String[] _unsupportedRenderKits = _EMPTY_ARRAY;
   private String _deprecated;
   private boolean _noOp = false;
+  private String _valueExpression;
 
   static private String[] _EMPTY_ARRAY = new String[0];
 

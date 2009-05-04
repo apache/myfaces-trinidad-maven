@@ -252,6 +252,10 @@ public class FacesConfigParser
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/deprecated");
     digester.addCallMethod("faces-config/component/property/property-extension/property-metadata/no-op", "makeNoOp");
 
+    // jsr-276 metadata rules
+    digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee/faces/design-time-metadata");
+    digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/required");
+    digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/value-expression", "valueExpression");
 
     // XInclude rules
     digester.setRuleNamespaceURI(XIncludeFilter.XINCLUDE_NAMESPACE);
