@@ -24,8 +24,10 @@
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                 xmlns:javaee="http://java.sun.com/xml/ns/javaee"
                 xmlns:mfp="http://myfaces.apache.org/maven-faces-plugin"
-                exclude-result-prefixes="xsl xs javaee mfp"
-                version="1.0" >
+                xmlns:fmd="http://java.sun.com/xml/ns/javaee/faces/design-time-metadata"
+                xmlns:exsl="http://exslt.org/common"
+                exclude-result-prefixes="xsl xs javaee mfp fmd"
+                version="1.0">
 
   <xsl:output method="xml" indent="yes"/>
   <xsl:param name="packageContains" />
@@ -47,9 +49,24 @@
   <!-- switch off default text processing -->
   <xsl:template match="//text()" />
 
+  <!-- these are used for inserting a namespace declaration in xslt 1.0 -->
+  <xsl:variable name="fmd">
+    <xsl:element name="fmd:xxx" namespace="http://java.sun.com/xml/ns/javaee/faces/design-time-metadata"/>
+  </xsl:variable>
+  <xsl:variable name="mfp">
+    <xsl:element name="mfp:xxx" namespace="http://myfaces.apache.org/maven-faces-plugin"/>
+  </xsl:variable>
+  <xsl:variable name="mafp">
+    <xsl:element name="mafp:xxx" namespace="http://xmlns.oracle.com/maven-adf-faces-plugin"/>
+  </xsl:variable>
+
   <xsl:template match="/javaee:faces-config" >
     <xsl:element name="faces-config"
                  namespace="http://java.sun.com/xml/ns/javaee" >
+      <!-- Add namespace declarations at root element, so they don't show up at lower elements when we change namespaces -->
+      <xsl:copy-of select="exsl:node-set($fmd)//namespace::*"/>
+      <xsl:copy-of select="exsl:node-set($mfp)//namespace::*"/>
+      <xsl:copy-of select="exsl:node-set($mafp)//namespace::*"/>
       <xsl:attribute name="xsi:schemaLocation">http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd</xsl:attribute>
       <xsl:attribute name="version">1.2</xsl:attribute>
       <xsl:apply-templates select="javaee:application" />
@@ -78,6 +95,7 @@
       </xsl:for-each>
       <xsl:apply-templates select="javaee:lifecycle[contains(javaee:phase-listener, $packageContains)]" />
       <xsl:apply-templates select="javaee:validator[contains(javaee:validator-class, $validatorPackageContains)]" />
+      <xsl:apply-templates select="javaee:faces-config-extension" />
     </xsl:element>
   </xsl:template>
 
@@ -362,12 +380,14 @@
       <xsl:element name="facet-extension">
         <!-- Check for possible children of the metadata -->
         <xsl:if test="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee']">
+          <xsl:apply-templates select="fmd:facet-metadata"/>
           <xsl:element name="facet-metadata">
             <!-- Select metadata children -->
             <xsl:apply-templates select="mfp:facet-metadata/*[
               namespace-uri() != 'http://java.sun.com/xml/ns/javaee']" />
             <!-- Add non-metadata children under the metadata -->
             <xsl:apply-templates select="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
+              and namespace-uri() != 'http://java.sun.com/xml/ns/javaee/faces/design-time-metadata'
               and (
                 namespace-uri() != 'http://myfaces.apache.org/maven-faces-plugin'
                 or name() != 'mfp:facet-metadata'
@@ -460,12 +480,14 @@
       <xsl:element name="property-extension">
         <!-- Check for possible children of the metadata -->
         <xsl:if test="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee']">
+          <xsl:apply-templates select="fmd:property-metadata"/>
           <xsl:element name="property-metadata">
             <!-- Select metadata children -->
             <xsl:apply-templates select="mfp:property-metadata/*[
               namespace-uri() != 'http://java.sun.com/xml/ns/javaee']" />
             <!-- Add non-metadata children under the metadata -->
             <xsl:apply-templates select="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
+              and namespace-uri() != 'http://java.sun.com/xml/ns/javaee/faces/design-time-metadata'
               and (
                 namespace-uri() != 'http://myfaces.apache.org/maven-faces-plugin'
                 or name() != 'mfp:property-metadata'
@@ -876,7 +898,8 @@
    See JIRA issues ADFFACES-358, ADFFACES-361 and ADFFACES-472 -->
   <xsl:template match="javaee:property-extension/*[
     namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
-    and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']">
+    and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin'
+    and namespace-uri() !='http://java.sun.com/xml/ns/javaee/faces/design-time-metadata']">
     <xsl:copy>
       <xsl:apply-templates select="@*|node()"/>
       <xsl:value-of select="text()"/>
@@ -898,6 +921,114 @@
     <xsl:element name="{local-name()}" >
       <xsl:apply-templates select="@*|node()"/>
       <xsl:value-of select="text()"/>
+    </xsl:element>
+  </xsl:template>
+
+  <!-- Rule for the jsr-276 (top level) component metadata, just copy the whole thing -->
+  <xsl:template match="//fmd:component-metadata">
+    <xsl:element name="fmd:component-metadata">
+     <xsl:copy-of select="*"/>
+    </xsl:element>
+  </xsl:template>
+
+  <!-- Rule for the jsr-276 (top level) property metadata, just copy the whole thing -->
+  <xsl:template match="//fmd:property-metadata">
+    <xsl:element name="fmd:property-metadata">
+     <xsl:copy-of select="*"/>
+    </xsl:element>
+  </xsl:template>
+
+  <!-- Rule for the jsr-276 (top level) facet metadata, just copy the whole thing -->
+  <xsl:template match="//fmd:facet-metadata">
+    <xsl:element name="fmd:facet-metadata">
+     <xsl:copy-of select="*"/>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:faces-config-extension">
+        <xsl:apply-templates select="fmd:global-metadata"/>
+  </xsl:template>
+
+  <!-- Rule for the jsr-276 (top level) global metadata extension -->
+  <xsl:template match="//fmd:global-metadata">
+    <xsl:element name="faces-config-extension">
+      <xsl:element name="fmd:global-metadata">
+        <xsl:apply-templates select="fmd:contract-definitions"/>
+        <xsl:apply-templates select="fmd:component-category-definitions"/>
+        <xsl:apply-templates select="fmd:property-category-definitions"/>
+        <xsl:apply-templates select="fmd:faces-taglib-definitions"/>
+      </xsl:element>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//fmd:contract-definitions">
+    <xsl:element name="fmd:contract-definitions">
+      <xsl:copy-of select="*"/>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//fmd:component-category-definitions">
+    <xsl:element name="fmd:component-category-definitions">
+      <xsl:copy-of select="*"/>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//fmd:property-category-definitions">
+    <xsl:element name="fmd:property-category-definitions">
+      <xsl:copy-of select="*"/>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//fmd:faces-taglib-definitions">
+    <xsl:element name="fmd:faces-taglib-definitions">
+      <xsl:apply-templates select="fmd:faces-taglib"/>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//fmd:faces-taglib">
+    <xsl:element name="fmd:faces-taglib">
+      <xsl:copy-of select="*"/>
+      <xsl:variable name="tagPrefix" select="fmd:short-name/text()"/>
+      <xsl:apply-templates select="*"/>
+        <xsl:for-each select="//javaee:validator">
+          <xsl:if test="starts-with(javaee:validator-extension/mfp:tag-name/text(), $tagPrefix)" >
+            <xsl:element name="fmd:tag">
+              <xsl:element name="fmd:name">
+                <xsl:value-of select="substring-after(javaee:validator-extension/mfp:tag-name/text(), ':')"/>
+              </xsl:element>
+              <xsl:element name="fmd:validator-id">
+                <xsl:value-of select="javaee:validator-id/text()"/>
+              </xsl:element>
+            </xsl:element>
+          </xsl:if>
+        </xsl:for-each>
+        <xsl:for-each select="//javaee:converter" >
+          <xsl:if test="starts-with(javaee:converter-extension/mfp:tag-name/text(), $tagPrefix)" >
+            <xsl:element name="fmd:tag">
+              <xsl:element name="fmd:name">
+                <xsl:value-of select="substring-after(javaee:converter-extension/mfp:tag-name/text(), ':')"/>
+              </xsl:element>
+              <xsl:element name="fmd:converter-id">
+                <xsl:value-of select="javaee:converter-id/text()"/>
+              </xsl:element>
+            </xsl:element>
+          </xsl:if>
+        </xsl:for-each>
+        <xsl:for-each select="//javaee:component" >
+          <xsl:if test="starts-with(javaee:component-extension/mfp:tag-name/text(), $tagPrefix)" >
+            <xsl:element name="fmd:tag">
+              <xsl:element name="fmd:name">
+                <xsl:value-of select="substring-after(javaee:component-extension/mfp:tag-name/text(), ':')"/>
+              </xsl:element>
+              <xsl:element name="fmd:component-type">
+                <xsl:value-of select="javaee:component-type/text()"/>
+              </xsl:element>
+              <xsl:element name="fmd:renderer-type">
+                <xsl:value-of select="javaee:component-extension/mfp:renderer-type/text()"/>
+              </xsl:element>
+            </xsl:element>
+          </xsl:if>
+        </xsl:for-each>
     </xsl:element>
   </xsl:template>
 
