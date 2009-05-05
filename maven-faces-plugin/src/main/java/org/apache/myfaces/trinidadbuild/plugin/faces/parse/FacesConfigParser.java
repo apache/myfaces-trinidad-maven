@@ -109,13 +109,7 @@ public class FacesConfigParser
 
     // faces-config/component/property
     digester.addObjectCreate("faces-config/component/property", PropertyBean.class);
-    digester.addBeanPropertySetter("faces-config/component/property/property-name",
-                                   "propertyName");
-    digester.addBeanPropertySetter("faces-config/component/property/property-class",
-                                   "propertyClass");
-    digester.addBeanPropertySetter("faces-config/component/property/description");
-    digester.addBeanPropertySetter("faces-config/component/property/default-value",
-                                   "defaultValue");
+    addComponentPropertyDigesterRules(digester);
     digester.addSetNext("faces-config/component/property", "addProperty",
                         PropertyBean.class.getName());
 
@@ -205,6 +199,37 @@ public class FacesConfigParser
     digester.addSetNext("faces-config/component/component-extension/event", "addEvent",
                         EventRefBean.class.getName());
 
+    // jsr-276 metadata rules
+    digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee/faces/design-time-metadata");
+    digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/required");
+    digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/value-expression", "valueExpression");
+
+    // XInclude rules
+    digester.setRuleNamespaceURI(XIncludeFilter.XINCLUDE_NAMESPACE);
+    digester.addFactoryCreate("faces-config/component/include",
+                              ComponentIncludeFactory.class);
+    digester.addFactoryCreate("faces-config/component/property/include",
+                              ComponentPropertyIncludeFactory.class);
+  }
+
+  // Add component property-related digster rules
+  protected static void addComponentPropertyDigesterRules(Digester digester)
+  {
+    String oldNamespace = digester.getRuleNamespaceURI();
+
+    digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee");
+
+    digester.addBeanPropertySetter("faces-config/component/property/property-name",
+                                   "propertyName");
+    digester.addBeanPropertySetter("faces-config/component/property/property-class",
+                                   "propertyClass");
+    digester.addBeanPropertySetter("faces-config/component/property/description");
+    digester.addBeanPropertySetter("faces-config/component/property/default-value",
+                                   "defaultValue");
+
+    // Maven Faces Plugin
+    digester.setRuleNamespaceURI("http://myfaces.apache.org/maven-faces-plugin");
+
     // faces-config/component/property/property-extension
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/state-holder",
                                    "stateHolder");
@@ -252,15 +277,7 @@ public class FacesConfigParser
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/deprecated");
     digester.addCallMethod("faces-config/component/property/property-extension/property-metadata/no-op", "makeNoOp");
 
-    // jsr-276 metadata rules
-    digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee/faces/design-time-metadata");
-    digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/required");
-    digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/value-expression", "valueExpression");
-
-    // XInclude rules
-    digester.setRuleNamespaceURI(XIncludeFilter.XINCLUDE_NAMESPACE);
-    digester.addFactoryCreate("faces-config/component/include",
-                              ComponentIncludeFactory.class);
+    digester.setRuleNamespaceURI(oldNamespace);
   }
 
   protected static void addConverterDigesterRules(Digester digester)
@@ -456,7 +473,8 @@ public class FacesConfigParser
     return digester;
   }
 
-  static public class ComponentIncludeFactory extends AbstractObjectCreationFactory
+  // Base class for include factories 
+  abstract static public class AbstractIncludeFactory extends AbstractObjectCreationFactory
   {
     public Object createObject(
       Attributes attributes) throws Exception
@@ -469,7 +487,7 @@ public class FacesConfigParser
       URL included = new URL(master, href);
 
       Digester includedDigester = createEmptyDigester();
-      addComponentDigesterRules(includedDigester, false);
+      addDigesterRules(includedDigester);
       includedDigester.push(included);
       includedDigester.push(digester.peek());
 
@@ -481,5 +499,24 @@ public class FacesConfigParser
       // We don't really want the included object - but return it anyway
       return included;
     }
+
+    abstract public void addDigesterRules(Digester includedDigester);
   }
+
+  // Factory for component includes
+  static public class ComponentIncludeFactory extends AbstractIncludeFactory
+  {
+    public void addDigesterRules(Digester digester) {
+      addComponentDigesterRules(digester, false);
+    }
+  }
+
+  // Factory for component property includes
+  static public class ComponentPropertyIncludeFactory extends AbstractIncludeFactory
+  {
+    public void addDigesterRules(Digester digester) {
+      addComponentPropertyDigesterRules(digester);
+    }
+  }
+
 }
