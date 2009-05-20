@@ -50,6 +50,12 @@
   <xsl:template match="//text()" />
 
   <!-- these are used for inserting a namespace declaration in xslt 1.0 -->
+  <xsl:variable name="tr">
+    <xsl:element name="tr:xxx" namespace="http://myfaces.apache.org/trinidad"/>
+  </xsl:variable>
+  <xsl:variable name="trh">
+    <xsl:element name="trh:xxx" namespace="http://myfaces.apache.org/trinidad/html"/>
+  </xsl:variable>
   <xsl:variable name="fmd">
     <xsl:element name="fmd:xxx" namespace="http://java.sun.com/xml/ns/javaee/faces/design-time-metadata"/>
   </xsl:variable>
@@ -64,6 +70,8 @@
     <xsl:element name="faces-config"
                  namespace="http://java.sun.com/xml/ns/javaee" >
       <!-- Add namespace declarations at root element, so they don't show up at lower elements when we change namespaces -->
+      <xsl:copy-of select="exsl:node-set($tr)//namespace::*"/>
+      <xsl:copy-of select="exsl:node-set($trh)//namespace::*"/>
       <xsl:copy-of select="exsl:node-set($fmd)//namespace::*"/>
       <xsl:copy-of select="exsl:node-set($mfp)//namespace::*"/>
       <xsl:copy-of select="exsl:node-set($mafp)//namespace::*"/>
