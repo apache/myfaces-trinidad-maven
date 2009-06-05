@@ -258,7 +258,7 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     String propName = property.getPropertyName();
     String propClass = property.getPropertyClass();
     String propVar = "_" + propName;
-    
+   
     if (property.isVirtual())
     {
       _writeVirtualSetMethod(out, componentClass, propName);
@@ -295,6 +295,12 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
                                     property.getPropertyClassParameters()))
     {
       _writeSetKnownTypeList (out, componentClass, propName, 
+                     property.getPropertyClassParameters()[0]);
+    }
+    else if (GeneratorHelper.isKnownTypeSet(propClass,  
+                                    property.getPropertyClassParameters()))
+    {
+      _writeSetKnownTypeSet (out, componentClass, propName, 
                      property.getPropertyClassParameters()[0]);
     }
     else if (GeneratorHelper.isConverter(propClass))
@@ -912,6 +918,62 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     }
   }
 
+  private void _writeSetKnownTypeSet(
+      PrettyWriter out,
+      String  componentClass,
+      String  propName,
+      String  propFullClass) throws IOException
+  {
+    String propKey = Util.getConstantNameFromProperty(propName, "_KEY");
+    String propVar = "_" + propName;
+    
+    String propClass = Util.getClassFromFullClass(propFullClass);
+    String boxedClass = Util.getBoxedClass(propClass);
+
+    System.out.println ("_writeSetSet: propFullClass = " + propFullClass +
+                        " propClass= " + propClass + 
+                        " boxedClass=" + boxedClass);
+    if (_is12)
+    {
+      out.println("set" + boxedClass + "SetProperty" + 
+                  "(bean, " + componentClass + "." + propKey + 
+                  ", " + propVar + ");");
+    }
+    else
+    {
+      out.println("if (" + propVar + " != null)");
+      out.println("{");
+      out.indent();
+      out.println("if (isValueReference(" + propVar + "))");
+      out.println("{");
+      out.indent();
+      out.println("ValueBinding vb = createValueBinding(" + propVar + ");");
+      out.println("bean.setValueBinding(" + componentClass + "." + propKey + ", vb);");
+      out.unindent();
+      out.println("}");
+      out.println("else");
+      out.println("{");
+      out.indent();
+      out.println("try");
+      out.println("{");
+      out.indent();
+      out.println("bean.setProperty(" + componentClass + "." + propKey + ",");
+      out.println("                 TagUtils.getStringSet(" + propVar + "));");
+      out.unindent();
+      out.println("}");
+      out.println("catch (ParseException pe)");
+      out.println("{");
+      out.indent();
+      out.println("setValidationError(");
+      out.println("  pe.getMessage() + \": \" + \"Position \" + pe.getErrorOffset());");
+      out.unindent();
+      out.println("}");
+      out.unindent();
+      out.println("}");
+      out.unindent();
+      out.println("}");
+    }
+  }
 
   private void _writeSetConverter(
       PrettyWriter out,

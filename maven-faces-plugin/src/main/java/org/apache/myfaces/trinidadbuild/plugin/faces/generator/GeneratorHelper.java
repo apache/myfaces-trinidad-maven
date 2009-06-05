@@ -83,6 +83,17 @@ public class GeneratorHelper
         "java.lang.String".equals(propClassParams[0]));
   }
 
+  // Allows Set of known types, kept in sync
+  // with UIXComponentELTag's set*Set methods.
+  public static boolean isKnownTypeSet (
+      String propClass,
+      String[] propClassParams)
+  {
+    return ("java.util.Set".equals(propClass) &&
+        propClassParams.length == 1 &&
+        "java.lang.String".equals(propClassParams[0]));
+  }
+
   public static boolean isColor(
       String propClass)
   {
