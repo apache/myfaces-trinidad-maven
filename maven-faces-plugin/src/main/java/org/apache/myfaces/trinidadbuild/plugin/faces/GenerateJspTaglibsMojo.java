@@ -610,8 +610,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
           }
           stream.writeEndElement();
         }
-        else if ((!property.isLiteralOnly() &&
-                (!(property.getValueExpression() != null && property.getValueExpression().equals("PROHIBITED")))) ||
+        else if (!property.isLiteralOnly() ||
                  // "binding" is always a deferred-value
                  "binding".equals(propertyName))
         {

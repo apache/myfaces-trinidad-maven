@@ -507,6 +507,12 @@ public class PropertyBean extends AttributeBean
   public void setValueExpression(String valueExpression)
   {
     this._valueExpression = valueExpression;
+    // This is for backward compatibility from jsr-276 metadata.  The old element
+    // <mfp:literal-only>true</mfp:literal-only> is now
+    // <fmd:value-expression>PROHIBITED</fmd:value-expression>.  There are a number of places
+    // that look at literalOnly, so we just make it transparent at the lowest level.
+    if (valueExpression.equals("PROHIBITED"))
+      setLiteralOnly(true);
   }
 
   /**
