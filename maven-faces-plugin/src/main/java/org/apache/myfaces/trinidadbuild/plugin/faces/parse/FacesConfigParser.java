@@ -188,6 +188,16 @@ public class FacesConfigParser
     digester.addSetNext("faces-config/component/component-extension/example",
                         "addExample", ExampleBean.class.getName());
 
+    // faces-config/component/component-extension/screenshot
+    digester.addObjectCreate("faces-config/component/component-extension/screenshot",
+                             ScreenshotBean.class);
+    digester.addBeanPropertySetter("faces-config/component/component-extension/screenshot/description",
+                                   "description");
+    digester.addBeanPropertySetter("faces-config/component/component-extension/screenshot/image",
+                                   "image");
+    digester.addSetNext("faces-config/component/component-extension/screenshot",
+                        "addScreenshot", ScreenshotBean.class.getName());
+
     // faces-config/component/component-extension/event
     digester.addObjectCreate("faces-config/component/component-extension/event", EventRefBean.class);
     digester.addBeanPropertySetter("faces-config/component/component-extension/event/event-type",

@@ -33,7 +33,9 @@ public class AbstractTagBean extends ObjectBean {
   private int     _tagClassModifiers;
   private Map     _examples;
   private int     _exampleIdx = 0;
-
+  private Map     _screenshots;
+  private int     _screenshotIdx = 0;
+  
   public AbstractTagBean() 
   {
     this(false);
@@ -50,6 +52,7 @@ public class AbstractTagBean extends ObjectBean {
       _properties = new LinkedHashMap();
     }
     _examples   = new LinkedHashMap();      
+    _screenshots = new LinkedHashMap();   
   }
 
   /**
@@ -225,6 +228,51 @@ public class AbstractTagBean extends ObjectBean {
     return _examples.values().iterator();
   }
 
+  /**
+   * Adds a Screenshot to this component.
+   *
+   * @param screenshot  the screenshot to add
+   */
+  public void addScreenshot(
+    ScreenshotBean screenshot)
+  {
+    String key = _generateScreenshotKey();
+    screenshot.setKey(key);
+    _screenshots.put(key, screenshot);
+  }
+
+  /**
+   * Returns true if this component has any screenshots.
+   *
+   * @return  true   if this component has any screenshots,
+   *          false  otherwise
+   */
+  public boolean hasScreenshots()
+  {
+    return !_screenshots.isEmpty();
+  }
+
+  /**
+   * Returns the screenshot for this screenshot key.
+   *
+   * @param key  the hashmap screenshot key
+   */
+  public ScreenshotBean findScreenshot(
+    String key)
+  {
+    return (ScreenshotBean)_screenshots.get(key);
+  }
+
+  /**
+  * Returns an iterator for all screenshots on this component only.
+  *
+  * @return  the screenshot iterator
+  */
+  public Iterator screenshots()
+  {
+    return _screenshots.values().iterator();
+  }
+
   public void parseTagClassModifier(
     String modifier)
   {
@@ -297,4 +345,14 @@ public class AbstractTagBean extends ObjectBean {
     _exampleIdx++;
     return key;
   }
+  
+  /* Get a generated key to use in storing
+   * this screen shot bean in its hashmap.
+   */
+  private String _generateScreenshotKey()
+  {
+    String key = "Screenshot" + Integer.toString(_screenshotIdx);
+    _screenshotIdx++;
+    return key;
+  }  
 }
