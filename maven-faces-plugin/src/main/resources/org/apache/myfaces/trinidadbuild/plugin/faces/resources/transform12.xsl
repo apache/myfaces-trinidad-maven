@@ -1055,6 +1055,7 @@
   <xsl:template match="//mfp:jsp-property-name" />
   <xsl:template match="//mfp:long-description" />
   <xsl:template match="//mfp:method-binding-signature" />
+  <xsl:template match="//mfp:screenshot" />
   <xsl:template match="//mfp:short-description" />
   <xsl:template match="//mfp:state-holder" />
   <xsl:template match="//mfp:tag-attribute-excluded" />

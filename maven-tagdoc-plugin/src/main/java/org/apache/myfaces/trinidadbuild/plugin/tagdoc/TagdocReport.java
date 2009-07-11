@@ -62,6 +62,7 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigParser;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacetBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ScreenshotBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ValidatorBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.ComponentFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.ConverterFilter;
@@ -401,11 +402,12 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       out.write(" <p>\n");
       _writeComponentSummary(out, component);
       out.write(" </p>\n");
-      out.write(" <p>\n");
-      _writeExamples(out, component);
-      out.write(" </p>\n");
       out.write(" </section>\n");
-      
+
+      _writeScreenshots(out, component);
+
+      _writeExamples(out, component);
+
       if (component.hasEvents(true))
       {
         out.write(" <section name=\"Events\">\n");
@@ -469,11 +471,12 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       out.write(" <p>\n");
       _writeConverterSummary(out, converter);
       out.write(" </p>\n");
-      out.write(" <p>\n");
-      _writeExamples(out, converter);
-      out.write(" </p>\n");
       out.write(" </section>\n");
-            
+
+      _writeScreenshots(out, converter);
+
+      _writeExamples(out, converter);
+
       out.write(" <section name=\"Attributes\">\n");
       _writeConverterAttributes(out, converter);
       out.write(" </section>\n");
@@ -519,11 +522,12 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       out.write(" <p>\n");
       _writeValidatorSummary(out, validator);
       out.write(" </p>\n");
-      out.write(" <p>\n");
-      _writeExamples(out, validator);
-      out.write(" </p>\n");
       out.write(" </section>\n");
-            
+
+      _writeScreenshots(out, validator);
+
+      _writeExamples(out, validator);
+
       out.write(" <section name=\"Attributes\">\n");
       _writeValidatorAttributes(out, validator);
       out.write(" </section>\n");
@@ -1062,8 +1066,8 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     ExampleBean exBean = null;
 
     // Write header
-    out.write("   <b>Example(s):</b> ");
-    out.write("   <br/>\n");
+    out.write(" <section name=\"Code Example(s)\">\n");
+    out.write(" <p>\n");    
     out.write("   <html>\n");
     
     // Go through each example, write its description
@@ -1097,6 +1101,64 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       }
     }
     out.write("   </html>\n");
+    out.write(" </p>\n");
+    out.write(" </section>\n");    
+  }
+
+  private void _writeScreenshots(Writer out, AbstractTagBean bean) throws IOException
+  {
+    if (!bean.hasScreenshots())
+      return;
+    
+    ScreenshotBean ssBean = null;
+
+    // Write header
+    out.write(" <section name=\"Screenshot(s)\">\n");
+    out.write(" <p>\n");
+    out.write("   <html>\n");
+
+    // Go through each screenshot, write its image
+    // followed by the image's caption.
+    Iterator iter = bean.screenshots();
+    while (iter.hasNext())
+    {
+      ssBean = (ScreenshotBean) iter.next();
+      String desc   = ssBean.getDescription();
+      String img = ssBean.getImage();
+
+      out.write("    <div class=\'screenshot\'>\n");
+
+      if (img != null)
+      {
+        if (!"".equals(img))
+        {
+          out.write(img);
+        }
+      }
+
+      if (desc != null)
+      {
+        desc = desc.replaceAll("<", "&lt;");
+        desc = desc.replaceAll(">", "&gt;");
+
+        if (!"".equals(desc))
+        {
+          out.write("<br/>");
+          out.write(desc + "\n");
+        }
+      }      
+      out.write("    </div>\n");    
+
+      // create extra space between each screenshot to ensure it is clear which description 
+      // text belongs to which image
+      if (iter.hasNext())
+      {
+        out.write("<br/>");
+      }
+    }
+    out.write("   </html>\n");
+    out.write(" </p>\n");
+    out.write(" </section>\n");
   }
 
   protected MavenProject getProject()
