@@ -179,6 +179,18 @@
     </site>
   </distributionManagement>
 
+  <!--
+    NOTE: When preparing the release (mvn release:prepare) you may get an error when the 
+          plugin is committing the TAG (file already exists (which is for sure not true))
+          There is an odd workaround for that:
+
+          # mvn release:prepare
+          => fails
+          # svn up -r head 
+          # mvn release:prepare -Dresume
+
+         See http://jira.codehaus.org/browse/SCM-406 as well
+  --> 
   <profiles>
     <profile>
       <id>release</id>
