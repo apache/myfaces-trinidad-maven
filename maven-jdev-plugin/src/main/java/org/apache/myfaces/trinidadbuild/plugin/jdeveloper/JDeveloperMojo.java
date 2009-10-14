@@ -261,6 +261,14 @@ public class JDeveloperMojo
   private Properties[] distributedTagLibraries;
 
   /**
+   * JVM javaOptions found under 
+   * Project Properties->Run/Debug/Profile->Launch Settings->Java Options
+   * in JDeveloper. "-ea" is the default for "enableAssertions".  
+   * @parameter expression="${jdev.jvm.java.options}" default-value="-ea"
+   */
+  private String javaOptions;
+
+  /**
    * Execute the Mojo.
    */
   public void execute()
@@ -1372,7 +1380,7 @@ public class JDeveloperMojo
     //   /hash[@n="oracle.jdeveloper.runner.RunConfigurations"]
     //     /hash[@n="runConfigurationDefinitions"]
     //       /hash[@n="Default"]
-    //         /value[@n="makeProject" v="false"]
+    //         /value[@n="compileBeforeRun" v="false"]
     //         /url[@n="targetURL" path="src/main/webapp/index.jspx"]
     Xpp3Dom configDOM =
       findNamedChild(projectDOM, "hash",
@@ -1388,7 +1396,13 @@ public class JDeveloperMojo
     else
       makeProjectDom.setAttribute("v", "false");
 
-    if ((runTarget != null) && !"".equals(runTarget))
+    Xpp3Dom javaOptionsDom =
+      findNamedChild(defaultDOM, "value", "javaOptions");
+
+    if (javaOptions != null)
+      javaOptionsDom.setAttribute("v", javaOptions);
+
+   if ((runTarget != null) && !"".equals(runTarget))
     {
       // Convert file separator chars to generic
       String targetURL = "";
