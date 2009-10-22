@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,14 +18,16 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.util;
 
-import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
-
 import java.io.File;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
+
 
 public class Util
 {
@@ -48,7 +50,7 @@ public class Util
           if (i>0){
               gen += ",";
           }
-          gen += getClassFromFullClass(property.getAttributeClassParameters()[i]);          
+          gen += getClassFromFullClass(property.getAttributeClassParameters()[i]);
       }
       return (gen.length() > 0?"<"+gen+">":gen);
   }
@@ -94,6 +96,11 @@ public class Util
     for (int i=0; i < propertyName.length(); i++)
     {
       char ch = propertyName.charAt(i);
+      if (!Character.isLetterOrDigit(ch))
+      {
+        // convert non-alphanumeric characters to underscores
+        ch = '_';
+      }
       if (i > 0 &&
           Character.isUpperCase(ch) &&
           Character.isLowerCase(propertyName.charAt(i-1)))
@@ -117,7 +124,7 @@ public class Util
     return prefix + Character.toUpperCase(propertyName.charAt(0)) +
            propertyName.substring(1);
   }
-  
+
   static public String getPropertyClass(PropertyBean property)
   {
     String propertyFullClass = property.getPropertyClass();
@@ -138,10 +145,10 @@ public class Util
         }
       }
       buffer.append('>');
-      
+
       propertyClass = buffer.toString();
     }
-    
+
     return propertyClass;
   }
 
@@ -184,12 +191,12 @@ public class Util
            "long".equals(className) ||
            "short".equals(className);
   }
-  
+
   static public String getAlternatePropertyClass(PropertyBean property)
   {
     StringBuffer buffer = new StringBuffer(60);
     _buildPropertyClass(buffer, property.getAlternateClass());
-    
+
     return buffer.toString();
   }
 
