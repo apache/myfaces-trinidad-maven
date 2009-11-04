@@ -119,13 +119,17 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
 
     String fullClassName = component.getComponentClass();
 
+    // TODO: This must be changed in the future...
+    JsfVersion version = JsfVersion.getVersion(jsfVersion);
+    boolean isVersionGreaterThan11 = version != JsfVersion.JSF_1_1;
+    
     if (component.isTrinidadComponent())
     {
-      generator = new TrinidadComponentGenerator(getLog(), _is12());
+      generator = new TrinidadComponentGenerator(getLog(), isVersionGreaterThan11);
     }
     else 
     {
-      generator = new MyFacesComponentGenerator(getLog(),_is12() );
+      generator = new MyFacesComponentGenerator(getLog(), isVersionGreaterThan11);
     }
 
     try
@@ -274,12 +278,6 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
               component.isModifiedSince(targetFile.lastModified()));
     }
   }
-
-  private boolean _is12()
-  {
-    return "1.2".equals(jsfVersion) || "12".equals(jsfVersion);
-  }
-  
 
   /**
    * @parameter expression="${project}"

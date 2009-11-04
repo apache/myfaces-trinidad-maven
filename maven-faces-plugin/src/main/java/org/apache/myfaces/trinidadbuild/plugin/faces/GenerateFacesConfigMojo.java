@@ -160,7 +160,7 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
           Result mergedResult = new StreamResult(resultStream);
 
           URL xslURL;
-          JsfVersion usedVersion = _getJsfVersion();
+          JsfVersion usedVersion = JsfVersion.getVersion(jsfVersion);
           if (usedVersion == JsfVersion.JSF_1_2)
           {
             xslURL = getClass().getResource("resources/transform12.xsl");
@@ -236,22 +236,6 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
     }
   }
 
-  private JsfVersion _getJsfVersion()
-  {
-    if("1.2".equals(jsfVersion) || "12".equals(jsfVersion))
-    {
-      return JsfVersion.JSF_1_2;  
-    }
-    else if ("2.0".equals(jsfVersion) || "20".equals(jsfVersion))
-    {
-      return JsfVersion.JSF_2_0;  
-    }
-    else
-    {
-      return JsfVersion.JSF_1_1;  
-    }
-  }
-
   private String getParameter(String paramName, String defaultValue)
   {
     String param;
@@ -267,17 +251,6 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
     return param;
   }
   
-  /**
-   * Private internal enum to 
-   * reflect the underlying JSF version.
-   */
-  private enum JsfVersion
-  {
-    JSF_1_1,
-    JSF_1_2,
-    JSF_2_0
-  }
-
   /**
    * @parameter expression="${project}"
    * @readonly
