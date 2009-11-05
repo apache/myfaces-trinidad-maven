@@ -78,6 +78,8 @@
       <xsl:attribute name="xsi:schemaLocation">http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd</xsl:attribute>
       <xsl:attribute name="version">2.0</xsl:attribute>
       <xsl:apply-templates select="javaee:name" />
+      <xsl:apply-templates select="javaee:ordering" />
+      <xsl:apply-templates select="javaee:absolute-ordering" />
       <xsl:apply-templates select="javaee:application" />
       <xsl:apply-templates select="javaee:factory" />
       <xsl:apply-templates select="javaee:component[not(contains(javaee:component-extension/mfp:component-class-modifier/text(), 'abstract')) and
@@ -240,6 +242,31 @@
   <xsl:template match="//javaee:name" >
     <xsl:element name="name" >
       <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+  
+  <xsl:template match="//javaee:ordering" >
+    <xsl:element name="ordering" >
+      <xsl:apply-templates select="javaee:after" />
+      <xsl:apply-templates select="javaee:before" />
+    </xsl:element>
+  </xsl:template>
+  
+  <xsl:template match="//javaee:after" >
+    <xsl:element name="after" >
+      <xsl:apply-templates />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:before" >
+    <xsl:element name="before" >
+      <xsl:apply-templates />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:absolute-ordering" >
+    <xsl:element name="absolute-ordering" >
+      <xsl:apply-templates />
     </xsl:element>
   </xsl:template>
 
@@ -697,6 +724,17 @@
   <xsl:template match="//javaee:redirect" >
     <xsl:element name="redirect" />
   </xsl:template>
+  
+  <xsl:template match="//javaee:name" >
+    <xsl:element name="name" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+  
+  <xsl:template match="//javaee:others" >
+    <xsl:element name="others" />
+  </xsl:template>
+  
 
   <xsl:template match="//javaee:referenced-bean" >
     <xsl:element name="referenced-bean" >
