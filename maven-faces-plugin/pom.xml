@@ -31,20 +31,6 @@
   <packaging>maven-plugin</packaging>
   <name>Apache Trinidad Maven Faces Plugin</name>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <inherited>true</inherited>
-        <configuration>
-          <source>1.4</source>
-          <target>1.4</target>
-        </configuration>
-      </plugin>
-    </plugins>      
-  </build>
-
   <reporting>
     <plugins>
       <plugin>
