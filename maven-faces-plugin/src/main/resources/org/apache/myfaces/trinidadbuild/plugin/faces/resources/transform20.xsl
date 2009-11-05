@@ -289,6 +289,7 @@
       <xsl:apply-templates select="javaee:variable-resolver[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:partial-traversal[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:system-event-listener" />
+      <xsl:apply-templates select="javaee:default-validators" />
       <xsl:apply-templates select="javaee:locale-config" />
       <xsl:apply-templates select="javaee:resource-bundle" />
     </xsl:element>
@@ -377,6 +378,12 @@
   <xsl:template match="//javaee:source-class" >
     <xsl:element name="source-class" >
       <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:default-validators" >
+    <xsl:element name="default-validators" >
+      <xsl:apply-templates select="javaee:validator-id"/>
     </xsl:element>
   </xsl:template>
 
