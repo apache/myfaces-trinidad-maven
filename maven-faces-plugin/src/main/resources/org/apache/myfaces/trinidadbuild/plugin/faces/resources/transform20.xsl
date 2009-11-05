@@ -288,6 +288,7 @@
       <xsl:apply-templates select="javaee:property-resolver[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:variable-resolver[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:partial-traversal[contains(text(), $packageContains)]" />
+      <xsl:apply-templates select="javaee:system-event-listener" />
       <xsl:apply-templates select="javaee:locale-config" />
       <xsl:apply-templates select="javaee:resource-bundle" />
     </xsl:element>
@@ -349,6 +350,32 @@
   
   <xsl:template match="//javaee:partial-traversal" >
     <xsl:element name="partial-traversal" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:system-event-listener" >
+    <xsl:element name="system-event-listener" >
+      <xsl:apply-templates select="javaee:system-event-class" />
+      <xsl:apply-templates select="javaee:system-event-listener-class[contains(text(), $packageContains)]" />
+      <xsl:apply-templates select="javaee:source-class" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:system-event-class" >
+    <xsl:element name="system-event-class" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:system-event-listener-class" >
+    <xsl:element name="system-event-listener-class" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:source-class" >
+    <xsl:element name="source-class" >
       <xsl:value-of select="text()" />
     </xsl:element>
   </xsl:template>
