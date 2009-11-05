@@ -96,6 +96,12 @@
           <xsl:apply-templates select="javaee:icon" />
           <xsl:apply-templates select="javaee:render-kit-id" />
           <xsl:apply-templates select="javaee:render-kit-class" />
+
+          <!-- client-behavior-renderer -->
+            <xsl:for-each select="key('render-kit-id', javaee:render-kit-id/text())" >
+              <xsl:apply-templates select="javaee:client-behavior-renderer[contains(javaee:client-behavior-renderer-class, $packageContains)]" />
+            </xsl:for-each>
+
           <!-- Drop renderers if desired -->
           <xsl:if test="$removeRenderers != 'true'">
             <xsl:for-each select="key('render-kit-id', javaee:render-kit-id/text())" >
@@ -281,6 +287,7 @@
       <xsl:apply-templates select="javaee:el-resolver[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:property-resolver[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:variable-resolver[contains(text(), $packageContains)]" />
+      <xsl:apply-templates select="javaee:partial-traversal[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:locale-config" />
       <xsl:apply-templates select="javaee:resource-bundle" />
     </xsl:element>
@@ -339,6 +346,12 @@
       <xsl:value-of select="text()" />
     </xsl:element>
   </xsl:template>
+  
+  <xsl:template match="//javaee:partial-traversal" >
+    <xsl:element name="partial-traversal" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
 
   <xsl:template match="//javaee:locale-config" >
     <xsl:element name="locale-config" >
@@ -352,6 +365,7 @@
       <xsl:apply-templates select="javaee:faces-context-factory[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:lifecycle-factory[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:render-kit-factory[contains(text(), $packageContains)]" />
+      <xsl:apply-templates select="javaee:view-declaration-language-factory[contains(text(), $packageContains)]" />
     </xsl:element>
   </xsl:template>
 
@@ -375,6 +389,12 @@
 
   <xsl:template match="//javaee:render-kit-factory" >
     <xsl:element name="render-kit-factory" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:view-declaration-language-factory" >
+    <xsl:element name="view-declaration-language-factory" >
       <xsl:value-of select="text()" />
     </xsl:element>
   </xsl:template>
@@ -825,6 +845,24 @@
 
   <xsl:template match="//javaee:renderer-class" >
     <xsl:element name="renderer-class" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:client-behavior-renderer" >
+    <xsl:element name="client-behavior-renderer" >
+      <xsl:apply-templates />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:client-behavior-renderer-type" >
+    <xsl:element name="client-behavior-renderer-type" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:client-behavior-renderer-class" >
+    <xsl:element name="client-behavior-renderer-class" >
       <xsl:value-of select="text()" />
     </xsl:element>
   </xsl:template>
