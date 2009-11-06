@@ -285,6 +285,8 @@
       <xsl:apply-templates select="javaee:description" />
       <xsl:apply-templates select="javaee:display-name" />
       <xsl:apply-templates select="javaee:icon" />
+      <xsl:apply-templates select="javaee:attribute" />
+      <xsl:apply-templates select="javaee:property" />
     </xsl:element>
   </xsl:template>
 
