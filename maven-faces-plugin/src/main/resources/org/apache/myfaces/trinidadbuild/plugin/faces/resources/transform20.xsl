@@ -80,6 +80,7 @@
       <xsl:apply-templates select="javaee:name" />
       <xsl:apply-templates select="javaee:ordering" />
       <xsl:apply-templates select="javaee:absolute-ordering" />
+      <xsl:apply-templates select="javaee:behavior" />
       <xsl:apply-templates select="javaee:application" />
       <xsl:apply-templates select="javaee:factory" />
       <xsl:apply-templates select="javaee:component[not(contains(javaee:component-extension/mfp:component-class-modifier/text(), 'abstract')) and
@@ -273,6 +274,35 @@
   <xsl:template match="//javaee:absolute-ordering" >
     <xsl:element name="absolute-ordering" >
       <xsl:apply-templates />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:behavior" >
+    <xsl:element name="behavior" >
+      <xsl:apply-templates select="javaee:behavior-class[contains(text(), $packageContains)]" />
+      <xsl:apply-templates select="javaee:behavior-extension" />
+      <xsl:apply-templates select="javaee:behavior-id[contains(text(), $packageContains)]" />
+      <xsl:apply-templates select="javaee:description" />
+      <xsl:apply-templates select="javaee:display-name" />
+      <xsl:apply-templates select="javaee:icon" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:behavior-class" >
+    <xsl:element name="behavior-class" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:behavior-extension" >
+    <xsl:element name="behavior-extension" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="//javaee:behavior-id" >
+    <xsl:element name="behavior-id" >
+      <xsl:value-of select="text()" />
     </xsl:element>
   </xsl:template>
 
