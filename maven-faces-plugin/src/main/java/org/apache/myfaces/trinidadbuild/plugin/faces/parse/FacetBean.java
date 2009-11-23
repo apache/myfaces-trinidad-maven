@@ -18,6 +18,10 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * FacetBean is a Java representation of the faces-config component or
  * renderer facet XML element.
@@ -104,9 +108,44 @@ public class FacetBean extends ObjectBean
   {
     this._hidden = hidden;
   }
+ 
+  /**
+   * Adds an Accessibility (e.g. section 508 compliance) Guideline to this facet. The
+   * accessibility guidelines are used during tag doc generation to give the application
+   * developer hints on how to configure the facet to be accessibility-compliant.
+   *
+   * @param accGuidelines  the accessibility guideline to add
+   */
+  public void addAccessibilityGuideline(
+    String accessibilityGuideline)
+  {
+    _accessibilityGuidelines.add(accessibilityGuideline);       
+  }
 
-  private String  _description;
-  private String  _facetName;
-  private boolean _required;
-  private boolean _hidden;
+  /**
+   * Returns true if this component has any accessibility guidelines.
+   *
+   * @return  true   if this component has any accessibility guidelines,
+   *          false  otherwise
+   */
+  public boolean hasAccessibilityGuidelines()
+  {
+    return !_accessibilityGuidelines.isEmpty();
+  }
+
+  /**
+   * Returns an iterator for all accessibility guidelines on this component only.
+   *
+   * @return  the accessibility guidelines iterator
+   */
+  public Iterator<String> accessibilityGuidelines()
+  {
+    return _accessibilityGuidelines.iterator();
+  }
+
+  private String       _description;
+  private String       _facetName;
+  private boolean      _required;
+  private boolean      _hidden;
+  private List<String> _accessibilityGuidelines = new ArrayList<String>();
 }

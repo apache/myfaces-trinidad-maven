@@ -1041,6 +1041,7 @@
   </xsl:template>
 
   <!-- Blacklisted mfp: that should not be copied over into the faces-config.xml: -->
+  <xsl:template match="//mfp:accessibility-guideline" />
   <xsl:template match="//mfp:alternate-class" />
   <xsl:template match="//mfp:author" />
   <xsl:template match="//mfp:component-metadata/mfp:group" />

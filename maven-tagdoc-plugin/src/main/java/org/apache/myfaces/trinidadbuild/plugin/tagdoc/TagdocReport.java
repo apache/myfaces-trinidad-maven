@@ -408,6 +408,8 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
       _writeExamples(out, component);
 
+      _writeAccessibilityGuidelines(out, component);
+
       if (component.hasEvents(true))
       {
         out.write(" <section name=\"Events\">\n");
@@ -1159,6 +1161,145 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("   </html>\n");
     out.write(" </p>\n");
     out.write(" </section>\n");
+  }
+
+  // Write out the accessibility Guidelines for the component.  Accessibility Guidelines
+  // help the application developer to create an application that can be used by users that e.g.
+  // use a screen reader (e.g JAWS).  Oftentimes, in order to be accessibility compliant (e.g. section 508
+  // compliant) an application developer needs to specify metadata for the screenreader application
+  // to be able to correctly interpret the application for the blind user.  The accessibility guideline
+  // can be associated with the Component itself, with a specific attribute of the component
+  // or with a specific facet of the component.  All accessibility guidelines are printed out
+  // together in an "Accessibility Guidelines" section, with the component-generic guidelines
+  // listed first, followed by the attribute specific guidelines and finally the facet-specific
+  // guidelines
+  private void _writeAccessibilityGuidelines(Writer out, ComponentBean bean) throws IOException
+  {
+    // accAttributes and accFacets are sorted lists of attributes and facets, respectively, 
+    // that have an associated accessibility guideline
+    TreeSet<PropertyBean> accAttributes = new TreeSet<PropertyBean>();
+    TreeSet<String> accFacets = new TreeSet<String>();
+
+    // see if any of the component's properties has an associated accessibility guideline
+    Iterator<PropertyBean> attrs = bean.properties();
+    while (attrs.hasNext())
+    {
+      PropertyBean property = attrs.next();
+      if (!property.isTagAttributeExcluded() && property.hasAccessibilityGuidelines())
+      {
+        accAttributes.add(property);
+      }
+    }
+
+    // see if any of the component's facets has an associated accessibility guideline
+    if (bean.hasFacets()) 
+    {
+      Iterator<FacetBean> facets = bean.facets(true);
+      while (facets.hasNext())
+      {
+        FacetBean facetBean = facets.next();
+        if (!facetBean.isHidden() && facetBean.hasAccessibilityGuidelines())
+        {
+          accFacets.add(facetBean.getFacetName());
+        }
+      }
+    }
+
+    // if neither the component nor the component's attributes nor the component's facets
+    // has an accessibility guideline, return
+    if (!bean.hasAccessibilityGuidelines() && accAttributes.isEmpty() && accFacets.isEmpty())
+      return;
+
+    String accGuideline;
+
+    // Write header
+    out.write(" <section name=\"Accessibility Guideline(s)\">\n");
+    out.write(" <p>\n");
+    out.write("   <html>\n");
+    out.write("     <ul>");
+
+    // write out component-generic accessibility guidelines, i.e. accessibility
+    // guidelines that apply to the component as a whole, not associated with a
+    // specific attribute
+    if (bean.hasAccessibilityGuidelines())
+    {
+      Iterator iter = bean.accessibilityGuidelines();
+      while (iter.hasNext())
+      {
+        accGuideline = (String) iter.next();
+        _writeAccessibilityGuideline(out, "", accGuideline);
+      }
+    }
+
+    // Write out attribute-specific accessibility guidelines.  Each attribute can have
+    // one or more associated accessibility guidelines.
+    if (!accAttributes.isEmpty())
+    {
+      Iterator<PropertyBean> propIter = accAttributes.iterator();
+      while (propIter.hasNext())
+      {
+        PropertyBean property = propIter.next();
+        Iterator<String> propAccIter = property.accessibilityGuidelines();
+        while (propAccIter.hasNext())
+        {
+          accGuideline = propAccIter.next();
+          _writeAccessibilityGuideline(out, property.getPropertyName() + " attribute", accGuideline);
+        }
+      }
+    }
+
+    // Write out facet-specific accessibility guidelines. A facet in the accFacets iterator
+    // can have one or more associated accessibility guidelines
+    if (!accFacets.isEmpty())
+    {
+      Iterator<String> facetIter = accFacets.iterator();
+      while (facetIter.hasNext())
+      {
+        String facetName = facetIter.next();
+        FacetBean facet = bean.findFacet(facetName, true);
+
+        Iterator<String> facetAccIter = facet.accessibilityGuidelines();
+        while (facetAccIter.hasNext())
+        {
+          accGuideline = facetAccIter.next();
+          _writeAccessibilityGuideline(out, facetName + " facet", accGuideline);
+        }
+      }
+    }
+
+    out.write("     </ul>");
+    out.write("   </html>\n");
+    out.write(" </p>\n");
+    out.write(" </section>\n");
+  }
+
+  // Write out an Accessibility Guideline
+  // A bullet in an unordered list, followed by (optionally) the reference name in bold, e.g. the
+  // name of the attribute or name of the facet which the guideline applies to, then the text
+  // of the accessibility guideline.  For accessibility guidelines on the component, the referenceName
+  // attribute is left blank.
+  private void _writeAccessibilityGuideline(Writer out, String referenceName, String desc) throws IOException
+  {
+    out.write("    <div class=\'accGuideline\'>\n");
+    out.write("<li>");
+
+    if (!"".equals(referenceName)) 
+    {
+      out.write("<b>");
+      out.write(referenceName);
+      out.write("</b>: ");    
+    }
+
+    if (desc != null)
+    {
+      if (!"".equals(desc))
+      {
+        out.write(desc + "\n");
+      }
+    } 
+
+    out.write("</li>");
+    out.write("    </div>\n");
   }
 
   protected MavenProject getProject()

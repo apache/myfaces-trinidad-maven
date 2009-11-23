@@ -18,9 +18,12 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
 
+import java.lang.Comparable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.lang.Comparable;
 
 /**
  * AttributeBean is a Java representation of the faces-config component or
@@ -177,6 +180,40 @@ public class AttributeBean extends ObjectBean implements Comparable
   }
 
   /**
+   * Adds an Accessibility (e.g. section 508 compliance) Guideline to this attribute. The
+   * accessibility guidelines are used during tag doc generation to give the application
+   * developer hints on how to configure the attribute to be accessibility-compliant.
+   *
+   * @param accessibilityGuideline  the accessibility guideline to add
+   */
+  public void addAccessibilityGuideline(
+    String accessibilityGuideline)
+  {
+    _accessibilityGuidelines.add(accessibilityGuideline);      
+  }
+
+  /**
+   * Returns true if this attribute has any accessibility guidelines.
+   *
+   * @return  true   if this component has any accessibility guidelines,
+   *          false  otherwise
+   */
+  public boolean hasAccessibilityGuidelines()
+  {
+    return !_accessibilityGuidelines.isEmpty();
+  }
+
+  /**
+   * Returns an iterator for all accessibility guidelines on this component only.
+   *
+   * @return  the accessibility guidelines iterator
+   */
+  public Iterator<String> accessibilityGuidelines()
+  {
+    return _accessibilityGuidelines.iterator();
+  }
+
+  /**
    * Sets the virtual flag of this property.
    *
    * @param virtual  the property required flag
@@ -219,6 +256,7 @@ public class AttributeBean extends ObjectBean implements Comparable
   private String   _alternateClass;
   private boolean  _virtual;
   private MethodSignatureBean _signature;
+  private List<String> _accessibilityGuidelines = new ArrayList<String>();
 
   static private final Pattern _GENERIC_TYPE = Pattern.compile("([^<]+)<(.+)>");
   static private final String[] _EMPTY_ARRAY = new String[0];

@@ -128,6 +128,11 @@ public class FacesConfigParser
     // faces-config/component/facet/facet-extension
     digester.addBeanPropertySetter("faces-config/component/facet/facet-extension/hidden");
 
+    // faces-config/component/facet/facet-extension/facet-metadata/accessibility-guideline
+    digester.addCallMethod("faces-config/component/facet/facet-extension/facet-metadata/accessibility-guideline",
+                           "addAccessibilityGuideline", 1);
+    digester.addCallParam("faces-config/component/facet/facet-extension/facet-metadata/accessibility-guideline", 0);
+
     // faces-config/component/facet/example
     digester.addObjectCreate("faces-config/component/facet/example",
                              ExampleBean.class);
@@ -177,6 +182,11 @@ public class FacesConfigParser
                                    "localName");
     digester.addBeanPropertySetter("faces-config/component/component-extension/uix2-node-class",
                                    "nodeClass");
+
+    // faces-config/component/component-extension/accessibility-guideline
+    digester.addCallMethod("faces-config/component/component-extension/accessibility-guideline",
+                           "addAccessibilityGuideline", 1);
+    digester.addCallParam("faces-config/component/component-extension/accessibility-guideline", 0);
 
     // faces-config/component/component-extension/example
     digester.addObjectCreate("faces-config/component/component-extension/example",
@@ -281,11 +291,17 @@ public class FacesConfigParser
     digester.addSetNext("faces-config/component/property/property-extension/method-binding-signature",
                         "setMethodBindingSignature",
                         MethodSignatureBean.class.getName());
-    // faces-config/component/property/property-extension/property-metada
+
+    // faces-config/component/property/property-extension/property-metadata
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/use-max-time",
                                    "useMaxTime");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/deprecated");
     digester.addCallMethod("faces-config/component/property/property-extension/property-metadata/no-op", "makeNoOp");
+
+    // faces-config/component/property/property-extension/property-metadata/accessibility-guideline
+    digester.addCallMethod("faces-config/component/property/property-extension/property-metadata/accessibility-guideline",
+                           "addAccessibilityGuideline", 1);
+    digester.addCallParam("faces-config/component/property/property-extension/property-metadata/accessibility-guideline", 0);
 
     // jsr-276 metadata rules
     digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee/faces/design-time-metadata");
