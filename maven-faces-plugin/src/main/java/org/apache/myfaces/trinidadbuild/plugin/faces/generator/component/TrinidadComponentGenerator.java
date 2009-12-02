@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,6 +18,18 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.generator.component;
 
+import java.io.IOException;
+
+import java.lang.reflect.Modifier;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.maven.plugin.logging.Log;
 import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
@@ -26,9 +38,6 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.PropertyFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.*;
 
 public class TrinidadComponentGenerator extends AbstractComponentGenerator
 {
@@ -63,7 +72,7 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
         if (property.isNoOp())
         {
           imports.add("org.apache.myfaces.trinidad.logging.TrinidadLogger");
-        }  
+        }
       }
     }
   }
@@ -105,7 +114,7 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
       {
         out.println("@Deprecated");
       }
-      
+
       out.println("static public final PropertyKey " + propKey + " =");
       out.indent();
       if (propAlias != null)
@@ -158,7 +167,6 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     // nothing by default
   }
 
-
   /**
    * Whether the getters/setters have the final modifier
    *
@@ -190,9 +198,9 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
         out.println("setProperty(" + propKey + ", (" + propVar + "));");
       }
     }
-    else 
-    { 
-      out.println("TrinidadLogger log = TrinidadLogger.createTrinidadLogger(this.getClass());");  
+    else
+    {
+      out.println("TrinidadLogger log = TrinidadLogger.createTrinidadLogger(this.getClass());");
       out.print("log.warning(\"property \\\"" + propName + "\\\" is ");
       out.print("using a no-op implementation. Used in extreme cases when the property value, beyond the default value, results in unwanted behavior.");
       out.println("\");");
@@ -425,5 +433,12 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     }
     return sb.toString();
   }
-    
+
+  private final static Set<String> _CLIENT_EVENT_NAMES = new HashSet<String>(
+    Arrays.asList(
+      new String[] { "onclick", "ondblclick", "onmousedown", "onmouseup", "onmouseover",
+        "onmousemove", "onmouseout", "onkeypress", "onkeydown", "onkeyup", "onfocus",
+        "onblur", "onsubmit", "onchange", "onabort", "onerror", "onload", "onreset",
+        "onresize", "onselect", "onunload" }
+    ));
 }

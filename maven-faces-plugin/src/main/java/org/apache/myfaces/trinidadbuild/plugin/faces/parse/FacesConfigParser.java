@@ -18,20 +18,24 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.net.URL;
+import java.net.URLConnection;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.commons.digester.AbstractObjectCreationFactory;
 import org.apache.commons.digester.Digester;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.rules.BeanPropertySetterRule;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class FacesConfigParser
 {
@@ -124,7 +128,7 @@ public class FacesConfigParser
 
     // Maven Faces Plugin
     digester.setRuleNamespaceURI("http://myfaces.apache.org/maven-faces-plugin");
-    
+
     // faces-config/component/facet/facet-extension
     digester.addBeanPropertySetter("faces-config/component/facet/facet-extension/hidden");
 
@@ -213,6 +217,11 @@ public class FacesConfigParser
     digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee/faces/design-time-metadata");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/required");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/value-expression", "valueExpression");
+    digester.addBeanPropertySetter("faces-config/component/component-extension/default-event-name",
+                                   "defaultEventName");
+    digester.addCallMethod("faces-config/component/component-extension/event-names",
+                           "parseEventNames", 1);
+    digester.addCallParam("faces-config/component/component-extension/event-names", 0);
 
     // XInclude rules
     digester.setRuleNamespaceURI(XIncludeFilter.XINCLUDE_NAMESPACE);
@@ -490,7 +499,7 @@ public class FacesConfigParser
     return digester;
   }
 
-  // Base class for include factories 
+  // Base class for include factories
   abstract static public class AbstractIncludeFactory extends AbstractObjectCreationFactory
   {
     public Object createObject(

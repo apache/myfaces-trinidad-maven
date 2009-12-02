@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -17,6 +17,15 @@
  *  under the License.
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
+
+import java.lang.reflect.Modifier;
+
+import java.util.Iterator;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -31,12 +40,6 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.SourceTemplate;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.lang.reflect.Modifier;
-import java.util.Iterator;
 
 /**
  * @version $Id$
@@ -122,12 +125,12 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
     // TODO: This must be changed in the future...
     JsfVersion version = JsfVersion.getVersion(jsfVersion);
     boolean isVersionGreaterThan11 = version != JsfVersion.JSF_1_1;
-    
+
     if (component.isTrinidadComponent())
     {
       generator = new TrinidadComponentGenerator(getLog(), isVersionGreaterThan11);
     }
-    else 
+    else
     {
       generator = new MyFacesComponentGenerator(getLog(), isVersionGreaterThan11);
     }
@@ -206,6 +209,10 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
         generator.writePropertyConstants(out, superclassName, component);
         generator.writeFacetConstants(out, component);
         generator.writeGenericConstants(out, componentFamily, componentType);
+        if (component.isClientBehaviorHolder())
+        {
+          generator.writeClientBehaviorConstants(out, component);
+        }
 
         // public constructors and methods
         generator.writeConstructor(out, component, Modifier.PUBLIC);
@@ -227,9 +234,12 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
         {
           generator.writePropertyMethods(out, component, template.getIgnoreMethods());
         }
-        
+
         if (!suppressListenerMethods)
           generator.writeListenerMethods(out, component);
+
+        if (component.isClientBehaviorHolder())
+          generator.writeClientBehaviorMethods(out, component);
 
         generator.writeStateManagementMethods(out, component);
 

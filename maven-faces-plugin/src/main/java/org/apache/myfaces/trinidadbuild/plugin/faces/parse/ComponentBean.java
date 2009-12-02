@@ -295,6 +295,43 @@ public class ComponentBean extends AbstractTagBean
     return _namingContainer;
   }
 
+  public boolean isClientBehaviorHolder()
+  {
+    return _eventNames != null && _eventNames.length > 0;
+  }
+
+  public void setDefaultEventName(String defaultEventName)
+  {
+    this._defaultEventName = defaultEventName;
+  }
+
+  public String getDefaultEventName()
+  {
+    return _defaultEventName;
+  }
+
+  public void setEventNames(String[] eventNames)
+  {
+    this._eventNames = eventNames;
+  }
+
+  public String[] getEventNames()
+  {
+    return _eventNames;
+  }
+
+  public void parseEventNames(String value)
+  {
+    if (value == null)
+    {
+      _eventNames = null;
+    }
+    else
+    {
+      _eventNames = value.trim().split("\\s+");
+    }
+  }
+
   /**
    * Sets the component supertype for this component.
    *
@@ -421,7 +458,6 @@ public class ComponentBean extends AbstractTagBean
     return prop;
   }
 
-
   /**
    * Returns true if this component has any properties.
    *
@@ -536,7 +572,6 @@ public class ComponentBean extends AbstractTagBean
   {
     return (FacetBean)_facets.get(facetName);
   }
-
 
   public FacetBean findFacet(
     String facetName,
@@ -824,7 +859,6 @@ public class ComponentBean extends AbstractTagBean
     return event;
   }
 
-
   /**
    * Returns an iterator for all events on this component only.
    *
@@ -901,7 +935,6 @@ public class ComponentBean extends AbstractTagBean
     ComponentBean parent = resolveSupertype();
     return (parent != null) ? parent.findRendererType() : null;
   }
-
 
   /**
    * Finds the component superclass in the component inheritance
@@ -1035,6 +1068,7 @@ public class ComponentBean extends AbstractTagBean
   private String  _tagSuperclass;
   private String  _localName;
   private String  _nodeClass;
+  private String  _defaultEventName;
   private boolean _namingContainer;
   private boolean _children = true;
   private Map     _properties;
@@ -1043,6 +1077,7 @@ public class ComponentBean extends AbstractTagBean
   private int     _componentClassModifiers;
   private int     _tagClassModifiers;
   private String[] _unsupportedAgents = new String[0];
+  private String[] _eventNames;
 
   static private final String _TRINIDAD_COMPONENT_BASE =
                          "org.apache.myfaces.trinidad.component.UIXComponentBase";
