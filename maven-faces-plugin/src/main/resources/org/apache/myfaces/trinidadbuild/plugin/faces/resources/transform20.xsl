@@ -84,7 +84,8 @@
       <xsl:apply-templates select="javaee:application" />
       <xsl:apply-templates select="javaee:factory" />
       <xsl:apply-templates select="javaee:component[not(contains(javaee:component-extension/mfp:component-class-modifier/text(), 'abstract')) and
-                                                    starts-with(javaee:component-type, $typePrefix)]" />
+        (starts-with(javaee:component-type, $typePrefix) or 
+          (contains(javaee:component-type, 'javax.faces.ViewRoot')))]" />
       <xsl:apply-templates select="javaee:converter[contains(javaee:converter-class, $converterPackageContains)]" />
       <xsl:apply-templates select="javaee:managed-bean[contains(javaee:managed-bean-class, $packageContains)]" />
       <xsl:apply-templates select="javaee:navigation-rule" />
