@@ -18,23 +18,26 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
 
-import javax.xml.namespace.QName;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.LinkedHashMap;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import javax.xml.namespace.QName;
 
 public class AbstractTagBean extends ObjectBean {
-  private String  _description;
-  private String  _longDescription;
-  private QName   _tagName;
-  private String  _tagClass;
-  protected Map   _properties;
-  private int     _tagClassModifiers;
-  private Map     _examples;
-  private int     _exampleIdx = 0;
-  private Map     _screenshots;
-  private int     _screenshotIdx = 0;
+  private List<String> _accessibilityGuidelines = new ArrayList<String>();
+  private String       _description;
+  private String       _longDescription;
+  private QName        _tagName;
+  private String       _tagClass;
+  protected Map        _properties;
+  private int          _tagClassModifiers;
+  private Map          _examples;
+  private int          _exampleIdx = 0;
+  private Map          _screenshots;
+  private int          _screenshotIdx = 0;
   
   public AbstractTagBean() 
   {
@@ -271,6 +274,40 @@ public class AbstractTagBean extends ObjectBean {
   public Iterator screenshots()
   {
     return _screenshots.values().iterator();
+  }
+
+  /**
+   * Adds an Accessibility (e.g. section 508 compliance) Guideline to this component. The
+   * accessibility guidelines are used during tag doc generation to give the application
+   * developer hints on how to configure the component to be accessibility-compliant.
+   *
+   * @param accessibilityGuideline  the accessibility guideline to add
+   */
+  public void addAccessibilityGuideline(
+    String accessibilityGuideline)
+  {
+    _accessibilityGuidelines.add(accessibilityGuideline);    
+  }
+
+  /**
+   * Returns true if this component has any accessibility guidelines.
+   *
+   * @return  true   if this component has any accessibility guidelines,
+   *          false  otherwise
+   */
+  public boolean hasAccessibilityGuidelines()
+  {
+    return !_accessibilityGuidelines.isEmpty();
+  }
+
+  /**
+   * Returns an iterator for all accessibility guidelines on this component only.
+   *
+   * @return  the accessibility guidelines iterator
+   */
+  public Iterator<String> accessibilityGuidelines()
+  {
+    return _accessibilityGuidelines.iterator();
   }
 
   public void parseTagClassModifier(
