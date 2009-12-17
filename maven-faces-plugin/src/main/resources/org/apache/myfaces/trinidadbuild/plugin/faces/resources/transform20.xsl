@@ -431,6 +431,7 @@
       <xsl:apply-templates select="javaee:application-factory[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:faces-context-factory[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:lifecycle-factory[contains(text(), $packageContains)]" />
+      <xsl:apply-templates select="javaee:partial-view-context-factory[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:render-kit-factory[contains(text(), $packageContains)]" />
       <xsl:apply-templates select="javaee:view-declaration-language-factory[contains(text(), $packageContains)]" />
     </xsl:element>
@@ -454,12 +455,18 @@
     </xsl:element>
   </xsl:template>
 
+  <xsl:template match="//javaee:partial-view-context-factory" >
+    <xsl:element name="partial-view-context-factory" >
+      <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>  
+
   <xsl:template match="//javaee:render-kit-factory" >
     <xsl:element name="render-kit-factory" >
       <xsl:value-of select="text()" />
     </xsl:element>
   </xsl:template>
-
+  
   <xsl:template match="//javaee:view-declaration-language-factory" >
     <xsl:element name="view-declaration-language-factory" >
       <xsl:value-of select="text()" />
