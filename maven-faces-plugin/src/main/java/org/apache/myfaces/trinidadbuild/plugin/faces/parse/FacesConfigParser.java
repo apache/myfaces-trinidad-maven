@@ -217,11 +217,11 @@ public class FacesConfigParser
     digester.setRuleNamespaceURI("http://java.sun.com/xml/ns/javaee/faces/design-time-metadata");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/required");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/value-expression", "valueExpression");
-    digester.addBeanPropertySetter("faces-config/component/component-extension/default-event-name",
+    digester.addBeanPropertySetter("faces-config/component/component-extension/component-metadata/default-event-name",
                                    "defaultEventName");
-    digester.addCallMethod("faces-config/component/component-extension/event-names",
+    digester.addCallMethod("faces-config/component/component-extension/component-metadata/event-names",
                            "parseEventNames", 1);
-    digester.addCallParam("faces-config/component/component-extension/event-names", 0);
+    digester.addCallParam("faces-config/component/component-extension/component-metadata/event-names", 0);
 
     // XInclude rules
     digester.setRuleNamespaceURI(XIncludeFilter.XINCLUDE_NAMESPACE);

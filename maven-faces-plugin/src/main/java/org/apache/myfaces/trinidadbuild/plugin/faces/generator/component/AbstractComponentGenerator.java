@@ -1024,19 +1024,23 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     ) throws IOException
   {
     String defaultEventName = component.getDefaultEventName();
+    out.println();
+    out.println("@Override");
+    out.println("public String getDefaultEventName()");
+    out.println("{");
+    out.indent();
     if (defaultEventName != null)
     {
-      out.println();
-      out.println("@Override");
-      out.println("public String getDefaultEventName()");
-      out.println("{");
-      out.indent();
       out.print("return \"");
       out.print(defaultEventName);
       out.println("\";");
-      out.unindent();
-      out.println("}");
     }
+    else
+    {
+      out.println("return super.getDefaultEventName();");
+    }
+    out.unindent();
+    out.println("}");
 
     out.println();
     out.println("@Override"); // JDK 1.6 is a requirement for JSF2 so this is okay
