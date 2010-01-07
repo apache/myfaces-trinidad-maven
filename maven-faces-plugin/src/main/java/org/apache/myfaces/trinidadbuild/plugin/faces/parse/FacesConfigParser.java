@@ -84,7 +84,7 @@ public class FacesConfigParser
     SAXParserFactory spf = SAXParserFactory.newInstance();
     spf.setNamespaceAware(true);
     // requires JAXP 1.3, in JavaSE 5.0
-    // spf.setXIncludeAware(true);
+    //spf.setXIncludeAware(true);
     Digester digester = new Digester(spf.newSAXParser());
     digester.setNamespaceAware(true);
 
@@ -229,6 +229,10 @@ public class FacesConfigParser
                               ComponentIncludeFactory.class);
     digester.addFactoryCreate("faces-config/component/property/include",
                               ComponentPropertyIncludeFactory.class);
+    digester.addFactoryCreate("faces-config/component/component-extension/include",
+                              ComponentIncludeFactory.class);
+    digester.addFactoryCreate("faces-config/component/component-extension/component-metadata/include",
+                              ComponentIncludeFactory.class);
   }
 
   // Add component property-related digster rules

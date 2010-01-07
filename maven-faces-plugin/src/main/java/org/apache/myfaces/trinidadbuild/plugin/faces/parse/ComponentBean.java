@@ -322,13 +322,21 @@ public class ComponentBean extends AbstractTagBean
 
   public void parseEventNames(String value)
   {
-    if (value == null)
+    if (value != null)
     {
-      _eventNames = null;
-    }
-    else
-    {
-      _eventNames = value.trim().split("\\s+");
+      String[] names = value.trim().split("\\s+");
+      // combine event names if given more than once (to make importing from another XML file more easy)
+      if (_eventNames == null)
+      {
+        _eventNames = names;
+      }
+      else
+      {
+        String[] currEventNames = _eventNames;
+        _eventNames = new String[_eventNames.length + names.length];
+        System.arraycopy(currEventNames, 0, _eventNames, 0, currEventNames.length);
+        System.arraycopy(names, 0, _eventNames, currEventNames.length, names.length);
+      }
     }
   }
 

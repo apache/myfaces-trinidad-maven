@@ -16,35 +16,35 @@
     KIND, either express or implied.  See the License for the
     specific language governing permissions and limitations
     under the License.
-	   
+
 -->
 <faces-config xmlns="http://java.sun.com/xml/ns/javaee"
               xmlns:af="http://myfaces.apache.org/trinidad"
               xmlns:xi="http://www.w3.org/2001/XInclude"
               xmlns:md="http://myfaces.apache.org/bali/xml/metadata"
-              xmlns:mfp="http://myfaces.apache.org/maven-faces-plugin" >
+              xmlns:mfp="http://myfaces.apache.org/maven-faces-plugin">
 
-  <component>  
-  
+  <component>
+
     <component-type>org.apache.myfaces.trinidad.Command</component-type>
     <component-class>org.apache.myfaces.trinidad.component.UIXCommand</component-class>
 
     <description>
       A base abstraction for components that implement ActionSource.
     </description>
-    
+
     <xi:include href="TestInclude.xml" xpointer="/faces-config/component/*"></xi:include>
 
     <property>
       <property-name>action</property-name>
       <property-class>javax.faces.el.MethodBinding</property-class>
       <description><![CDATA[
-      
+
           The reference to the Java method that will be invoked when
           an ActionEvent is broadcast by this component. The method
           signature takes a single ActionEvent parameter and returns
           void.
-          
+
           Test to make sure that markup in a pre block is escaped.
           <pre>
             <af:commandButton />
@@ -53,7 +53,7 @@
             <af:commandButton />
           </pre>
 
-      ]]>    
+      ]]>
       </description>
       <property-extension>
         <mfp:state-holder>true</mfp:state-holder>
@@ -70,12 +70,12 @@
       <property-name>actionListener</property-name>
       <property-class>javax.faces.el.MethodBinding</property-class>
       <description><![CDATA[
-      
+
           The reference to the Java method that will be invoked when
           an ActionEvent is broadcast by this component.  The method
           signature takes a single ActionEvent parameter and returns
           void.
-      ]]>    
+      ]]>
       </description>
       <property-extension>
         <mfp:state-holder>true</mfp:state-holder>
@@ -110,11 +110,11 @@
     <property>
       <property-name>immediate</property-name>
       <property-class>boolean</property-class>
-      <description>a reference to an action method sent by the command component, 
-           or the static outcome of an action.  When immediate is true, the 
-           default ActionListener provided by the JavaServer Faces implementation 
-           should be executed during Apply Request Values phase of the request 
-           processing lifecycle, rather than waiting until the Invoke Application 
+      <description>a reference to an action method sent by the command component,
+           or the static outcome of an action.  When immediate is true, the
+           default ActionListener provided by the JavaServer Faces implementation
+           should be executed during Apply Request Values phase of the request
+           processing lifecycle, rather than waiting until the Invoke Application
            phase.
       </description>
       <property-extension>
@@ -123,11 +123,11 @@
     </property>
 
     <property>
-      <description><![CDATA[the visibility of the component.  If it is "false", the component will 
-      be hidden on the client.  Unlike "rendered", this does not affect the lifecycle on the server 
-      - the component may have its bindings executed, etc. - and the visibility of the component can 
-      be toggled on and off on the client, or toggled with PPR.  When "rendered" is false, the 
-      component will not in any way be rendered, and cannot be made visible on the client. 
+      <description><![CDATA[the visibility of the component.  If it is "false", the component will
+      be hidden on the client.  Unlike "rendered", this does not affect the lifecycle on the server
+      - the component may have its bindings executed, etc. - and the visibility of the component can
+      be toggled on and off on the client, or toggled with PPR.  When "rendered" is false, the
+      component will not in any way be rendered, and cannot be made visible on the client.
       In most cases, use the "rendered" property instead of the "visible" property.]]>
       </description>
       <property-name>visible</property-name>
@@ -137,7 +137,7 @@
         <mfp:required>false</mfp:required>
         <mfp:unsupported-render-kits>org.apache.myfaces.trinidad.core</mfp:unsupported-render-kits>
         <mfp:property-metadata>
-          <mfp:deprecated>The "visible" attribute has been deprecated.  
+          <mfp:deprecated>The "visible" attribute has been deprecated.
             Use the af:showPopupBehavior tag or the show/hide methods on the popup client component.
           </mfp:deprecated>
           <mfp:no-op/>
