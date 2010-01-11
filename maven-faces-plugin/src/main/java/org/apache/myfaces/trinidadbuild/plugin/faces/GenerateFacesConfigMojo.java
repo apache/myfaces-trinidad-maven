@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,7 +25,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import java.net.URL;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,12 +50,15 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+
 
 /**
  * @version $Id$
@@ -118,6 +123,8 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
           Transformer identity = transFactory.newTransformer();
           ByteArrayOutputStream out = new ByteArrayOutputStream();
           identity.transform(new DOMSource(document), new StreamResult(out));
+          System.out.println("----------------------------------------");
+          System.out.println(out.toString());
 
           InputStream mergedStream = new ByteArrayInputStream(out.toByteArray());
           // expand all the xi:include elements
@@ -211,7 +218,7 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
             tmpFile.delete();
           }
 
-          
+
           targetFile.setReadOnly();
 
           getLog().info("Generated " + targetPath);
@@ -250,7 +257,7 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
     }
     return param;
   }
-  
+
   /**
    * @parameter expression="${project}"
    * @readonly
