@@ -123,8 +123,6 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
           Transformer identity = transFactory.newTransformer();
           ByteArrayOutputStream out = new ByteArrayOutputStream();
           identity.transform(new DOMSource(document), new StreamResult(out));
-          System.out.println("----------------------------------------");
-          System.out.println(out.toString());
 
           InputStream mergedStream = new ByteArrayInputStream(out.toByteArray());
           // expand all the xi:include elements
