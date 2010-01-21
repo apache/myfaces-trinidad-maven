@@ -242,6 +242,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     {
       imports.add("java.util.Arrays");
       imports.add("java.util.Collection");
+      imports.add("java.util.Collections");
       imports.add("java.util.List");
       imports.add("java.util.Map");
       imports.add("javax.faces.component.behavior.ClientBehavior");
@@ -1080,9 +1081,10 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     ComponentBean component
     ) throws IOException
   {
-    out.println("private final static Collection<String> _EVENT_NAMES = Arrays.asList(");
+    out.println("// Supported client events for client behaviors:");
+    out.println("private final static Collection<String> _EVENT_NAMES = Collections.unmodifiableCollection(");
     out.indent();
-    out.println("new String [] { ");
+    out.println("Arrays.asList(");
     out.indent();
     boolean first = true;
     int wrapAt = 5;
@@ -1110,7 +1112,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     }
     out.println();
     out.unindent();
-    out.println(" });");
+    out.println("));");
     out.unindent();
   }
 

@@ -416,7 +416,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
       if (component.isClientBehaviorHolder())
       {
-        out.write(" <section name=\"Client Events\">\n");
+        out.write(" <section name=\"Supported Client Events for Client Behaviors\">\n");
         out.write(" <p>\n");
         _writeComponentClientEvents(out, component);
         out.write(" </p>\n");

@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -433,12 +431,4 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     }
     return sb.toString();
   }
-
-  private final static Set<String> _CLIENT_EVENT_NAMES = new HashSet<String>(
-    Arrays.asList(
-      new String[] { "onclick", "ondblclick", "onmousedown", "onmouseup", "onmouseover",
-        "onmousemove", "onmouseout", "onkeypress", "onkeydown", "onkeyup", "onfocus",
-        "onblur", "onsubmit", "onchange", "onabort", "onerror", "onload", "onreset",
-        "onresize", "onselect", "onunload" }
-    ));
 }
