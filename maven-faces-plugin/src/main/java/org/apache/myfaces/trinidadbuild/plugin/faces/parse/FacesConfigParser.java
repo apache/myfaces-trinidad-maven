@@ -224,6 +224,21 @@ public class FacesConfigParser
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/required");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/value-expression", "valueExpression");
 
+    // faces-config/component/facet/facet-extension/facet-metadata/allowed-child-components
+    digester.addCallMethod("faces-config/component/facet/facet-extension/facet-metadata/allowed-child-components",
+                           "parseAllowedChildComponents", 1);
+    digester.addCallParam("faces-config/component/facet/facet-extension/facet-metadata/allowed-child-components", 0);
+
+    // faces-config/component/component-extension/component-metadata/required-ancestor-contracts
+    digester.addCallMethod("faces-config/component/component-extension/component-metadata/required-ancestor-contracts",
+                           "parseRequiredAncestorContracts", 1);
+    digester.addCallParam("faces-config/component/component-extension/component-metadata/required-ancestor-contracts", 0);
+
+    // faces-config/component/component-extension/component-metadata/satisfied-contracts
+    digester.addCallMethod("faces-config/component/component-extension/component-metadata/satisfied-contracts",
+                           "parseSatisfiedContracts", 1);
+    digester.addCallParam("faces-config/component/component-extension/component-metadata/satisfied-contracts", 0);
+
     // XInclude rules
     digester.setRuleNamespaceURI(XIncludeFilter.XINCLUDE_NAMESPACE);
     digester.addFactoryCreate("faces-config/component/include",
