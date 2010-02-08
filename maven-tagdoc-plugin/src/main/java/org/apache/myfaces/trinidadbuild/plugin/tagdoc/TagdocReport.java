@@ -891,6 +891,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       {
         String valStr = _formatPropList(attr.getPropertyValues(),
                                         "Valid Values");
+
+        // The default value for the attribute. defaultValueStr will be null if no
+        // default value is specified via <default-value> in component xml file.
+        // Since _formatPropList takes an array as the first input param, covert the default
+        // value into a single item array when calling formatPropList
+        String defaultValueStr = _formatPropList (new String[] { attr.getDefaultValue() },
+                                        "Default Value");
+
         String unsupAgentsStr =
           _formatPropList(attr.getUnsupportedAgents(),
                           "Not supported on the following agents",
@@ -914,6 +922,17 @@ public class TagdocReport extends AbstractMavenMultiPageReport
         if (valStr != null)
         {
           out.write(valStr);
+        }
+        
+        if (defaultValueStr != null)
+        {
+          out.write(defaultValueStr);
+        }
+        
+        // if we print out a list of possible values and/or a default value for the attribute, 
+        // then enter a line break before printing out other information about the attribute.
+        if (valStr != null || defaultValueStr != null) 
+        {
           out.write("<br/>");
         }
         
