@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -115,16 +116,77 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       return;
     }
 
-
-    Iterator components = facesConfig.components();
+    // Need to cycle through the components two times, hence need two iterators.
+    // components Iterator will be used when actually writing out the tag doc
+    // compIter Iterator will be used when creating the maps of component relationships
+    Iterator<ComponentBean> components = facesConfig.components();
     components = new FilteredIterator(components, new SkipFilter());
     components = new FilteredIterator(components, new ComponentTagFilter());
     components = new FilteredIterator(components, new ComponentNamespaceFilter());
     
+    Iterator<ComponentBean> compIter = facesConfig.components();
+    compIter = new FilteredIterator(compIter, new SkipFilter());
+    compIter = new FilteredIterator(compIter, new ComponentTagFilter());
+    compIter = new FilteredIterator(compIter, new ComponentNamespaceFilter());
+    
+    // compTypeMap holds a map of compononent types to tag names that implement that component type
+    // The map is built using getComponentType method on the component bean to determine the 
+    // component type of a given tag name
+    Map<String, List<QName>>  compTypeMap = new HashMap<String, List<QName>> ();
+    // contractMap holds a map of contract name to tag names that satisify that contract.
+    // The map is built using the getSatisfiedContracts method API on the component bean to determine 
+    // which contracts are satisfied for a given tagname
+    Map<String, List<QName>> contractMap = new HashMap<String, List<QName>>();
+    while (compIter.hasNext())
+    {
+      ComponentBean compBean = compIter.next();
+      List<QName> tagNames;
+      String compType = compBean.getComponentType();
+      if (compType != null &&
+          compTypeMap.containsKey (compType) && 
+          compBean.getTagName() != null) 
+      {
+        // the component type map already contains an entry for this component type
+        tagNames = compTypeMap.get(compType);
+      } 
+      else 
+      {
+        // the component type map does not contain an entry for this component type
+        // so create a new ArrayList that will be used to store the tag names of 
+        // component that have this component type
+        tagNames = new ArrayList<QName>();
+      }
+      tagNames.add(compBean.getTagName());
+      compTypeMap.put (compType, tagNames);      
+
+      if (compBean.hasSatisfiedContracts())
+      {
+        Iterator<String> satContractsIter = compBean.satisfiedContracts();
+        while (satContractsIter.hasNext())
+        {
+          String satContract = satContractsIter.next();
+          if (contractMap.containsKey (satContract))
+          {
+            // the contract map already contains an entry for this contract 
+            tagNames = contractMap.get(satContract);
+          }
+          else
+          {
+            // the contract map does not contain an entry for this contract, so 
+            // create a new ArrayList which will be used to store the tag names of
+            // components that satisfy this contract
+            tagNames = new ArrayList<QName>();
+          }
+          tagNames.add(compBean.getTagName());
+          contractMap.put (satContract, tagNames);
+        }
+      }
+    }
+    
     Iterator validators = facesConfig.validators();
     validators = new FilteredIterator(validators, new ValidatorTagFilter());
     validators = new FilteredIterator(validators, new ValidatorNamespaceFilter());
-    
+
     Iterator converters = facesConfig.converters();
     converters = new FilteredIterator(converters, new ConverterTagFilter());
     converters = new FilteredIterator(converters, new ConverterNamespaceFilter());
@@ -147,7 +209,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     int count = 0;
     while (components.hasNext())
     {
-      String pageName = _generateComponentDoc((ComponentBean)components.next());
+      String pageName = _generateComponentDoc((ComponentBean)components.next(), compTypeMap, contractMap);
       if (pageName != null)
       {
         componentPages.add(pageName);
@@ -244,6 +306,53 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
     return set;
+  }
+
+  private String _formatTagList(
+    Iterator<String> strIter,
+    Map <String, List<QName>> pMap,
+    String header)
+  {
+    String formatted = null;
+    
+    // Don't know how long this will be, but 300 should be plenty.
+    StringBuffer sb = new StringBuffer(300);
+    sb.append("\n");
+    sb.append("<b>");
+    sb.append(header);
+    sb.append(":</b> ");
+
+    boolean gotOne = false;    
+    while (strIter.hasNext())
+    {
+      List<QName> tagNameList = pMap.get(strIter.next());
+      if (tagNameList != null && !tagNameList.isEmpty())
+      {
+        Iterator<QName> tagNameIter  = tagNameList.iterator();
+
+        while (tagNameIter.hasNext())
+        {
+          QName tagName = tagNameIter.next();
+
+          String tagdocURL = _platformAgnosticPath("../tagdoc/" +
+            _toPageName(tagName) + ".html");
+          sb.append("<a href=\"" + tagdocURL + "\">");
+          sb.append(_getQualifiedName(tagName));
+          sb.append("</a>");
+          if (gotOne)
+          {
+            sb.append(", ");
+          }
+          gotOne = true;
+        }
+      }
+      if (gotOne)
+      {
+        sb.append("<br/>\n");
+        formatted = sb.toString();
+      }
+    }
+    return formatted;
   }
 
   private String _formatPropList(
@@ -372,7 +481,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     return "unknown";
   }
 
-  private String _generateComponentDoc(ComponentBean component)
+  private String _generateComponentDoc(ComponentBean component, Map<String, List<QName>> compTypeMap, Map <String, List<QName>> contractMap)
     throws Exception
   {
     if (component.getTagName() == null)
@@ -400,7 +509,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
       out.write(" <section name=\"Summary\">\n");
       out.write(" <p>\n");
-      _writeComponentSummary(out, component);
+      _writeComponentSummary(out, component, contractMap);
       out.write(" </p>\n");
       out.write(" </section>\n");
 
@@ -423,7 +532,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       {
         out.write(" <section name=\"Supported Facets\">\n");
         out.write(" <p>\n");
-        _writeComponentFacets(out, component);
+        _writeComponentFacets(out, component, compTypeMap);
         out.write(" </p>\n");
         out.write(" </section>\n");
       }
@@ -546,7 +655,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   }
 
 
-  private void _writeComponentSummary(Writer out, ComponentBean bean) throws IOException
+  private void _writeComponentSummary(Writer out, ComponentBean bean, Map <String, List<QName>> contractMap) throws IOException
   {
     out.write("   <b>Tag name:</b> &lt;" +
               _getQualifiedName(bean.getTagName()) + "&gt;\n");
@@ -564,6 +673,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("   <br/>\n");
     out.write("   <b>Component type:</b> " + bean.getComponentType() +  "\n");
     out.write("   <br/>\n");
+
+    if (bean.hasRequiredAncestorContracts())
+    {
+      String formattedAncestors = _formatTagList ( bean.requiredAncestorContracts(), 
+                                                   contractMap, 
+                                                   "Required Ancestor Tag");
+      out.write (formattedAncestors);
+    }
 
     if (_isNamingContainer(bean))
     {
@@ -1041,14 +1158,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   }
 
 
-  private void _writeComponentFacets(Writer out, ComponentBean bean) throws IOException
+  private void _writeComponentFacets(Writer out, ComponentBean bean, Map<String, List<QName>> compTypeMap) throws IOException
   {
     // Sort the facets
     TreeSet facetNames = new TreeSet();
-    Iterator iter = bean.facets(true);
+    Iterator<FacetBean> iter = bean.facets(true);
     while (iter.hasNext())
     {
-      FacetBean facetBean = (FacetBean)iter.next();
+      FacetBean facetBean = iter.next();
       if (!facetBean.isHidden())
       {
         facetNames.add(facetBean.getFacetName());
@@ -1061,14 +1178,22 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("<th>Description</th>\n");
     out.write("</tr>\n");
 
-    Iterator nameIter = facetNames.iterator();
+    Iterator<String> nameIter = facetNames.iterator();
     while (nameIter.hasNext())
     {
-      String name = (String) nameIter.next();
+      String name = nameIter.next();
       FacetBean facet = bean.findFacet(name, true);
       out.write("<tr>\n");
       out.write("<td>" + facet.getFacetName() + "</td>");
       out.write("<td>");
+
+      if (facet.hasAllowedChildComponents())
+      {
+        String formattedChildComps = _formatTagList (facet.allowedChildComponents(), compTypeMap, "Allowed Child Components");
+        out.write (formattedChildComps);
+        out.write("<br/>");
+      }
+      
       out.write(facet.getDescription());
       out.write("</td>\n");
       out.write("</tr>\n");

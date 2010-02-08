@@ -19,6 +19,7 @@
 package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -143,9 +144,75 @@ public class FacetBean extends ObjectBean
     return _accessibilityGuidelines.iterator();
   }
 
+  /**
+   * Parses the string of allowed child class names into a String array
+   * using space as the separator between values.
+   * In the component metadata file, the allowed child components
+   * are denoted with allowed-child-components markup.  As an example,
+   * oracle.adf.RichMenu is an allowed child component of 
+   * af:panelCollection's (oracle.adf.view.rich.component.rich.output.RichPanelCollection) 
+   * menu facet. The allowed child components of one component are matched with the
+   * component type attribute of other components to determine which child tags
+   * are allowed in the component hierarchy.
+   *
+   * @param allowedChildComponents  a space delimited string of allowed child component class names
+   */
+  public void parseAllowedChildComponents(
+    String allowedChildComponents)
+  {
+    setAllowedChildComponents(allowedChildComponents.split(" "));
+  }
+
+  /**
+   * Sets the possible values for this property.
+   * In the component metadata file, the allowed child components
+   * are denoted with allowed-child-components markup.  As an example,
+   * oracle.adf.RichMenu is an allowed child component of 
+   * af:panelCollection's (oracle.adf.view.rich.component.rich.output.RichPanelCollection)
+   * menu facet. The allowed child components of one component are matched with the
+   * component type attribute of other components to determine which child tags
+   * are allowed in the component hierarchy.
+   *
+   * @param allowedChildComponents  a string array of the allowed child component class names
+   */
+  public void setAllowedChildComponents(
+    String[] allowedChildComponents)
+  {
+    _allowedChildComponents = Arrays.asList(allowedChildComponents);
+  }
+
+  /**
+   * Returns the allowed child components for this facet.
+   * In the component metadata file, the allowed child components
+   * are denoted with allowed-child-components markup.  As an example,
+   * oracle.adf.RichMenu is an allowed child component of 
+   * af:panelCollection's (oracle.adf.view.rich.component.rich.output.RichPanelCollection)
+   * menu facet. The allowed child components of one component are matched with the
+   * component type attribute of other components to determine which child tags
+   * are allowed in the component hierarchy.
+   * 
+   * @return  an iterator of allowed child component class name strings
+   */
+  public Iterator<String> allowedChildComponents()
+  {
+    return (_allowedChildComponents.iterator());
+  }  
+
+  /**
+   * Returns true if this component has any allowed child components.
+   *
+   * @return  true   if this component has any allowed child components,
+   *          false  otherwise
+   */
+  public boolean hasAllowedChildComponents()
+  {
+    return (!_allowedChildComponents.isEmpty());
+  }
+
   private String       _description;
   private String       _facetName;
   private boolean      _required;
   private boolean      _hidden;
   private List<String> _accessibilityGuidelines = new ArrayList<String>();
+  private List<String> _allowedChildComponents = new ArrayList<String>();
 }
