@@ -20,9 +20,12 @@ package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
 
 import java.lang.reflect.Modifier;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -759,6 +762,147 @@ public class ComponentBean extends AbstractTagBean
   }
 
   /**
+   * Parses the string of satisfied contracts into a String array
+   * using space as the separator between values.
+   * In the component metadata file, the satisfied contracts are noted
+   * with satisfied-contracts markup.  As an example, af:popup 
+   * (oracle.adf.view.rich.component.rich.RichPopup) supports
+   * oracle-adf-richmenu-holder, oracle-adf-richdialog-holder, 
+   * oracle-adf-richnotewindow-holder, and oracle-adf-richpanelwindow-holder
+   * contracts.  The satisfied contracts of a given component are matched
+   * with the required ancestor contracts of other components to determine
+   * if a component hierarchy is legally assembled.
+   *
+   * @param satisfiedContracts  a space delimited string of satisifed contracts
+   */
+  public void parseSatisfiedContracts(
+    String satisfiedContracts)
+  {
+    setSatisfiedContracts(satisfiedContracts.split(" "));
+  }
+
+  /**
+   * Sets the possible values for this property.
+   * In the component metadata file, the satisfied contracts are noted
+   * with satisfied-contracts markup.  As an example, af:popup 
+   * (oracle.adf.view.rich.component.rich.RichPopup) supports
+   * oracle-adf-richmenu-holder, oracle-adf-richdialog-holder, 
+   * oracle-adf-richnotewindow-holder, and oracle-adf-richpanelwindow-holder
+   * contracts.  The satisfied contracts of a given component are matched
+   * with the required ancestor contracts of other components to determine
+   * if a component hierarchy is legally assembled.
+   * 
+   * @param satisfiedContracts  a string array of the satisfied contracts
+   */
+  public void setSatisfiedContracts(
+    String[] satisfiedContracts)
+  {
+    _satisfiedContracts = Arrays.asList(satisfiedContracts);
+  }
+
+  /**
+   * Returns an iterator of the satisfied contracts for this component.
+   * In the component metadata file, the satisfied contracts are noted
+   * with satisfied-contracts markup.  As an example, af:popup 
+   * (oracle.adf.view.rich.component.rich.RichPopup) supports
+   * oracle-adf-richmenu-holder, oracle-adf-richdialog-holder, 
+   * oracle-adf-richnotewindow-holder, and oracle-adf-richpanelwindow-holder
+   * contracts.  The satisfied contracts of a given component are matched
+   * with the required ancestor contracts of other components to determine
+   * if a component hierarchy is legally assembled.
+   * 
+   * @return  a java.util.Iterator of Strings, where each string is the name of a 
+   *          satisfied contract
+   */
+  public Iterator<String> satisfiedContracts()
+  {
+    return _satisfiedContracts.iterator();
+  }  
+  
+  /**
+   * Returns true if this component has any satisfied contracts.
+   *
+   * @return  true   if this component has any satisfied contracts,
+   *          false  otherwise
+   */
+  public boolean hasSatisfiedContracts()
+  {
+    return (!_satisfiedContracts.isEmpty());
+  }
+  
+  /**
+   * Parses the string of required ancestor contracts into a String array
+   * using space as the separator between values.
+   * In the component metadata file, the required ancestors are noted
+   * with required-ancestor-contracts markup. This indicates that an
+   * ancestor (e.g. parent or grandparent) tag must be have satisfied-contracts 
+   * metadata matching the required-ancestor-contracts metadata of this tag.
+   * As an example, af:dialog
+   * (oracle.adf.view.rich.component.rich.RichDialog) lists
+   * oracle-adf-richdialog-holder as a required ancestor contract, and 
+   * af:popup (oracle.adf.view.rich.component.rich.RichPopup) lists
+   * oracle-adf-richdialog-holder as a satisified contract.
+   *
+   * @param requiredAncestorContracts  a space delimited string of required ancestor contracts
+   */
+  public void parseRequiredAncestorContracts(
+    String requiredAncestorContracts)
+  {
+    setRequiredAncestorContracts(requiredAncestorContracts.split(" "));
+  }
+
+  /**
+   * Sets the possible values for this property.
+   * In the component metadata file, the required ancestors are noted
+   * with required-ancestor-contracts markup. This indicates that an
+   * ancestor (e.g. parent or grandparent) tag must be have satisfied-contracts 
+   * metadata matching the required-ancestor-contracts metadata of this tag.
+   * As an example, af:dialog
+   * (oracle.adf.view.rich.component.rich.RichDialog) lists
+   * oracle-adf-richdialog-holder as a required ancestor contract, and 
+   * af:popup (oracle.adf.view.rich.component.rich.RichPopup) lists
+   * oracle-adf-richdialog-holder as a satisified contract.
+   * 
+   * @param requiredAncestorContracts  a string array of the required ancestor contracts
+   */
+  public void setRequiredAncestorContracts(
+    String[] requiredAncestorContracts)
+  {
+    _requiredAncestorContracts = Arrays.asList(requiredAncestorContracts);
+  }
+
+  /**
+   * Returns the required ancestor contracts for this component.
+   * In the component metadata file, the required ancestors are noted
+   * with required-ancestor-contracts markup. This indicates that an
+   * ancestor (e.g. parent or grandparent) tag must be have satisfied-contracts 
+   * metadata matching the required-ancestor-contracts metadata of this tag.
+   * As an example, af:dialog
+   * (oracle.adf.view.rich.component.rich.RichDialog) lists
+   * oracle-adf-richdialog-holder as a required ancestor contract, and 
+   * af:popup (oracle.adf.view.rich.component.rich.RichPopup) lists
+   * oracle-adf-richdialog-holder as a satisified contract.
+   * 
+   * @return  a java.util.Iterator of strings, where each string is the name
+   *          of a required ancestor contract
+   */
+  public Iterator<String> requiredAncestorContracts()
+  {
+    return _requiredAncestorContracts.iterator();
+  }  
+
+  /**
+   * Returns true if this component has any required ancestor contracts.
+   *
+   * @return  true   if this component has any required ancestor contracts,
+   *          false  otherwise
+   */
+  public boolean hasRequiredAncestorContracts()
+  {
+    return (!_requiredAncestorContracts.isEmpty());
+  }
+  
+  /**
    * Adds a Java Language class modifier to the tag class.
    *
    * @param modifier  the modifier to be added
@@ -1085,6 +1229,9 @@ public class ComponentBean extends AbstractTagBean
   private int     _componentClassModifiers;
   private int     _tagClassModifiers;
   private String[] _unsupportedAgents = new String[0];
+  private List<String> _requiredAncestorContracts = new ArrayList<String>();
+  private List<String> _satisfiedContracts = new ArrayList<String>();
+
   private String[] _eventNames;
 
   static private final String _TRINIDAD_COMPONENT_BASE =

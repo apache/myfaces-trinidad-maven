@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -121,11 +122,72 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       return;
     }
 
-
-    Iterator components = facesConfig.components();
+    // Need to cycle through the components two times, hence need two iterators.
+    // components Iterator will be used when actually writing out the tag doc
+    // compIter Iterator will be used when creating the maps of component relationships
+    Iterator<ComponentBean> components = facesConfig.components();
     components = new FilteredIterator(components, new SkipFilter());
     components = new FilteredIterator(components, new ComponentTagFilter());
     components = new FilteredIterator(components, new ComponentNamespaceFilter());
+
+    Iterator<ComponentBean> compIter = facesConfig.components();
+    compIter = new FilteredIterator(compIter, new SkipFilter());
+    compIter = new FilteredIterator(compIter, new ComponentTagFilter());
+    compIter = new FilteredIterator(compIter, new ComponentNamespaceFilter());
+    
+    // compTypeMap holds a map of compononent types to tag names that implement that component type
+    // The map is built using getComponentType method on the component bean to determine the 
+    // component type of a given tag name
+    Map<String, List<QName>>  compTypeMap = new HashMap<String, List<QName>> ();
+    // contractMap holds a map of contract name to tag names that satisify that contract.
+    // The map is built using the getSatisfiedContracts method API on the component bean to determine 
+    // which contracts are satisfied for a given tagname
+    Map<String, List<QName>> contractMap = new HashMap<String, List<QName>>();
+    while (compIter.hasNext())
+    {
+      ComponentBean compBean = compIter.next();
+      List<QName> tagNames;
+      String compType = compBean.getComponentType();
+      if (compType != null &&
+          compTypeMap.containsKey (compType) && 
+          compBean.getTagName() != null) 
+      {
+        // the component type map already contains an entry for this component type
+        tagNames = compTypeMap.get(compType);
+      } 
+      else 
+      {
+        // the component type map does not contain an entry for this component type
+        // so create a new ArrayList that will be used to store the tag names of 
+        // component that have this component type
+        tagNames = new ArrayList<QName>();
+      }
+      tagNames.add(compBean.getTagName());
+      compTypeMap.put (compType, tagNames);      
+
+      if (compBean.hasSatisfiedContracts())
+      {
+        Iterator<String> satContractsIter = compBean.satisfiedContracts();
+        while (satContractsIter.hasNext())
+        {
+          String satContract = satContractsIter.next();
+          if (contractMap.containsKey (satContract))
+          {
+            // the contract map already contains an entry for this contract 
+            tagNames = contractMap.get(satContract);
+          }
+          else
+          {
+            // the contract map does not contain an entry for this contract, so 
+            // create a new ArrayList which will be used to store the tag names of
+            // components that satisfy this contract
+            tagNames = new ArrayList<QName>();
+          }
+          tagNames.add(compBean.getTagName());
+          contractMap.put (satContract, tagNames);
+        }
+      }
+    }
 
     Iterator validators = facesConfig.validators();
     validators = new FilteredIterator(validators, new ValidatorTagFilter());
@@ -153,7 +215,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     int count = 0;
     while (components.hasNext())
     {
-      String pageName = _generateComponentDoc((ComponentBean)components.next());
+      String pageName = _generateComponentDoc((ComponentBean)components.next(), compTypeMap, contractMap);
       if (pageName != null)
       {
         componentPages.add(pageName);
@@ -250,6 +312,53 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
     return set;
+  }
+
+  private String _formatTagList(
+    Iterator<String> strIter,
+    Map <String, List<QName>> pMap,
+    String header)
+  {
+    String formatted = null;
+    
+    // Don't know how long this will be, but 300 should be plenty.
+    StringBuffer sb = new StringBuffer(300);
+    sb.append("\n");
+    sb.append("<b>");
+    sb.append(header);
+    sb.append(":</b> ");
+
+    boolean gotOne = false;    
+    while (strIter.hasNext())
+    {
+      List<QName> tagNameList = pMap.get(strIter.next());
+      if (tagNameList != null && !tagNameList.isEmpty())
+      {
+        Iterator<QName> tagNameIter  = tagNameList.iterator();
+
+        while (tagNameIter.hasNext())
+        {
+          QName tagName = tagNameIter.next();
+
+          String tagdocURL = _platformAgnosticPath("../tagdoc/" +
+            _toPageName(tagName) + ".html");
+          sb.append("<a href=\"" + tagdocURL + "\">");
+          sb.append(_getQualifiedName(tagName));
+          sb.append("</a>");
+          if (gotOne)
+          {
+            sb.append(", ");
+          }
+          gotOne = true;
+        }
+      }
+      if (gotOne)
+      {
+        sb.append("<br/>\n");
+        formatted = sb.toString();
+      }
+    }
+    return formatted;
   }
 
   private String _formatPropList(
@@ -378,7 +487,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     return "unknown";
   }
 
-  private String _generateComponentDoc(ComponentBean component)
+  private String _generateComponentDoc(ComponentBean component, Map<String, List<QName>> compTypeMap, Map <String, List<QName>> contractMap)
     throws Exception
   {
     if (component.getTagName() == null)
@@ -406,13 +515,15 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
       out.write(" <section name=\"Summary\">\n");
       out.write(" <p>\n");
-      _writeComponentSummary(out, component);
+      _writeComponentSummary(out, component, contractMap);
       out.write(" </p>\n");
       out.write(" </section>\n");
 
       _writeScreenshots(out, component);
 
       _writeExamples(out, component);
+
+      _writeAccessibilityGuidelines(out, component);
 
       if (component.isClientBehaviorHolder())
       {
@@ -436,7 +547,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       {
         out.write(" <section name=\"Supported Facets\">\n");
         out.write(" <p>\n");
-        _writeComponentFacets(out, component);
+        _writeComponentFacets(out, component, compTypeMap);
         out.write(" </p>\n");
         out.write(" </section>\n");
       }
@@ -558,7 +669,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     return pageName;
   }
 
-  private void _writeComponentSummary(Writer out, ComponentBean bean) throws IOException
+  private void _writeComponentSummary(Writer out, ComponentBean bean, Map <String, List<QName>> contractMap) throws IOException
   {
     out.write("   <b>Tag name:</b> &lt;" +
               _getQualifiedName(bean.getTagName()) + "&gt;\n");
@@ -576,6 +687,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("   <br/>\n");
     out.write("   <b>Component type:</b> " + bean.getComponentType() +  "\n");
     out.write("   <br/>\n");
+
+    if (bean.hasRequiredAncestorContracts())
+    {
+      String formattedAncestors = _formatTagList ( bean.requiredAncestorContracts(), 
+                                                   contractMap, 
+                                                   "Required Ancestor Tag");
+      out.write (formattedAncestors);
+    }
 
     if (_isNamingContainer(bean))
     {
@@ -901,6 +1020,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       {
         String valStr = _formatPropList(attr.getPropertyValues(),
                                         "Valid Values");
+
+        // The default value for the attribute. defaultValueStr will be null if no
+        // default value is specified via <default-value> in component xml file.
+        // Since _formatPropList takes an array as the first input param, covert the default
+        // value into a single item array when calling formatPropList
+        String defaultValueStr = _formatPropList (new String[] { attr.getDefaultValue() },
+                                        "Default Value");
+
         String unsupAgentsStr =
           _formatPropList(attr.getUnsupportedAgents(),
                           "Not supported on the following agents",
@@ -924,6 +1051,17 @@ public class TagdocReport extends AbstractMavenMultiPageReport
         if (valStr != null)
         {
           out.write(valStr);
+        }
+        
+        if (defaultValueStr != null)
+        {
+          out.write(defaultValueStr);
+        }
+        
+        // if we print out a list of possible values and/or a default value for the attribute, 
+        // then enter a line break before printing out other information about the attribute.
+        if (valStr != null || defaultValueStr != null) 
+        {
           out.write("<br/>");
         }
 
@@ -1067,14 +1205,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   }
 
 
-  private void _writeComponentFacets(Writer out, ComponentBean bean) throws IOException
+  private void _writeComponentFacets(Writer out, ComponentBean bean, Map<String, List<QName>> compTypeMap) throws IOException
   {
     // Sort the facets
     TreeSet facetNames = new TreeSet();
-    Iterator iter = bean.facets(true);
+    Iterator<FacetBean> iter = bean.facets(true);
     while (iter.hasNext())
     {
-      FacetBean facetBean = (FacetBean)iter.next();
+      FacetBean facetBean = iter.next();
       if (!facetBean.isHidden())
       {
         facetNames.add(facetBean.getFacetName());
@@ -1087,14 +1225,22 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("<th>Description</th>\n");
     out.write("</tr>\n");
 
-    Iterator nameIter = facetNames.iterator();
+    Iterator<String> nameIter = facetNames.iterator();
     while (nameIter.hasNext())
     {
-      String name = (String) nameIter.next();
+      String name = nameIter.next();
       FacetBean facet = bean.findFacet(name, true);
       out.write("<tr>\n");
       out.write("<td>" + facet.getFacetName() + "</td>");
       out.write("<td>");
+
+      if (facet.hasAllowedChildComponents())
+      {
+        String formattedChildComps = _formatTagList (facet.allowedChildComponents(), compTypeMap, "Allowed Child Components");
+        out.write (formattedChildComps);
+        out.write("<br/>");
+      }
+
       out.write(facet.getDescription());
       out.write("</td>\n");
       out.write("</tr>\n");
@@ -1204,6 +1350,145 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("   </html>\n");
     out.write(" </p>\n");
     out.write(" </section>\n");
+  }
+
+  // Write out the accessibility Guidelines for the component.  Accessibility Guidelines
+  // help the application developer to create an application that can be used by users that e.g.
+  // use a screen reader (e.g JAWS).  Oftentimes, in order to be accessibility compliant (e.g. section 508
+  // compliant) an application developer needs to specify metadata for the screenreader application
+  // to be able to correctly interpret the application for the blind user.  The accessibility guideline
+  // can be associated with the Component itself, with a specific attribute of the component
+  // or with a specific facet of the component.  All accessibility guidelines are printed out
+  // together in an "Accessibility Guidelines" section, with the component-generic guidelines
+  // listed first, followed by the attribute specific guidelines and finally the facet-specific
+  // guidelines
+  private void _writeAccessibilityGuidelines(Writer out, ComponentBean bean) throws IOException
+  {
+    // accAttributes and accFacets are sorted lists of attributes and facets, respectively, 
+    // that have an associated accessibility guideline
+    TreeSet<PropertyBean> accAttributes = new TreeSet<PropertyBean>();
+    TreeSet<String> accFacets = new TreeSet<String>();
+
+    // see if any of the component's properties has an associated accessibility guideline
+    Iterator<PropertyBean> attrs = bean.properties();
+    while (attrs.hasNext())
+    {
+      PropertyBean property = attrs.next();
+      if (!property.isTagAttributeExcluded() && property.hasAccessibilityGuidelines())
+      {
+        accAttributes.add(property);
+      }
+    }
+
+    // see if any of the component's facets has an associated accessibility guideline
+    if (bean.hasFacets()) 
+    {
+      Iterator<FacetBean> facets = bean.facets(true);
+      while (facets.hasNext())
+      {
+        FacetBean facetBean = facets.next();
+        if (!facetBean.isHidden() && facetBean.hasAccessibilityGuidelines())
+        {
+          accFacets.add(facetBean.getFacetName());
+        }
+      }
+    }
+
+    // if neither the component nor the component's attributes nor the component's facets
+    // has an accessibility guideline, return
+    if (!bean.hasAccessibilityGuidelines() && accAttributes.isEmpty() && accFacets.isEmpty())
+      return;
+
+    String accGuideline;
+
+    // Write header
+    out.write(" <section name=\"Accessibility Guideline(s)\">\n");
+    out.write(" <p>\n");
+    out.write("   <html>\n");
+    out.write("     <ul>");
+
+    // write out component-generic accessibility guidelines, i.e. accessibility
+    // guidelines that apply to the component as a whole, not associated with a
+    // specific attribute
+    if (bean.hasAccessibilityGuidelines())
+    {
+      Iterator iter = bean.accessibilityGuidelines();
+      while (iter.hasNext())
+      {
+        accGuideline = (String) iter.next();
+        _writeAccessibilityGuideline(out, "", accGuideline);
+      }
+    }
+
+    // Write out attribute-specific accessibility guidelines.  Each attribute can have
+    // one or more associated accessibility guidelines.
+    if (!accAttributes.isEmpty())
+    {
+      Iterator<PropertyBean> propIter = accAttributes.iterator();
+      while (propIter.hasNext())
+      {
+        PropertyBean property = propIter.next();
+        Iterator<String> propAccIter = property.accessibilityGuidelines();
+        while (propAccIter.hasNext())
+        {
+          accGuideline = propAccIter.next();
+          _writeAccessibilityGuideline(out, property.getPropertyName() + " attribute", accGuideline);
+        }
+      }
+    }
+
+    // Write out facet-specific accessibility guidelines. A facet in the accFacets iterator
+    // can have one or more associated accessibility guidelines
+    if (!accFacets.isEmpty())
+    {
+      Iterator<String> facetIter = accFacets.iterator();
+      while (facetIter.hasNext())
+      {
+        String facetName = facetIter.next();
+        FacetBean facet = bean.findFacet(facetName, true);
+
+        Iterator<String> facetAccIter = facet.accessibilityGuidelines();
+        while (facetAccIter.hasNext())
+        {
+          accGuideline = facetAccIter.next();
+          _writeAccessibilityGuideline(out, facetName + " facet", accGuideline);
+        }
+      }
+    }
+
+    out.write("     </ul>");
+    out.write("   </html>\n");
+    out.write(" </p>\n");
+    out.write(" </section>\n");
+  }
+
+  // Write out an Accessibility Guideline
+  // A bullet in an unordered list, followed by (optionally) the reference name in bold, e.g. the
+  // name of the attribute or name of the facet which the guideline applies to, then the text
+  // of the accessibility guideline.  For accessibility guidelines on the component, the referenceName
+  // attribute is left blank.
+  private void _writeAccessibilityGuideline(Writer out, String referenceName, String desc) throws IOException
+  {
+    out.write("    <div class=\'accGuideline\'>\n");
+    out.write("<li>");
+
+    if (!"".equals(referenceName)) 
+    {
+      out.write("<b>");
+      out.write(referenceName);
+      out.write("</b>: ");    
+    }
+
+    if (desc != null)
+    {
+      if (!"".equals(desc))
+      {
+        out.write(desc + "\n");
+      }
+    } 
+
+    out.write("</li>");
+    out.write("    </div>\n");
   }
 
   protected MavenProject getProject()
