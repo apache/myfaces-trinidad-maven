@@ -206,6 +206,9 @@
       <!--
       NOTE: Execute this profile like
             mvn clean source:jar install deploy -DaltDeploymentRepository=matzew::default::file://FOLDER -Prelease
+
+      REMOTE STAGE:
+           mvn clean source:jar install deploy -DaltDeploymentRepository=apache.snapshots::default::scpexe://people.apache.org/home/matzew/public_html/staging_repo -Prelease
        -->
       <build>
         <plugins>
