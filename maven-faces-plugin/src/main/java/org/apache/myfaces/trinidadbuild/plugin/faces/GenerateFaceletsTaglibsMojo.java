@@ -163,10 +163,13 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
 
           TransformerFactory transFactory = TransformerFactory.newInstance();
           Transformer identity = transFactory.newTransformer();
-          identity.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,
-                                     _FACELETS_TAG_LIBRARY_DOCTYPE_PUBLIC);
-          identity.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
-                                     _FACELETS_TAG_LIBRARY_DOCTYPE_SYSTEM);
+          if (!_isJSF20PLus())
+          {
+            identity.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,
+                                       _FACELETS_TAG_LIBRARY_DOCTYPE_PUBLIC);
+            identity.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
+                                       _FACELETS_TAG_LIBRARY_DOCTYPE_SYSTEM);
+          }
           identity.transform(mergedSource, mergedResult);
 
           targetFile.setReadOnly();
@@ -247,10 +250,28 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
   {
     stream.writeStartDocument("1.0");
     stream.writeCharacters("\n");
-    stream.writeDTD(dtd);
-    stream.writeCharacters("\n");
+    
+    boolean isJSF20PLus = _isJSF20PLus();
+    
+    String ns = _FACELETS_NAMESPACE_URI_20;
+    
+    if (!isJSF20PLus)
+    {
+      ns = _FACELETS_NAMESPACE_URI;
+      stream.writeDTD(dtd);
+      stream.writeCharacters("\n");
+    }
+    
     stream.writeStartElement("facelet-taglib");
-    stream.writeDefaultNamespace(_FACELETS_NAMESPACE_URI);
+    stream.writeDefaultNamespace(ns);
+    
+    if (isJSF20PLus)
+    {
+      stream.writeNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+      stream.writeAttribute("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation",
+                            "http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facelettaglibrary_2_0.xsd");
+      stream.writeAttribute("version", "2.0");
+    }
     stream.writeCharacters("\n  ");
   }
 
@@ -636,6 +657,9 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
 
   static private final String _FACELETS_NAMESPACE_URI =
               "http://java.sun.com/JSF/Facelet";
+  
+  static private final String _FACELETS_NAMESPACE_URI_20 =
+              "http://java.sun.com/xml/ns/javaee";
 
   static final private String _FACELETS_TAG_LIBRARY_DOCTYPE_PUBLIC =
               "-//Sun Microsystems, Inc.//DTD Facelet Taglib 1.0//EN";
