@@ -170,6 +170,27 @@ public class ComponentBean extends AbstractTagBean
   }
 
   /**
+   * Sets the Java Script component class for this component.
+   *
+   * @param jsComponentClass  the JavaScript component class
+   */
+  public void setJsComponentClass(
+    String jsComponentClass)
+  {
+    _jsComponentClass = jsComponentClass;
+  }
+
+  /**
+   * Returns the JavaScript component class for this component.
+   *
+   * @return  the Java Script component class
+   */
+  public String getJsComponentClass()
+  {
+    return _jsComponentClass;
+  }
+  
+  /**
    * Sets the description of this property.
    *
    * @param description  the property description
@@ -1171,6 +1192,7 @@ public class ComponentBean extends AbstractTagBean
   private String  _componentType;
   private String  _componentFamily;
   private String  _componentClass;
+  private String  _jsComponentClass;
   private String  _componentSupertype;
   private String  _componentSuperclass;
   private String  _rendererType;

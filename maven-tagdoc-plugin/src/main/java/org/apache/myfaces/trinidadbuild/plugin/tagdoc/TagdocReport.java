@@ -662,15 +662,29 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("   <br/>\n");
     
 
-    out.write("   <b>UIComponent class:</b> ");
+    out.write("   <b>Java class:</b> ");
     String javadocURL = _platformAgnosticPath("../apidocs/" +
       bean.getComponentClass().replace('.', '/') + ".html");
     out.write("<a href=\"" + javadocURL + "\">");
-
+    
     out.write(bean.getComponentClass());
     out.write("</a>");
     out.write("\n");
     out.write("   <br/>\n");
+
+    // Write out the corresponding Java Script class for this component with a link to its JavaScript doc
+    String jsClass = bean.getJsComponentClass();
+    if (jsClass != null && !jsClass.isEmpty()) 
+    {
+      out.write("   <b>JavaScript class:</b> ");
+      String jsdocURL = _platformAgnosticPath("../js_docs_out/" + jsClass.replace('.', '/') + ".html");
+      out.write("<a href=\"" + jsdocURL + "\">");
+      out.write(jsClass);
+      out.write("</a>");
+      out.write("\n");
+      out.write("   <br/>\n");
+    }
+
     out.write("   <b>Component type:</b> " + bean.getComponentType() +  "\n");
     out.write("   <br/>\n");
 
