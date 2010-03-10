@@ -147,9 +147,9 @@ abstract public class AbstractFacesMojo extends AbstractMojo
         // requires JAXP 1.3, in JavaSE 5.0
         // spf.setXIncludeAware(false);
 
-        for (Iterator i=masters.iterator(); i.hasNext();)
+        for (Iterator<URL> i=masters.iterator(); i.hasNext();)
         {
-          URL url = (URL)i.next();
+          URL url = i.next();
           Digester digester = new Digester(spf.newSAXParser());
           digester.setNamespaceAware(true);
 

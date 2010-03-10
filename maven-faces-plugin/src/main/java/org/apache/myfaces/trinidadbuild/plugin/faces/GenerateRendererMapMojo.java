@@ -71,10 +71,10 @@ public class GenerateRendererMapMojo extends AbstractFacesMojo
     }
     else
     {
-      Iterator renderkits = facesConfig.renderKits();
+      Iterator<RenderKitBean> renderkits = facesConfig.renderKits();
       while (renderkits.hasNext())
       {
-        RenderKitBean renderkit = (RenderKitBean) renderkits.next();
+        RenderKitBean renderkit = renderkits.next();
         String id = renderkit.getRenderKitId();
         if (!id.startsWith(renderKitPrefix))
           continue;
@@ -92,10 +92,10 @@ public class GenerateRendererMapMojo extends AbstractFacesMojo
     PrintWriter pw = new PrintWriter(fw);
     try
     {
-      Iterator renderers = rk.renderers();
+      Iterator<RendererBean> renderers = rk.renderers();
       while (renderers.hasNext())
       {
-        RendererBean r = (RendererBean) renderers.next();
+        RendererBean r = renderers.next();
         pw.print(r.getComponentFamily());
         pw.print('|');
         pw.print(r.getRendererType());

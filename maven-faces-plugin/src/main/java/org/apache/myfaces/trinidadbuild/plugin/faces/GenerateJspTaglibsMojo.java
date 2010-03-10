@@ -144,9 +144,9 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
       // taglibs map syntax requires distinct shortNames,
       // which is a Good Thing!
-      for (Iterator i = taglibs.entrySet().iterator(); i.hasNext(); )
+      for (Iterator<Map.Entry> i = taglibs.entrySet().iterator(); i.hasNext(); )
       {
-        Map.Entry entry = (Map.Entry)i.next();
+        Map.Entry entry = i.next();
         String shortName = (String)entry.getKey();
         String namespaceURI = (String)entry.getValue();
 
@@ -492,11 +492,11 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     // converters need an id attribute
     writeTagAttribute(stream, "id", "the identifier for the converter", null, null);
 
-    Iterator properties = converter.properties();
+    Iterator<PropertyBean> properties = converter.properties();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
     while (properties.hasNext())
     {
-      PropertyBean property = (PropertyBean)properties.next();
+      PropertyBean property = properties.next();
       writeTagAttribute(stream,
                          property.getPropertyName(),
                          property.getDescription(),
@@ -704,11 +704,11 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     // validators need an id attribute
     writeTagAttribute(stream, "id", "the identifier for the validator", null, null);
 
-    Iterator properties = validator.properties();
+    Iterator<PropertyBean> properties = validator.properties();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
     while (properties.hasNext())
     {
-      PropertyBean property = (PropertyBean)properties.next();
+      PropertyBean property = properties.next();
       writeTagAttribute(stream,
                          property.getPropertyName(),
                          property.getDescription(),

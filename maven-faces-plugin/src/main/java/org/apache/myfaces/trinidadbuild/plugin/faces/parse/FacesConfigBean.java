@@ -50,7 +50,7 @@ public class FacesConfigBean extends ObjectBean
   public ConverterBean findConverter(
     String converterId)
   {
-    return (ConverterBean)_converters.get(converterId);
+    return _converters.get(converterId);
   }
 
   /**
@@ -70,7 +70,7 @@ public class FacesConfigBean extends ObjectBean
    *
    * @return  the converter iterator
    */
-  public Iterator converters()
+  public Iterator<ConverterBean> converters()
   {
     return _converters.values().iterator();
   }
@@ -96,7 +96,7 @@ public class FacesConfigBean extends ObjectBean
   public ValidatorBean findValidator(
     String validatorId)
   {
-    return (ValidatorBean)_validators.get(validatorId);
+    return _validators.get(validatorId);
   }
 
   /**
@@ -116,7 +116,7 @@ public class FacesConfigBean extends ObjectBean
    *
    * @return  the validator iterator
    */
-  public Iterator validators()
+  public Iterator<ValidatorBean> validators()
   {
     return _validators.values().iterator();
   }
@@ -145,7 +145,7 @@ public class FacesConfigBean extends ObjectBean
   public ComponentBean findComponent(
     String componentType)
   {
-    return (ComponentBean)_components.get(componentType);
+    return _components.get(componentType);
   }
 
   /**
@@ -165,7 +165,7 @@ public class FacesConfigBean extends ObjectBean
    *
    * @return  the component iterator
    */
-  public Iterator components()
+  public Iterator<ComponentBean> components()
   {
     return _components.values().iterator();
   }
@@ -232,7 +232,7 @@ public class FacesConfigBean extends ObjectBean
    *
    * @return  the event iterator
    */
-  public Iterator events()
+  public Iterator<EventBean> events()
   {
     return _events.values().iterator();
   }
@@ -304,11 +304,11 @@ public class FacesConfigBean extends ObjectBean
     return _cur;
   }
 
-  private Map _converters = new TreeMap();
-  private Map _validators = new TreeMap();
-  private Map _components = new TreeMap();
-  private Map _events = new TreeMap();
-  private Map _renderKits = new TreeMap();
+  private Map<String, ConverterBean> _converters = new TreeMap<String, ConverterBean>();
+  private Map<String, ValidatorBean> _validators = new TreeMap<String, ValidatorBean>();
+  private Map<String, ComponentBean> _components = new TreeMap<String, ComponentBean>();
+  private Map<String, EventBean> _events = new TreeMap<String, EventBean>();
+  private Map<String, RenderKitBean> _renderKits = new TreeMap<String, RenderKitBean>();
   private URL _currentResource = null;
 
   static private final Logger _LOG = Logger.getLogger(FacesConfigBean.class.getName());

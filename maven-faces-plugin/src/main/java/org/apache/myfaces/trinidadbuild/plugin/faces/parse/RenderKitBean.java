@@ -87,7 +87,7 @@ public class RenderKitBean extends ObjectBean
     String rendererType)
   {
     String compositeKey = componentFamily + "|" + rendererType;
-    return (RendererBean) _renderers.get(compositeKey);
+    return _renderers.get(compositeKey);
   }
 
   /**
@@ -106,7 +106,7 @@ public class RenderKitBean extends ObjectBean
    *
    * @return  the renderer iterator
    */
-  public Iterator renderers()
+  public Iterator<RendererBean> renderers()
   {
     return _renderers.values().iterator();
   }
@@ -120,10 +120,10 @@ public class RenderKitBean extends ObjectBean
     FacesConfigBean owner)
   {
     super.attach(owner);
-    Iterator renderers = renderers();
+    Iterator<RendererBean> renderers = renderers();
     while (renderers.hasNext())
     {
-      RendererBean renderer = (RendererBean)renderers.next();
+      RendererBean renderer = renderers.next();
       renderer.attach(owner);
     }
   }
@@ -131,13 +131,13 @@ public class RenderKitBean extends ObjectBean
   void addAllRenderers(
     RenderKitBean renderKit)
   {
-    for (Iterator i = renderKit._renderers.values().iterator(); i.hasNext();)
+    for (Iterator<RendererBean> i = renderKit._renderers.values().iterator(); i.hasNext();)
     {
       // use addRenderer to establish owner
-      addRenderer((RendererBean)i.next());
+      addRenderer(i.next());
     }
   }
 
   private String  _renderKitId = "";
-  private Map     _renderers;
+  private Map<String,RendererBean>   _renderers;
 }

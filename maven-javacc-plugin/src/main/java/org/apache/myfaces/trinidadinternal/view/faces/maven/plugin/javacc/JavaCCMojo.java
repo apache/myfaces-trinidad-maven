@@ -249,9 +249,9 @@ public class JavaCCMojo
       return;
     }
 
-    for (Iterator i = staleGrammars.iterator(); i.hasNext(); )
+    for (Iterator<File> i = staleGrammars.iterator(); i.hasNext(); )
     {
-      File javaccFile = (File) i.next();
+      File javaccFile = i.next();
       try
       {
         org.javacc.parser.Main.mainProgram(generateJavaCCArgumentList(javaccFile.getAbsolutePath()));

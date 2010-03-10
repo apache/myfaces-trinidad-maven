@@ -165,7 +165,7 @@ public abstract class AbstractValidatorTagGenerator extends AbstractTagGenerator
       PrettyWriter  out,
       ValidatorBean validator) throws IOException
     {
-      Iterator properties = validator.properties();
+      Iterator<PropertyBean> properties = validator.properties();
       properties = new FilteredIterator(properties, new TagAttributeFilter());
       if (properties.hasNext())
       {
@@ -180,7 +180,7 @@ public abstract class AbstractValidatorTagGenerator extends AbstractTagGenerator
         out.indent();
         while (properties.hasNext())
         {
-          PropertyBean property = (PropertyBean)properties.next();
+          PropertyBean property = properties.next();
           writeSetProperty(out, property);
         }
         out.unindent();

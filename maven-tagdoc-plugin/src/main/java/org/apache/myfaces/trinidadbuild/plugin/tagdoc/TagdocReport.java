@@ -137,6 +137,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     // The map is built using the getSatisfiedContracts method API on the component bean to determine 
     // which contracts are satisfied for a given tagname
     Map<String, List<QName>> contractMap = new HashMap<String, List<QName>>();
+
     while (compIter.hasNext())
     {
       ComponentBean compBean = compIter.next();
@@ -183,11 +184,11 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       }
     }
 
-    Iterator validators = facesConfig.validators();
+    Iterator<ValidatorBean> validators = facesConfig.validators();
     validators = new FilteredIterator(validators, new ValidatorTagFilter());
     validators = new FilteredIterator(validators, new ValidatorNamespaceFilter());
 
-    Iterator converters = facesConfig.converters();
+    Iterator<ConverterBean> converters = facesConfig.converters();
     converters = new FilteredIterator(converters, new ConverterTagFilter());
     converters = new FilteredIterator(converters, new ConverterNamespaceFilter());
     
@@ -209,7 +210,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     int count = 0;
     while (components.hasNext())
     {
-      String pageName = _generateComponentDoc((ComponentBean)components.next(), compTypeMap, contractMap);
+      String pageName = _generateComponentDoc(components.next(), compTypeMap, contractMap);
       if (pageName != null)
       {
         componentPages.add(pageName);
@@ -218,7 +219,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
     while (converters.hasNext())
     {
-      String pageName = _generateConverterDoc((ConverterBean)converters.next());
+      String pageName = _generateConverterDoc(converters.next());
       if (pageName != null)
       {
         converterPages.add(pageName);
@@ -227,7 +228,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
     while (validators.hasNext())
     {
-      String pageName = _generateValidatorDoc((ValidatorBean)validators.next());
+      String pageName = _generateValidatorDoc(validators.next());
       if (pageName != null)
       {
         validatorPages.add(pageName);
@@ -253,9 +254,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     sink.sectionTitle1_();
     sink.section1();
 
-    for (Iterator i = taglibs.entrySet().iterator(); i.hasNext(); )
+    for (Iterator<Map.Entry> i = taglibs.entrySet().iterator(); i.hasNext(); )
     {
-      Map.Entry entry = (Map.Entry)i.next();
+      Map.Entry entry = i.next();
       sink.paragraph();
 
       sink.bold();
@@ -426,13 +427,13 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     sink.tableHeaderCell_();
     sink.tableRow_();
     
-    Iterator iter = pages.iterator();
+    Iterator<String> iter = pages.iterator();
     while (iter.hasNext())
     {
       sink.tableRow();
       sink.tableCell();
       
-      String name = (String) iter.next();
+      String name = iter.next();
       String tagName = "<" + name.replace('_', ':') + ">";
       
       sink.link(_DOC_SUBDIRECTORY + "/" + name + ".html");
@@ -471,9 +472,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     if (namespace == null)
       return null;
 
-    for (Iterator i = taglibs.entrySet().iterator(); i.hasNext(); )
+    for (Iterator<Map.Entry> i = taglibs.entrySet().iterator(); i.hasNext(); )
     {
-      Map.Entry entry = (Map.Entry)i.next();
+      Map.Entry entry = i.next();
       if (namespace.equals(entry.getValue()))
         return (String) entry.getKey();
     }
@@ -828,20 +829,20 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   {
     // Sort the names
     TreeSet attributes = new TreeSet();
-    Iterator attrs = bean.properties(true);
+    Iterator<PropertyBean> attrs = bean.properties(true);
     while (attrs.hasNext())
     {
-      PropertyBean property = (PropertyBean) attrs.next();
+      PropertyBean property = attrs.next();
       if (!property.isTagAttributeExcluded())
         attributes.add(property.getPropertyName());
     }
 
     // Now get a list of PropertyBeans
     List list = new ArrayList();
-    Iterator iter = attributes.iterator();
+    Iterator<String> iter = attributes.iterator();
     while (iter.hasNext())
     {
-      String attrName = (String) iter.next();
+      String attrName = iter.next();
       list.add(bean.findProperty(attrName, true));
     }
     
@@ -863,13 +864,13 @@ public class TagdocReport extends AbstractMavenMultiPageReport
                               bean.getComponentClass(),
                               groups.isEmpty() ? null : "Ungrouped");
 
-    Iterator groupIter = groups.iterator();
+    Iterator<String> groupIter = groups.iterator();
     while (groupIter.hasNext())
     {
       _writeComponentAttributes(out,
                                 list.iterator(),
                                 bean.getComponentClass(),
-                                (String) groupIter.next());
+                                groupIter.next());
     }
 
   }
@@ -879,20 +880,20 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   {
     // Sort the names
     TreeSet attributes = new TreeSet();
-    Iterator attrs = bean.properties();
+    Iterator<PropertyBean> attrs = bean.properties();
     while (attrs.hasNext())
     {
-      PropertyBean property = (PropertyBean) attrs.next();
+      PropertyBean property = attrs.next();
       if (!property.isTagAttributeExcluded())
         attributes.add(property.getPropertyName());
     }
 
     // Now get a list of PropertyBeans
     List list = new ArrayList();
-    Iterator iter = attributes.iterator();
+    Iterator<String> iter = attributes.iterator();
     while (iter.hasNext())
     {
-      String attrName = (String) iter.next();
+      String attrName = iter.next();
       list.add(bean.findProperty(attrName));
     }
     
@@ -908,20 +909,20 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   {
     // Sort the names
     TreeSet attributes = new TreeSet();
-    Iterator attrs = bean.properties();
+    Iterator<PropertyBean> attrs = bean.properties();
     while (attrs.hasNext())
     {
-      PropertyBean property = (PropertyBean) attrs.next();
+      PropertyBean property = attrs.next();
       if (!property.isTagAttributeExcluded())
         attributes.add(property.getPropertyName());
     }
 
     // Now get a list of PropertyBeans
     List list = new ArrayList();
-    Iterator iter = attributes.iterator();
+    Iterator<String> iter = attributes.iterator();
     while (iter.hasNext())
     {
-      String attrName = (String) iter.next();
+      String attrName = iter.next();
       list.add(bean.findProperty(attrName));
     }
     
@@ -934,7 +935,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
 
   private void _writeComponentAttributes(Writer out,
-                                         Iterator attributes,
+                                         Iterator<PropertyBean> attributes,
                                          String className,
                                          String group) throws IOException
   {
@@ -942,7 +943,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     while (attributes.hasNext())
     {
-      PropertyBean attr = (PropertyBean) attributes.next();
+      PropertyBean attr = attributes.next();
       
       if (attr.isHidden())
       {
@@ -1146,10 +1147,10 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("<th>Description</th>\n");
     out.write("</tr>\n");
 
-    Iterator iter = bean.events(true);
+    Iterator<EventRefBean> iter = bean.events(true);
     while (iter.hasNext())
     {
-      EventRefBean eventRef = (EventRefBean) iter.next();
+      EventRefBean eventRef = iter.next();
       EventBean    event = eventRef.resolveEventType();
 
       out.write("<tr>\n");
@@ -1232,10 +1233,10 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     
     // Go through each example, write its description
     // followed by the example source code.
-    Iterator iter = bean.examples();
+    Iterator<ExampleBean> iter = bean.examples();
     while (iter.hasNext())
     {
-      exBean = (ExampleBean) iter.next();
+      exBean = iter.next();
       String desc   = exBean.getSourceDescription();
       String source = exBean.getSourceCode();
       
@@ -1279,10 +1280,10 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     // Go through each screenshot, write its image
     // followed by the image's caption.
-    Iterator iter = bean.screenshots();
+    Iterator<ScreenshotBean> iter = bean.screenshots();
     while (iter.hasNext())
     {
-      ssBean = (ScreenshotBean) iter.next();
+      ssBean = iter.next();
       String desc   = ssBean.getDescription();
       String img = ssBean.getImage();
 
@@ -1381,10 +1382,10 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     // specific attribute
     if (bean.hasAccessibilityGuidelines())
     {
-      Iterator iter = bean.accessibilityGuidelines();
+      Iterator<String> iter = bean.accessibilityGuidelines();
       while (iter.hasNext())
       {
-        accGuideline = (String) iter.next();
+        accGuideline = iter.next();
         _writeAccessibilityGuideline(out, "", accGuideline);
       }
     }
@@ -1574,9 +1575,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
         // requires JAXP 1.3, in JavaSE 5.0
         // spf.setXIncludeAware(false);
 
-        for (Iterator i=masters.iterator(); i.hasNext();)
+        for (Iterator<URL> i=masters.iterator(); i.hasNext();)
         {
-          URL url = (URL)i.next();
+          URL url = i.next();
           Digester digester = new Digester(spf.newSAXParser());
           digester.setNamespaceAware(true);
 
