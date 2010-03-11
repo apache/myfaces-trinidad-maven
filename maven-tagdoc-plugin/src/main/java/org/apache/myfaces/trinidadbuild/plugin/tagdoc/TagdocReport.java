@@ -319,9 +319,15 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     // Don't know how long this will be, but 300 should be plenty.
     StringBuffer sb = new StringBuffer(300);
     sb.append("\n");
-    sb.append("<b>");
-    sb.append(header);
-    sb.append(":</b> ");
+
+    // In the case of the component summary, the header is written out in a separate table cell, and so no
+    // header text is passed into this method
+    if (header != null && !header.isEmpty())
+    {
+      sb.append("<b>");
+      sb.append(header);
+      sb.append(":</b> ");
+    }
 
     boolean gotOne = false;    
     while (strIter.hasNext())
@@ -335,23 +341,23 @@ public class TagdocReport extends AbstractMavenMultiPageReport
         {
           QName tagName = tagNameIter.next();
 
+          if (gotOne)
+          {
+            sb.append(", ");
+          }
           String tagdocURL = _platformAgnosticPath("../tagdoc/" +
             _toPageName(tagName) + ".html");
           sb.append("<a href=\"" + tagdocURL + "\">");
           sb.append(_getQualifiedName(tagName));
           sb.append("</a>");
-          if (gotOne)
-          {
-            sb.append(", ");
-          }
           gotOne = true;
         }
       }
-      if (gotOne)
-      {
-        sb.append("<br/>\n");
-        formatted = sb.toString();
-      }
+    }
+    if (gotOne)
+    {
+      sb.append("<br/>\n");
+      formatted = sb.toString();
     }
     return formatted;
   }
@@ -375,9 +381,15 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       // Don't know how long this will be, but 100 should be plenty.
       StringBuffer sb = new StringBuffer(100);
       sb.append("\n");
-      sb.append("<b>");
-      sb.append(header);
-      sb.append(":</b> ");
+
+      // In the case of the component summary section the header text is written out
+      // in a separate table cell, so no header text is passed into this method
+      if (header != null && !header.isEmpty())
+      {
+        sb.append("<b>");
+        sb.append(header);
+        sb.append(":</b> ");
+      }
 
       boolean gotOne = false;
 
@@ -658,59 +670,84 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
   private void _writeComponentSummary(Writer out, ComponentBean bean, Map <String, List<QName>> contractMap) throws IOException
   {
-    out.write("   <b>Tag name:</b> &lt;" +
-              _getQualifiedName(bean.getTagName()) + "&gt;\n");
-    out.write("   <br/>\n");
+    // In order to align all the Summary parts, create an HTML table.  The first column will be in bold, the second column in normal font.
+    // The rows of the table are:
+    // 1. Tag name
+    // 2. Java class
+    // 3. JavaScript class (optional)
+    // 4. Component type
+    // 5. Required ancestors (optional)
+    // 6. Naming container (optional)
+    // 7. Unsupported agents (optional)
     
+    out.write("<div class=\'summary\'>\n");
+    out.write("<table>\n");
+    out.write("<tr>\n");
+    out.write("<td><b>Tag Name:</b></td>");
+    out.write("<td>&lt;" + _getQualifiedName(bean.getTagName()) + "&gt;</td>\n");
+    out.write("</tr>\n");
 
-    out.write("   <b>Java class:</b> ");
+    out.write("<tr>\n");
+    out.write("<td><b>Java Class:</b></td>");
     String javadocURL = _platformAgnosticPath("../apidocs/" +
       bean.getComponentClass().replace('.', '/') + ".html");
-    out.write("<a href=\"" + javadocURL + "\">");
-    
+    out.write("<td><a href=\"" + javadocURL + "\">");
     out.write(bean.getComponentClass());
-    out.write("</a>");
-    out.write("\n");
-    out.write("   <br/>\n");
+    out.write("</a></td>\n");
+    out.write("</tr>\n");
 
     // Write out the corresponding Java Script class for this component with a link to its JavaScript doc
     String jsClass = bean.getJsComponentClass();
     if (jsClass != null && !jsClass.isEmpty()) 
     {
-      out.write("   <b>JavaScript class:</b> ");
+      out.write("<tr>\n");
+      out.write("<td><b>JavaScript Class:</b></td>");
       String jsdocURL = _platformAgnosticPath("../js_docs_out/" + jsClass.replace('.', '/') + ".html");
-      out.write("<a href=\"" + jsdocURL + "\">");
+      out.write("<td><a href=\"" + jsdocURL + "\">");
       out.write(jsClass);
-      out.write("</a>");
-      out.write("\n");
-      out.write("   <br/>\n");
+      out.write("</a></td>\n");
+      out.write("</tr>\n");
     }
 
-    out.write("   <b>Component type:</b> " + bean.getComponentType() +  "\n");
-    out.write("   <br/>\n");
+    out.write("<tr>\n");
+    out.write("<td><b>Component Type:</b></td>");
+    out.write("<td>" + bean.getComponentType() +  "</td>\n");
+    out.write("</tr>\n");
 
     if (bean.hasRequiredAncestorContracts())
     {
       String formattedAncestors = _formatTagList ( bean.requiredAncestorContracts(), 
-                                                   contractMap, 
-                                                   "Required Ancestor Tag");
-      out.write (formattedAncestors);
+                                                   contractMap,
+                                                   null);
+      out.write("<tr>\n");
+      out.write("<td><b>Required Ancestor Tag(s):</b></td>");
+      out.write ("<td>" + formattedAncestors + "</td>");
+      out.write("</tr>\n");
     }
 
     if (_isNamingContainer(bean))
     {
-      out.write("   <p><b>Naming container:</b>  Yes.  When referring to children of this " +
+      out.write("<tr>\n");
+      out.write("<td><b>Naming Container:</b></td>"); 
+      out.write("<td>Yes.  When referring to children of this " +
                 "component (\"partialTriggers\", <code>findComponent()</code>, etc.), " +
-                "you must prefix the child's ID with this component's ID and a colon (':').</p>");
+                "you must prefix the child's ID with this component's ID and a colon (':').</td>");
+      out.write("</tr>\n");
     }
       
     String fmtd = _formatPropList(bean.getUnsupportedAgents(),
-                                  "Unsupported agents",
+                                  null,
                                   _NON_DOCUMENTED_AGENTS);
     if (fmtd != null)
     {
-      out.write("   " + fmtd);
+      out.write("<tr>\n");
+      out.write("<td><b>Unsupported Agent(s):</b></td>");
+      out.write("<td>" + fmtd + "</td>");
+      out.write("</tr>\n");
     }
+    
+    out.write("</table>\n");
+    out.write("</div>\n");
 
     String doc = bean.getLongDescription();
     if (doc == null)
@@ -734,13 +771,20 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
   private void _writeValidatorSummary(Writer out, ValidatorBean bean) throws IOException
   {
-    out.write("   <b>Tag name:</b> &lt;" +
-              _getQualifiedName(bean.getTagName()) + "&gt;\n");
-    out.write("   <br/>\n");
+    out.write("<div class=\'summary\'>\n");
+    out.write("<table>\n");
+
+    out.write("<tr>\n");
+    out.write("<td><b>Tag Name:</b></td>");
+    out.write("<td>" + _getQualifiedName(bean.getTagName()) + "&gt;</td>\n");
+    out.write("</tr>\n");
     
-    out.write("   <br/>\n");
-    out.write("   <b> type:</b> " + bean.getValidatorId() +  "\n");
-    out.write("   <br/>\n");
+    out.write("<tr>\n");
+    out.write("<td><b>Type:</b></td>");
+    out.write("<td>" + bean.getValidatorId() +  "</td>\n");
+    out.write("</tr>\n");
+    out.write("</table>\n");
+    out.write("</div>\n");
 
     String doc = bean.getLongDescription();
     if (doc == null)
@@ -753,13 +797,20 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
   private void _writeConverterSummary(Writer out, ConverterBean bean) throws IOException
   {
-    out.write("   <b>Tag name:</b> &lt;" +
-              _getQualifiedName(bean.getTagName()) + "&gt;\n");
-    out.write("   <br/>\n");
+    out.write("<div class=\'summary\'>\n");
+    out.write("<table>\n");
+
+    out.write("<tr>\n");
+    out.write("<td><b>Tag Name:</b></td>");
+    out.write("<td>" + _getQualifiedName(bean.getTagName()) + "&gt;</td>\n");
+    out.write("</tr>\n");
     
-    out.write("   <br/>\n");
-    out.write("   <b> type:</b> " + bean.getConverterId() +  "\n");
-    out.write("   <br/>\n");
+    out.write("<tr>\n");
+    out.write("<td><b>Type:</b></td>");
+    out.write("<td>" + bean.getConverterId() +  "</td>\n");
+    out.write("</tr>\n");
+    out.write("</table>\n");
+    out.write("</div>\n");
 
     String doc = bean.getLongDescription();
     if (doc == null)
