@@ -129,12 +129,12 @@ public class GeneratorHelper
       String packageName,
       Set imports)
   {
-    Iterator iterator = imports.iterator();
+    Iterator<String> iterator = imports.iterator();
     iterator = new FilteredIterator(iterator,
         new PackageImportsFilter(packageName));
     while (iterator.hasNext())
     {
-      String className = (String) iterator.next();
+      String className = iterator.next();
       out.println("import " + className + ";");
     }
 

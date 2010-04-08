@@ -50,7 +50,7 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
 
     imports.add("org.apache.myfaces.trinidad.bean.FacesBean");
 
-    Iterator properties = component.properties();
+    Iterator<PropertyBean> properties = component.properties();
     properties = new FilteredIterator(properties, new NonVirtualFilter());
     // PropertyKey only needed if there are properties
     if (properties.hasNext())
@@ -60,7 +60,7 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
       PropertyFilter resolvable = new ResolvableTypeFilter();
       while (properties.hasNext())
       {
-        PropertyBean property = (PropertyBean) properties.next();
+        PropertyBean property = properties.next();
 
         // ComponentUtils only needed for resolvable properties
         if (resolvable.accept(property))
@@ -99,11 +99,11 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     out.unindent();
 
     //  component property keys
-    Iterator properties = component.properties();
+    Iterator<PropertyBean> properties = component.properties();
     properties = new FilteredIterator(properties, new NonVirtualFilter());
     while (properties.hasNext())
     {
-      PropertyBean property = (PropertyBean) properties.next();
+      PropertyBean property = properties.next();
       String propName = property.getPropertyName();
       String propKey = Util.getConstantNameFromProperty(propName, "_KEY");
       String propAlias = property.getAliasOf();

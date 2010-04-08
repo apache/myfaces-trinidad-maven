@@ -93,11 +93,11 @@ public abstract class AbstractTagGenerator {
       PrettyWriter  out,
       AbstractTagBean abstractTag) throws IOException
     {
-      Iterator properties = abstractTag.properties();
+      Iterator<PropertyBean> properties = abstractTag.properties();
       properties = new FilteredIterator(properties, new TagAttributeFilter());
       while (properties.hasNext())
       {
-        PropertyBean property = (PropertyBean)properties.next();
+        PropertyBean property = properties.next();
         out.println();
         writePropertyMember(out, property);
         writePropertySet(out, property);
@@ -136,7 +136,7 @@ public abstract class AbstractTagGenerator {
     PrettyWriter  out,
     AbstractTagBean abstractTag) throws IOException
   {
-    Iterator properties = abstractTag.properties();
+    Iterator<PropertyBean> properties = abstractTag.properties();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
     if (properties.hasNext())
     {
@@ -150,7 +150,7 @@ public abstract class AbstractTagGenerator {
       out.println("super.release();");
       while (properties.hasNext())
       {
-        PropertyBean property = (PropertyBean)properties.next();
+        PropertyBean property = properties.next();
         String propName = property.getPropertyName();
         String propVar = "_" + Util.getVariableFromName(propName);
         out.println(propVar + " = null;");
@@ -210,12 +210,12 @@ public abstract class AbstractTagGenerator {
   }
 
   protected void addImportsFromPropertes(AbstractTagBean abstractTagBean, Set imports) {
-    Iterator properties = abstractTagBean.properties();
+    Iterator<PropertyBean> properties = abstractTagBean.properties();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
 
     while (properties.hasNext())
     {
-      PropertyBean property = (PropertyBean)properties.next();
+      PropertyBean property = properties.next();
 
       String propertyClass = property.getPropertyClass();
       if (propertyClass != null)

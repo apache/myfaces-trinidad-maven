@@ -32,11 +32,11 @@ public class AbstractTagBean extends ObjectBean {
   private String       _longDescription;
   private QName        _tagName;
   private String       _tagClass;
-  protected Map        _properties;
+  protected Map<String, PropertyBean> _properties;
   private int          _tagClassModifiers;
-  private Map          _examples;
+  private Map<String, ExampleBean>    _examples;
   private int          _exampleIdx = 0;
-  private Map          _screenshots;
+  private Map<String, ScreenshotBean> _screenshots;
   private int          _screenshotIdx = 0;
   
   public AbstractTagBean() 
@@ -52,10 +52,10 @@ public class AbstractTagBean extends ObjectBean {
     // use the same properties.
     if (!isComponentBean)
     {
-      _properties = new LinkedHashMap();
+      _properties = new LinkedHashMap<String, PropertyBean>();
     }
-    _examples   = new LinkedHashMap();      
-    _screenshots = new LinkedHashMap();   
+    _examples   = new LinkedHashMap<String, ExampleBean>();      
+    _screenshots = new LinkedHashMap<String, ScreenshotBean>();   
   }
 
   /**
@@ -162,7 +162,7 @@ public class AbstractTagBean extends ObjectBean {
   public PropertyBean findProperty(
     String propertyName)
   {
-    return (PropertyBean)_properties.get(propertyName);
+    return _properties.get(propertyName);
   }
 
   /**
@@ -181,7 +181,7 @@ public class AbstractTagBean extends ObjectBean {
    *
    * @return  the property iterator
    */
-  public Iterator properties()
+  public Iterator<PropertyBean> properties()
   {
     return _properties.values().iterator();
   }
@@ -218,7 +218,7 @@ public class AbstractTagBean extends ObjectBean {
   public ExampleBean findExample(
     String key)
   {
-    return (ExampleBean)_examples.get(key);
+    return _examples.get(key);
   }
 
   /**
@@ -226,7 +226,7 @@ public class AbstractTagBean extends ObjectBean {
    *
    * @return  the example iterator
    */
-  public Iterator examples()
+  public Iterator<ExampleBean> examples()
   {
     return _examples.values().iterator();
   }
@@ -263,7 +263,7 @@ public class AbstractTagBean extends ObjectBean {
   public ScreenshotBean findScreenshot(
     String key)
   {
-    return (ScreenshotBean)_screenshots.get(key);
+    return _screenshots.get(key);
   }
 
   /**
@@ -271,7 +271,7 @@ public class AbstractTagBean extends ObjectBean {
   *
   * @return  the screenshot iterator
   */
-  public Iterator screenshots()
+  public Iterator<ScreenshotBean> screenshots()
   {
     return _screenshots.values().iterator();
   }

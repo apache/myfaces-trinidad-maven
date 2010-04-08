@@ -61,10 +61,10 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
   {
     Set imports = new TreeSet();
 
-    for (Iterator lIterator = components.iterator(); lIterator.hasNext();)
+    for (Iterator<ComponentBean> lIterator = components.iterator(); lIterator.hasNext();)
     {
-      ComponentBean component = (ComponentBean) lIterator.next();
-      Iterator properties = component.properties();
+      ComponentBean component = lIterator.next();
+      Iterator<PropertyBean> properties = component.properties();
       properties = new FilteredIterator(properties, new TagAttributeFilter());
 
       // TODO: remove these imports
@@ -81,7 +81,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
 
       while (properties.hasNext())
       {
-        PropertyBean property = (PropertyBean) properties.next();
+        PropertyBean property = properties.next();
 
         String propertyClass = property.getPropertyClass();
         String[] propertyClassParams = property.getPropertyClassParameters();
@@ -195,12 +195,12 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
   public void writePropertyMembers(PrettyWriter out,
                                    ComponentBean component) throws IOException
   {
-    Iterator properties = component.properties();
+    Iterator<PropertyBean> properties = component.properties();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
 
     while (properties.hasNext())
     {
-      PropertyBean property = (PropertyBean) properties.next();
+      PropertyBean property = properties.next();
       writePropertyDeclaration(out, property);
       writePropertySetter(out, property);
     }
@@ -209,9 +209,9 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
 
   public void writePropertyMembers(PrettyWriter out, Collection components) throws IOException
   {
-    for (Iterator lIterator = components.iterator(); lIterator.hasNext();)
+    for (Iterator<ComponentBean> lIterator = components.iterator(); lIterator.hasNext();)
     {
-      writePropertyMembers(out, (ComponentBean) lIterator.next());
+      writePropertyMembers(out, lIterator.next());
     }
   }
 

@@ -185,9 +185,9 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
   {
 
     Collection all = new HashSet();
-    for (Iterator lIterator = components.iterator(); lIterator.hasNext();)
+    for (Iterator<ComponentBean> lIterator = components.iterator(); lIterator.hasNext();)
     {
-      ComponentBean component = (ComponentBean) lIterator.next();
+      ComponentBean component = lIterator.next();
       Iterator prop = component.properties();
       while (prop.hasNext())
       {

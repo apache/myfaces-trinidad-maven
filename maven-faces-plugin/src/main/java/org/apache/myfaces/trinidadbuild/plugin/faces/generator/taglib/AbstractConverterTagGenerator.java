@@ -87,7 +87,7 @@ public abstract class AbstractConverterTagGenerator extends AbstractTagGenerator
     PrettyWriter  out,
     ConverterBean converter) throws IOException
   {
-    Iterator properties = converter.properties();
+    Iterator<PropertyBean> properties = converter.properties();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
     if (properties.hasNext())
     {
@@ -102,7 +102,7 @@ public abstract class AbstractConverterTagGenerator extends AbstractTagGenerator
       out.indent();
       while (properties.hasNext())
       {
-        PropertyBean property = (PropertyBean)properties.next();
+        PropertyBean property = properties.next();
         writeSetProperty(out, property);
       }
       out.unindent();

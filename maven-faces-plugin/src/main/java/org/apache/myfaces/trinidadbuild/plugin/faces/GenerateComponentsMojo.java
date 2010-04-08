@@ -84,7 +84,7 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
       if (suppressListenerMethods)
         getLog().warn("Event listener methods will not be generated");
 
-      Iterator components = facesConfig.components();
+      Iterator<ComponentBean> components = facesConfig.components();
       components = new FilteredIterator(components, new SkipFilter());
       components = new FilteredIterator(components,
                                         new ComponentTypeFilter(typePrefix));
@@ -102,7 +102,7 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
         int count = 0;
         while (components.hasNext())
         {
-          _generateComponent((ComponentBean)components.next());
+          _generateComponent(components.next());
           count++;
         }
         getLog().info("Generated " + count + " component(s)");

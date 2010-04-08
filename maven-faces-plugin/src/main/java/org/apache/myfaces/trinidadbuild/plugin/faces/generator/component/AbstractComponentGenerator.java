@@ -100,10 +100,10 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       out.println(" * <th align=\"left\">Phases</th>");
       out.println(" * <th align=\"left\">Description</th>");
       out.println(" * </tr>");
-      Iterator events = component.events(true);
+      Iterator<EventRefBean> events = component.events(true);
       while (events.hasNext())
       {
-        EventRefBean eventRef = (EventRefBean) events.next();
+        EventRefBean eventRef = events.next();
         EventBean event = eventRef.resolveEventType();
         if (event != null)
         {
@@ -156,10 +156,10 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     if (component.isClientBehaviorHolder())
       interfaces.add("javax.faces.component.behavior.ClientBehaviorHolder");
 
-    Iterator events = component.events();
+    Iterator<EventRefBean> events = component.events();
     while (events.hasNext())
     {
-      EventRefBean eventRef = (EventRefBean) events.next();
+      EventRefBean eventRef = events.next();
       EventBean event = eventRef.resolveEventType();
       if (event != null)
       {
@@ -249,14 +249,14 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       imports.add("javax.faces.component.behavior.ClientBehaviorHolder");
     }
 
-    Iterator properties = component.properties();
+    Iterator<PropertyBean> properties = component.properties();
     properties = new FilteredIterator(properties, new NonVirtualFilter());
     // PropertyKey only needed if there are properties
     if (properties.hasNext())
     {
       while (properties.hasNext())
       {
-        PropertyBean property = (PropertyBean) properties.next();
+        PropertyBean property = properties.next();
         String propertyClass = property.getPropertyClass();
         if (propertyClass != null)
         {
@@ -279,10 +279,10 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     if (facets.hasNext())
       imports.add("javax.faces.component.UIComponent");
 
-    Iterator events = component.events();
+    Iterator<EventRefBean> events = component.events();
     while (events.hasNext())
     {
-      EventRefBean eventRef = (EventRefBean) events.next();
+      EventRefBean eventRef = events.next();
       EventBean event = eventRef.resolveEventType();
 
       if (event == null)
@@ -376,11 +376,11 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       ComponentBean component) throws IOException
   {
     //  component property keys
-    Iterator properties = component.properties();
+    Iterator<PropertyBean> properties = component.properties();
     properties = new FilteredIterator(properties, new NonVirtualFilter());
     while (properties.hasNext())
     {
-      PropertyBean property = (PropertyBean) properties.next();
+      PropertyBean property = properties.next();
       String[] propertyValues = property.getPropertyValues();
 
       if (propertyValues != null)
@@ -406,10 +406,10 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       PrettyWriter out,
       ComponentBean component) throws IOException
   {
-    Iterator facets = component.facets();
+    Iterator<FacetBean> facets = component.facets();
     while (facets.hasNext())
     {
-      FacetBean facet = (FacetBean) facets.next();
+      FacetBean facet = facets.next();
       String facetName = facet.getFacetName();
       String facetKey = Util.getConstantNameFromProperty(facetName, "_FACET");
       out.println("static public final " +
@@ -609,11 +609,11 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
   public void writePropertyMethods(PrettyWriter out, ComponentBean component, Collection ignoreList)
       throws IOException
   {
-    Iterator properties = component.properties();
+    Iterator<PropertyBean> properties = component.properties();
     properties = new FilteredIterator(properties, new NonVirtualFilter());
     while (properties.hasNext())
     {
-      PropertyBean property = (PropertyBean) properties.next();
+      PropertyBean property = properties.next();
       if (property.isList())
         writePropertyListMethods(out, property, ignoreList);
       else
@@ -821,10 +821,10 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       PrettyWriter out,
       ComponentBean component) throws IOException
   {
-    Iterator facets = component.facets();
+    Iterator<FacetBean> facets = component.facets();
     while (facets.hasNext())
     {
-      FacetBean facet = (FacetBean) facets.next();
+      FacetBean facet = facets.next();
       writeFacetGet(out, facet);
       writeFacetSet(out, facet);
     }
@@ -907,10 +907,10 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       PrettyWriter out,
       ComponentBean component) throws IOException
   {
-    Iterator events = component.events();
+    Iterator<EventRefBean> events = component.events();
     while (events.hasNext())
     {
-      EventRefBean eventRef = (EventRefBean) events.next();
+      EventRefBean eventRef = events.next();
       EventBean event = eventRef.resolveEventType();
       if (event != null)
       {

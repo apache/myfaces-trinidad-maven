@@ -49,9 +49,9 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
   {
     imports.add("javax.faces.context.FacesContext");
     imports.add("javax.el.ValueExpression");
-    for (Iterator lIterator = component.properties(); lIterator.hasNext();)
+    for (Iterator<PropertyBean> lIterator = component.properties(); lIterator.hasNext();)
     {
-      PropertyBean lPropertyBean = (PropertyBean) lIterator.next();
+      PropertyBean lPropertyBean = lIterator.next();
       if (GeneratorHelper.isValidator(lPropertyBean, _is12))
       {
         imports.add("javax.faces.validator.Validator");
@@ -297,9 +297,9 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
     // first we count the primitive properties, because for each primitive property
     // we save a new property that says if the property has been set or not
     int primitivePropertiesCount = 0;
-    for (Iterator iterator = component.properties(); iterator.hasNext();)
+    for (Iterator<PropertyBean> iterator = component.properties(); iterator.hasNext();)
     {
-      PropertyBean property = (PropertyBean) iterator.next();
+      PropertyBean property = iterator.next();
       if (Util.isPrimitiveClass(property.getPropertyClass()))
       {
         primitivePropertiesCount++;
@@ -321,9 +321,9 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
 
     int propIndex = 1;
 
-    for (Iterator iterator = component.properties(); iterator.hasNext();)
+    for (Iterator<PropertyBean> iterator = component.properties(); iterator.hasNext();)
     {
-      PropertyBean property = (PropertyBean) iterator.next();
+      PropertyBean property = iterator.next();
       String varName = property.getFieldPropertyName();
 
       if (property.isStateHolder())
@@ -381,9 +381,9 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
 
     int propIndex = 1;
 
-    for (Iterator iterator = component.properties(); iterator.hasNext();)
+    for (Iterator<PropertyBean> iterator = component.properties(); iterator.hasNext();)
     {
-      PropertyBean property = (PropertyBean) iterator.next();
+      PropertyBean property = iterator.next();
 
       String varName = property.getFieldPropertyName();
       String propFullClass = property.getPropertyClass();

@@ -44,9 +44,9 @@ public class ComponentBean extends AbstractTagBean
   public ComponentBean()
   {
     super(true);
-    _properties = new LinkedHashMap();
-    _facets = new LinkedHashMap();
-    _events = new LinkedHashMap();
+    _properties = new LinkedHashMap<String, PropertyBean>();
+    _facets = new LinkedHashMap<String, FacetBean>();
+    _events = new LinkedHashMap<String, EventRefBean>();
   }
 
   /**
@@ -467,7 +467,7 @@ public class ComponentBean extends AbstractTagBean
   public PropertyBean findProperty(
     String propertyName)
   {
-    return (PropertyBean)_properties.get(propertyName);
+    return _properties.get(propertyName);
   }
 
   /**
@@ -528,7 +528,7 @@ public class ComponentBean extends AbstractTagBean
    *
    * @return  the property iterator
    */
-  public Iterator properties()
+  public Iterator<PropertyBean> properties()
   {
     return _properties.values().iterator();
   }
@@ -542,7 +542,7 @@ public class ComponentBean extends AbstractTagBean
    *
    * @return  the property iterator
    */
-  public Iterator properties(
+  public Iterator<PropertyBean> properties(
     boolean flatten)
   {
     if (flatten)
@@ -562,9 +562,9 @@ public class ComponentBean extends AbstractTagBean
     if (parent != null)
     {
       Map superProps = parent.getFlattenedProperties();
-      for (Iterator iter = superProps.entrySet().iterator(); iter.hasNext(); )
+      for (Iterator<Map.Entry> iter = superProps.entrySet().iterator(); iter.hasNext(); )
       {
-        Map.Entry entry = (Map.Entry)iter.next();
+        Map.Entry entry = iter.next();
         if (!props.containsKey(entry.getKey()))
         {
           props.put(entry.getKey(), entry.getValue());
@@ -602,7 +602,7 @@ public class ComponentBean extends AbstractTagBean
   public FacetBean findFacet(
     String facetName)
   {
-    return (FacetBean)_facets.get(facetName);
+    return _facets.get(facetName);
   }
 
   public FacetBean findFacet(
@@ -658,7 +658,7 @@ public class ComponentBean extends AbstractTagBean
    *
    * @return  the facet iterator
    */
-  public Iterator facets()
+  public Iterator<FacetBean> facets()
   {
     return _facets.values().iterator();
   }
@@ -672,7 +672,7 @@ public class ComponentBean extends AbstractTagBean
   *
   * @return  the facet iterator
   */
-  public Iterator facets(
+  public Iterator<FacetBean> facets(
    boolean flatten)
   {
     if (flatten)
@@ -692,9 +692,9 @@ public class ComponentBean extends AbstractTagBean
     if (parent != null)
     {
       Map superFacets = parent.getFlattenedFacets();
-      for (Iterator iter = superFacets.entrySet().iterator(); iter.hasNext(); )
+      for (Iterator<Map.Entry> iter = superFacets.entrySet().iterator(); iter.hasNext(); )
       {
-        Map.Entry entry = (Map.Entry)iter.next();
+        Map.Entry entry = iter.next();
         if (!facets.containsKey(entry.getKey()))
         {
           facets.put(entry.getKey(), entry.getValue());
@@ -1011,17 +1011,17 @@ public class ComponentBean extends AbstractTagBean
    *
    * @param eventName  the event name to find
    */
-  public EventBean findEvent(
+  public EventRefBean findEvent(
     String eventName)
   {
-    return (EventBean)_events.get(eventName);
+    return _events.get(eventName);
   }
 
-  public EventBean findEvent(
+  public EventRefBean findEvent(
     String eventName,
     boolean flatten)
   {
-    EventBean event = findEvent(eventName);
+    EventRefBean event = findEvent(eventName);
     if (event == null && flatten)
     {
       ComponentBean parent = resolveSupertype();
@@ -1037,7 +1037,7 @@ public class ComponentBean extends AbstractTagBean
    *
    * @return  the event iterator
    */
-  public Iterator events()
+  public Iterator<EventRefBean> events()
   {
     return _events.values().iterator();
   }
@@ -1051,10 +1051,10 @@ public class ComponentBean extends AbstractTagBean
   *
   * @return  the event iterator
   */
-  public Iterator events(
+  public Iterator<EventRefBean> events(
    boolean flatten)
   {
-    Iterator events = events();
+    Iterator<EventRefBean> events = events();
     if (flatten)
     {
       ComponentBean parent = resolveSupertype();
@@ -1220,10 +1220,10 @@ public class ComponentBean extends AbstractTagBean
     FacesConfigBean owner)
   {
     super.attach(owner);
-    Iterator events = events(false);
+    Iterator<EventRefBean> events = events(false);
     while (events.hasNext())
     {
-      EventRefBean eventRef = (EventRefBean)events.next();
+      EventRefBean eventRef = events.next();
       eventRef.attach(owner);
     }
   }
@@ -1245,9 +1245,9 @@ public class ComponentBean extends AbstractTagBean
   private String  _defaultEventName;
   private boolean _namingContainer;
   private boolean _children = true;
-  private Map     _properties;
-  private Map     _facets;
-  private Map     _events;
+  private Map<String, PropertyBean> _properties;
+  private Map<String, FacetBean>    _facets;
+  private Map<String, EventRefBean>    _events;
   private int     _componentClassModifiers;
   private int     _tagClassModifiers;
   private String[] _unsupportedAgents = new String[0];
