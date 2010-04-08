@@ -106,6 +106,8 @@ public class FacesConfigParser
                                      "componentType");
       digester.addBeanPropertySetter("faces-config/component/component-class",
                                      "componentClass");
+      digester.addBeanPropertySetter("faces-config/component/js-component-class",
+                                     "jsComponentClass");      
       digester.addBeanPropertySetter("faces-config/component/description");
       digester.addSetNext("faces-config/component", "addComponent",
                           ComponentBean.class.getName());
