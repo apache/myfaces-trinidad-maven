@@ -322,7 +322,8 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     // In the case of the component summary, the header is written out in a separate table cell, and so no
     // header text is passed into this method
-    if (header != null && !header.isEmpty())
+    // TODO use !header.isEmpty() on jdk1.6
+    if (header != null && !(header.length() == 0))
     {
       sb.append("<b>");
       sb.append(header);
@@ -384,7 +385,8 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
       // In the case of the component summary section the header text is written out
       // in a separate table cell, so no header text is passed into this method
-      if (header != null && !header.isEmpty())
+      // TODO use !header.isEmpty() on jdk1.6
+      if (header != null && !(header.length() == 0))
       {
         sb.append("<b>");
         sb.append(header);
@@ -698,7 +700,8 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     // Write out the corresponding Java Script class for this component with a link to its JavaScript doc
     String jsClass = bean.getJsComponentClass();
-    if (jsClass != null && !jsClass.isEmpty()) 
+    // TODO use !header.isEmpty() on jdk1.6
+    if (jsClass != null && !(jsClass.length() == 0)) 
     {
       out.write("<tr>\n");
       out.write("<td><b>JavaScript Class:</b></td>");
