@@ -38,7 +38,7 @@ public class TrinidadValidatorTagGenerator extends AbstractValidatorTagGenerator
 
     if (is12())
     {
-      imports.add("javax.faces.webapp.ValidatorELTag");
+      imports.add("org.apache.myfaces.trinidadinternal.taglib.ValidatorELTag");
       imports.add("javax.faces.context.FacesContext");
       imports.add("javax.faces.application.Application");
     }

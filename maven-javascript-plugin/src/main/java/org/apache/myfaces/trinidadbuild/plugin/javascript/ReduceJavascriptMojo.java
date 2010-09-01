@@ -55,7 +55,10 @@ public class ReduceJavascriptMojo extends AbstractMojo
     {
       Resource resource = new Resource();
       resource.setDirectory(targetDirectory.getCanonicalPath());
-      project.addResource(resource);
+      if (!this.addResource) 
+      {
+        project.addResource(resource);
+      }
 
       // TODO: switch Optimized, not Debug, to be the special-case
       //       so that Debug can be processed as ordinary resource copy
@@ -162,4 +165,8 @@ public class ReduceJavascriptMojo extends AbstractMojo
    */
   private String optimizeTargetPath;
 
+  /**
+   * @parameter
+   */
+  private boolean addResource;
 }

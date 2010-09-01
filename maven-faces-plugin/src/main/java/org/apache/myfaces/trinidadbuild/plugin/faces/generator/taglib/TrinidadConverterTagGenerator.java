@@ -38,7 +38,7 @@ public class TrinidadConverterTagGenerator extends AbstractConverterTagGenerator
 
     if (is12())
     {
-      imports.add("javax.faces.webapp.ConverterELTag");
+      imports.add("org.apache.myfaces.trinidadinternal.taglib.ConverterELTag");
       imports.add("javax.faces.context.FacesContext");
       imports.add("javax.faces.application.Application");
     }
