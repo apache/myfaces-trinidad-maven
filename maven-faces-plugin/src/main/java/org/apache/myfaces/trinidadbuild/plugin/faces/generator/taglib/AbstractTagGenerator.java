@@ -181,7 +181,7 @@ public abstract class AbstractTagGenerator {
 
   protected void writeImports(
     PrettyWriter   out,
-    AbstractTagBean  abstractTagBean, Set imports)
+    AbstractTagBean  abstractTagBean, Set<String> imports)
   {
 
     // do not import implicit!
@@ -191,7 +191,7 @@ public abstract class AbstractTagGenerator {
     GeneratorHelper.writeImports(out, packageName, imports);
   }
 
-  protected final void writeHeader(PrettyWriter out, AbstractTagBean converter, Set imports) {
+  protected final void writeHeader(PrettyWriter out, AbstractTagBean converter, Set<String> imports) {
     String packageName = Util.getPackageFromFullClass(converter.getTagClass());
     // header/copyright
     writePreamble(out);
@@ -209,7 +209,7 @@ public abstract class AbstractTagGenerator {
     out.println(" */");
   }
 
-  protected void addImportsFromPropertes(AbstractTagBean abstractTagBean, Set imports) {
+  protected void addImportsFromPropertes(AbstractTagBean abstractTagBean, Set<String> imports) {
     Iterator<PropertyBean> properties = abstractTagBean.properties();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
 
@@ -242,9 +242,9 @@ public abstract class AbstractTagGenerator {
   // TODO: for everything but Locale, String[], Date, and TimeZone,
   // in JSF 1.2 we should already be going through coercion, and
   // not need any of the "TagUtils" functions
-  private Map _createResolvableTypes()
+  private Map<String, String> _createResolvableTypes()
   {
-    Map resolvableTypes = new HashMap();
+    Map<String, String> resolvableTypes = new HashMap<String, String>();
 
     resolvableTypes.put("boolean", "Boolean");
     resolvableTypes.put("char", "Character");

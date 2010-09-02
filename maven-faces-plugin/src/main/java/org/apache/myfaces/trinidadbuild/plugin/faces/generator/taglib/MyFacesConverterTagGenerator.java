@@ -33,8 +33,8 @@ public class MyFacesConverterTagGenerator extends AbstractConverterTagGenerator 
     super(is12, licenseHeader, log);
   }
 
-  protected Set createImports(ConverterBean converter) {
-    Set imports = new TreeSet();
+  protected Set<String> createImports(ConverterBean converter) {
+    Set<String> imports = new TreeSet<String>();
 
     if (is12())
     {
