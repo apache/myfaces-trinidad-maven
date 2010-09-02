@@ -33,12 +33,12 @@ public class TrinidadValidatorTagGenerator extends AbstractValidatorTagGenerator
     super(_is12, _licenseHeader, _log);
   }
 
-  protected Set createImports(ValidatorBean validator) {
-    Set imports = new TreeSet();
+  protected Set<String> createImports(ValidatorBean validator) {
+    Set<String> imports = new TreeSet<String>();
 
     if (is12())
     {
-      imports.add("org.apache.myfaces.trinidadinternal.taglib.ValidatorELTag");
+      imports.add("javax.faces.webapp.ValidatorELTag");
       imports.add("javax.faces.context.FacesContext");
       imports.add("javax.faces.application.Application");
     }

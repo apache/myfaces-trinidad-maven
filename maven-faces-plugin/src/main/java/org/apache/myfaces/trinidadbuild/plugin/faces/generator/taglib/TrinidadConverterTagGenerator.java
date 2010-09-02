@@ -33,12 +33,12 @@ public class TrinidadConverterTagGenerator extends AbstractConverterTagGenerator
     super(is12, licenseHeader, log);
   }
 
-  protected Set createImports(ConverterBean converter) {
-    Set imports = new TreeSet();
+  protected Set<String> createImports(ConverterBean converter) {
+    Set<String> imports = new TreeSet<String>();
 
     if (is12())
     {
-      imports.add("org.apache.myfaces.trinidadinternal.taglib.ConverterELTag");
+      imports.add("javax.faces.webapp.ConverterELTag");
       imports.add("javax.faces.context.FacesContext");
       imports.add("javax.faces.application.Application");
     }
