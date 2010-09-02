@@ -203,8 +203,6 @@ public abstract class AbstractTagGenerator {
     writeImports(out, converter, imports);
 
     out.println("/**");
-    // TODO: remove this blank line.
-    out.println();
     out.println(" * Auto-generated tag class.");
     out.println(" */");
   }
