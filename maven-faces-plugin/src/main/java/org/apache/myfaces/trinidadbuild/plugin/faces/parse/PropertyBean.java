@@ -524,6 +524,24 @@ public class PropertyBean extends AttributeBean
     return _valueExpression;
   }
 
+  /**
+   * Set if this property is overridding a property in an ancestor class.
+   * @param override if overridding a property
+   */
+  public void setOverride(boolean override)
+  {
+    this._override = override;
+  }
+
+  /**
+   * Get if this property is overridding a property in an ancestor class.
+   * @return If the property is an overide
+   */
+  public boolean isOverride()
+  {
+    return _override;
+  }
+
   private String  _aliasOf;
   private String  _jspPropertyName;
   private String  _fieldPropertyName;
@@ -537,6 +555,7 @@ public class PropertyBean extends AttributeBean
   private boolean _enum;
   private boolean _useMaxTime;
   private boolean _hidden;
+  private boolean _override;
   private String[] _propertyValues;
   private String[] _unsupportedAgents = _EMPTY_ARRAY;
   private String[] _unsupportedRenderKits = _EMPTY_ARRAY;

@@ -19,10 +19,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -56,9 +58,12 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.util.ConverterFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.ValidatorFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
+
 import org.codehaus.plexus.util.FileUtils;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+
 
 abstract public class AbstractFacesMojo extends AbstractMojo
 {
@@ -117,7 +122,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
       } catch (MalformedURLException e) {
         getLog().error("", e);
       }
-      return urls;  
+      return urls;
     }
     else
     {
@@ -218,7 +223,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     {
       return _DEFAULT_LICENSE_HEADER;
     }
-    
+
     if (!licenseHeaderFile.exists())
     {
       throw new MojoExecutionException("License header file not found: "
@@ -232,12 +237,12 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     }
 
     StringBuffer sb = new StringBuffer();
-    
+
     try
     {
       BufferedReader reader = new BufferedReader(new FileReader(licenseHeaderFile));
       String line;
-      
+
       while ((line = reader.readLine()) != null)
       {
         sb.append(line+"\n");
@@ -247,17 +252,17 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     {
       throw new MojoExecutionException("Exception reading license header file", e);
     }
-    
+
     return sb.toString();
   }
-  
+
   protected String getLicenseHeader() throws MojoExecutionException
   {
     if (_licenseHeader == null)
     {
       _licenseHeader = readLicenseHeader();
     }
-    
+
     return _licenseHeader;
   }
 
@@ -286,6 +291,9 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     {
       processIndexEntry(index[i]);
     }
+
+    // Perform any post-processing
+    _facesConfig.performPostProcessing();
   }
 
   protected void processIndexEntry(
@@ -408,7 +416,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     protected boolean accept(
       ComponentBean component)
     {
-      String componentType = component.getComponentType();        
+      String componentType = component.getComponentType();
       return (componentType.startsWith(_typePrefix));
     }
      private final String _typePrefix;
@@ -498,7 +506,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     private final String _packageContains;
   }
 
-  
+
 
   static final protected class ComponentTagFilter extends ComponentFilter
   {
@@ -680,4 +688,4 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     " * under the License.\n" +
     "*/\n";
 }
-  
+

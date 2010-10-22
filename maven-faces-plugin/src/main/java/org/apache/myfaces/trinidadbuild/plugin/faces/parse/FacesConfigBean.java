@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,10 +19,12 @@
 package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
 
 import java.net.URL;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+
 
 /**
  * FacesConfigBean is a Java representation of the faces-config XML element.
@@ -296,12 +298,45 @@ public class FacesConfigBean extends ObjectBean
   {
     return _currentResource;
   }
-  
+
   public URL setCurrentResource(URL resource)
   {
     URL _cur = _currentResource;
     _currentResource = resource;
     return _cur;
+  }
+
+  /**
+   * Performs any processing of the meta-data that must be performed after all of the
+   * meta-data has been collected. This includes processing on super-class data and other
+   * inter-related computations that cannot be done as the data is being parsed.
+   */
+  public void performPostProcessing()
+  {
+    _identifyOverriddenProperies();
+  }
+
+  private void _identifyOverriddenProperies()
+  {
+    for (ComponentBean component : _components.values())
+    {
+      ComponentBean parentComponent = component.resolveSupertype();
+      if (parentComponent == null)
+      {
+        continue;
+      }
+
+      for (Iterator<PropertyBean> iter = component.properties(); iter.hasNext();)
+      {
+        PropertyBean property = iter.next();
+        PropertyBean parentProperty = parentComponent.findProperty(property.getPropertyName(),
+                                        true);
+        if (parentProperty != null)
+        {
+          property.setOverride(true);
+        }
+      }
+    }
   }
 
   private Map<String, ConverterBean> _converters = new TreeMap<String, ConverterBean>();
