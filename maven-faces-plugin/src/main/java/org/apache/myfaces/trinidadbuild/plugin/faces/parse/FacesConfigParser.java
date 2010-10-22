@@ -326,6 +326,7 @@ public class FacesConfigParser
                            "parsePropertyValues", 1);
     digester.addCallParam("faces-config/component/property/property-extension/property-metadata/property-values", 0);
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/deprecated");
+    digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/hidden");
 
     digester.setRuleNamespaceURI(oldNamespace);
   }

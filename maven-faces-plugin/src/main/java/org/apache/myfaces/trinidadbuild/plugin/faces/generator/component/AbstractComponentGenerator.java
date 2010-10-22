@@ -583,6 +583,11 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
   {
     Iterator<PropertyBean> properties = component.properties();
     properties = new FilteredIterator(properties, new NonVirtualFilter());
+    if (isAccessorMethodFinal())
+    {
+      // Do not generate property methods if they are final and the properties are overrides
+      properties = new FilteredIterator(properties, new NonOverriddenFilter());
+    }
     while (properties.hasNext())
     {
       PropertyBean property = properties.next();
@@ -1043,6 +1048,16 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
         PropertyBean property)
     {
       return (!property.isVirtual());
+    }
+  }
+
+  protected static class NonOverriddenFilter
+    extends PropertyFilter
+  {
+    protected boolean accept(
+      PropertyBean property)
+    {
+      return (!property.isOverride());
     }
   }
 

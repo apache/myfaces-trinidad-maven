@@ -882,8 +882,10 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   private void _writeComponentAttributes(Writer out, ComponentBean bean) throws IOException
   {
     // Sort the names
-    TreeSet attributes = new TreeSet();
+    TreeSet<String> attributes = new TreeSet<String>();
     Iterator<PropertyBean> attrs = bean.properties(true);
+    attrs = new FilteredIterator(attrs, new NonHiddenFilter());
+
     while (attrs.hasNext())
     {
       PropertyBean property = attrs.next();
@@ -892,7 +894,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
     // Now get a list of PropertyBeans
-    List list = new ArrayList();
+    List<PropertyBean> list = new ArrayList<PropertyBean>();
     Iterator<String> iter = attributes.iterator();
     while (iter.hasNext())
     {
@@ -900,8 +902,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       list.add(bean.findProperty(attrName, true));
     }
     
-
-    TreeSet groups = new TreeSet(new GroupComparator());
+    TreeSet<String> groups = new TreeSet<String>(new GroupComparator());
     /* No current support for grouping
     // Make sure "null" is the representative for unknown groups
     Iterator iter = attributes.iterator();
@@ -926,9 +927,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
                                 bean.getComponentClass(),
                                 groupIter.next());
     }
-
   }
-
 
   private void _writeConverterAttributes(Writer out, ConverterBean bean) throws IOException
   {
@@ -999,11 +998,6 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     {
       PropertyBean attr = attributes.next();
       
-      if (attr.isHidden())
-      {
-        continue;
-      }
-
       /*
       if ((group == null) || "Ungrouped".equals(group))
       {
@@ -1723,8 +1717,6 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
-
-
   private class ComponentNamespaceFilter extends ComponentFilter
   {
     public ComponentNamespaceFilter()
@@ -1773,8 +1765,6 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
-
-
   static final protected class TagAttributeFilter extends PropertyFilter
   {
     protected boolean accept(
@@ -1811,10 +1801,16 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
+  final protected static class NonHiddenFilter extends PropertyFilter
+  {
+    protected boolean accept(
+        PropertyBean property)
+    {
+      return (!property.isHidden());
+    }
+  }
 
   private FacesConfigBean _facesConfig;
-
-
 
   // todo: make this configurable?
   private boolean _attrDocSpansColumns = false;
