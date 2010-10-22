@@ -134,13 +134,13 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     compIter = new FilteredIterator(compIter, new SkipFilter());
     compIter = new FilteredIterator(compIter, new ComponentTagFilter());
     compIter = new FilteredIterator(compIter, new ComponentNamespaceFilter());
-    
+
     // compTypeMap holds a map of compononent types to tag names that implement that component type
-    // The map is built using getComponentType method on the component bean to determine the 
+    // The map is built using getComponentType method on the component bean to determine the
     // component type of a given tag name
     Map<String, List<QName>>  compTypeMap = new HashMap<String, List<QName>> ();
     // contractMap holds a map of contract name to tag names that satisify that contract.
-    // The map is built using the getSatisfiedContracts method API on the component bean to determine 
+    // The map is built using the getSatisfiedContracts method API on the component bean to determine
     // which contracts are satisfied for a given tagname
     Map<String, List<QName>> contractMap = new HashMap<String, List<QName>>();
     while (compIter.hasNext())
@@ -149,21 +149,21 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       List<QName> tagNames;
       String compType = compBean.getComponentType();
       if (compType != null &&
-          compTypeMap.containsKey (compType) && 
-          compBean.getTagName() != null) 
+          compTypeMap.containsKey (compType) &&
+          compBean.getTagName() != null)
       {
         // the component type map already contains an entry for this component type
         tagNames = compTypeMap.get(compType);
-      } 
-      else 
+      }
+      else
       {
         // the component type map does not contain an entry for this component type
-        // so create a new ArrayList that will be used to store the tag names of 
+        // so create a new ArrayList that will be used to store the tag names of
         // component that have this component type
         tagNames = new ArrayList<QName>();
       }
       tagNames.add(compBean.getTagName());
-      compTypeMap.put (compType, tagNames);      
+      compTypeMap.put (compType, tagNames);
 
       if (compBean.hasSatisfiedContracts())
       {
@@ -173,12 +173,12 @@ public class TagdocReport extends AbstractMavenMultiPageReport
           String satContract = satContractsIter.next();
           if (contractMap.containsKey (satContract))
           {
-            // the contract map already contains an entry for this contract 
+            // the contract map already contains an entry for this contract
             tagNames = contractMap.get(satContract);
           }
           else
           {
-            // the contract map does not contain an entry for this contract, so 
+            // the contract map does not contain an entry for this contract, so
             // create a new ArrayList which will be used to store the tag names of
             // components that satisfy this contract
             tagNames = new ArrayList<QName>();
@@ -320,7 +320,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     String header)
   {
     String formatted = null;
-    
+
     // Don't know how long this will be, but 300 should be plenty.
     StringBuffer sb = new StringBuffer(300);
     sb.append("\n");
@@ -334,7 +334,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       sb.append(":</b> ");
     }
 
-    boolean gotOne = false;    
+    boolean gotOne = false;
     while (strIter.hasNext())
     {
       List<QName> tagNameList = pMap.get(strIter.next());
@@ -443,13 +443,13 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     sink.text("Tag Name");
     sink.tableHeaderCell_();
     sink.tableRow_();
-    
+
     Iterator<String> iter = pages.iterator();
     while (iter.hasNext())
     {
       sink.tableRow();
       sink.tableCell();
-      
+
       String name = iter.next();
       String tagName = "<" + name.replace('_', ':') + ">";
 
@@ -712,7 +712,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     // Write out the corresponding Java Script class for this component with a link to its JavaScript doc
     String jsClass = bean.getJsComponentClass();
-    if (jsClass != null && !jsClass.isEmpty()) 
+    if (jsClass != null && !jsClass.isEmpty())
     {
       out.write("<tr>\n");
       out.write("<td><b>JavaScript Class:</b></td>");
@@ -730,7 +730,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     if (bean.hasRequiredAncestorContracts())
     {
-      String formattedAncestors = _formatTagList ( bean.requiredAncestorContracts(), 
+      String formattedAncestors = _formatTagList ( bean.requiredAncestorContracts(),
                                                    contractMap,
                                                    null);
       out.write("<tr>\n");
@@ -742,7 +742,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     if (_isNamingContainer(bean))
     {
       out.write("<tr>\n");
-      out.write("<td><b>Naming Container:</b></td>"); 
+      out.write("<td><b>Naming Container:</b></td>");
       out.write("<td>Yes.  When referring to children of this " +
                 "component (\"partialTriggers\", <code>findComponent()</code>, etc.), " +
                 "you must prefix the child's ID with this component's ID and a colon (':').</td>");
@@ -792,7 +792,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("<td><b>Tag Name:</b></td>");
     out.write("<td>" + _getQualifiedName(bean.getTagName()) + "&gt;</td>\n");
     out.write("</tr>\n");
-    
+
     out.write("<tr>\n");
     out.write("<td><b>Type:</b></td>");
     out.write("<td>" + bean.getValidatorId() +  "</td>\n");
@@ -893,8 +893,10 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   private void _writeComponentAttributes(Writer out, ComponentBean bean) throws IOException
   {
     // Sort the names
-    TreeSet attributes = new TreeSet();
+    TreeSet<String> attributes = new TreeSet<String>();
     Iterator<PropertyBean> attrs = bean.properties(true);
+    attrs = new FilteredIterator(attrs, new NonHiddenFilter());
+
     while (attrs.hasNext())
     {
       PropertyBean property = attrs.next();
@@ -903,7 +905,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
     // Now get a list of PropertyBeans
-    List list = new ArrayList();
+    List<PropertyBean> list = new ArrayList<PropertyBean>();
     Iterator<String> iter = attributes.iterator();
     while (iter.hasNext())
     {
@@ -911,8 +913,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       list.add(bean.findProperty(attrName, true));
     }
 
-
-    TreeSet groups = new TreeSet(new GroupComparator());
+    TreeSet<String> groups = new TreeSet<String>(new GroupComparator());
     /* No current support for grouping
     // Make sure "null" is the representative for unknown groups
     Iterator iter = attributes.iterator();
@@ -937,9 +938,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
                                 bean.getComponentClass(),
                                 groupIter.next());
     }
-
   }
-
 
   private void _writeConverterAttributes(Writer out, ConverterBean bean) throws IOException
   {
@@ -1009,11 +1008,6 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     while (attributes.hasNext())
     {
       PropertyBean attr = attributes.next();
-      
-      if (attr.isHidden())
-      {
-        continue;
-      }
 
       /*
       if ((group == null) || "Ungrouped".equals(group))
@@ -1120,15 +1114,15 @@ public class TagdocReport extends AbstractMavenMultiPageReport
         {
           out.write(valStr);
         }
-        
+
         if (defaultValueStr != null)
         {
           out.write(defaultValueStr);
         }
-        
-        // if we print out a list of possible values and/or a default value for the attribute, 
+
+        // if we print out a list of possible values and/or a default value for the attribute,
         // then enter a line break before printing out other information about the attribute.
-        if (valStr != null || defaultValueStr != null) 
+        if (valStr != null || defaultValueStr != null)
         {
           out.write("<br/>");
         }
@@ -1432,7 +1426,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   // guidelines
   private void _writeAccessibilityGuidelines(Writer out, ComponentBean bean) throws IOException
   {
-    // accAttributes and accFacets are sorted lists of attributes and facets, respectively, 
+    // accAttributes and accFacets are sorted lists of attributes and facets, respectively,
     // that have an associated accessibility guideline
     TreeSet<PropertyBean> accAttributes = new TreeSet<PropertyBean>();
     TreeSet<String> accFacets = new TreeSet<String>();
@@ -1449,7 +1443,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
     // see if any of the component's facets has an associated accessibility guideline
-    if (bean.hasFacets()) 
+    if (bean.hasFacets())
     {
       Iterator<FacetBean> facets = bean.facets(true);
       while (facets.hasNext())
@@ -1540,11 +1534,11 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("    <div class=\'accGuideline\'>\n");
     out.write("<li>");
 
-    if (!"".equals(referenceName)) 
+    if (!"".equals(referenceName))
     {
       out.write("<b>");
       out.write(referenceName);
-      out.write("</b>: ");    
+      out.write("</b>: ");
     }
 
     if (desc != null)
@@ -1553,7 +1547,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       {
         out.write(desc + "\n");
       }
-    } 
+    }
 
     out.write("</li>");
     out.write("    </div>\n");
@@ -1767,8 +1761,6 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
-
-
   private class ComponentNamespaceFilter extends ComponentFilter
   {
     public ComponentNamespaceFilter()
@@ -1817,8 +1809,6 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
-
-
   static final protected class TagAttributeFilter extends PropertyFilter
   {
     protected boolean accept(
@@ -1855,10 +1845,16 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
+  final protected static class NonHiddenFilter extends PropertyFilter
+  {
+    protected boolean accept(
+        PropertyBean property)
+    {
+      return (!property.isHidden());
+    }
+  }
 
   private FacesConfigBean _facesConfig;
-
-
 
   // todo: make this configurable?
   private boolean _attrDocSpansColumns = false;

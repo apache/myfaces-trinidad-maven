@@ -107,7 +107,7 @@ public class FacesConfigParser
       digester.addBeanPropertySetter("faces-config/component/component-class",
                                      "componentClass");
       digester.addBeanPropertySetter("faces-config/component/js-component-class",
-                                     "jsComponentClass");      
+                                     "jsComponentClass");
       digester.addBeanPropertySetter("faces-config/component/description");
       digester.addSetNext("faces-config/component", "addComponent",
                           ComponentBean.class.getName());
@@ -231,6 +231,7 @@ public class FacesConfigParser
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/value-expression", "valueExpression");
     digester.addBeanPropertySetter("faces-config/component/component-extension/component-metadata/default-event-name",
                                    "defaultEventName");
+    digester.addBeanPropertySetter("faces-config/component/facet/facet-extension/facet-metadata/hidden");
     digester.addCallMethod("faces-config/component/component-extension/component-metadata/event-names",
                            "parseEventNames", 1);
     digester.addCallParam("faces-config/component/component-extension/component-metadata/event-names", 0);
@@ -339,6 +340,7 @@ public class FacesConfigParser
                            "parsePropertyValues", 1);
     digester.addCallParam("faces-config/component/property/property-extension/property-metadata/property-values", 0);
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/deprecated");
+    digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/hidden");
 
     digester.setRuleNamespaceURI(oldNamespace);
   }
