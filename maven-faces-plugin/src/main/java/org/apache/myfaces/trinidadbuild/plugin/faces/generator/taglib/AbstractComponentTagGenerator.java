@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,21 +18,25 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib;
 
-import org.apache.myfaces.trinidadbuild.plugin.faces.generator.GeneratorHelper;
-import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
-import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
-import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.SourceTemplate;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
-
 import java.io.IOException;
+
 import java.lang.reflect.Modifier;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.myfaces.trinidadbuild.plugin.faces.generator.GeneratorHelper;
+import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.PropertyFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.SourceTemplate;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
+
 
 /**
  * TODO: comment this!
@@ -197,6 +201,11 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
   {
     Iterator properties = component.properties();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
+    if (isSetterMethodFinal())
+    {
+      // Do not generate property methods if they are final and the properties are overrides
+      properties = new FilteredIterator(properties, new NonOverriddenFilter());
+    }
 
     while (properties.hasNext())
     {
@@ -206,6 +215,15 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
     }
   }
 
+  /**
+   * Whether the tag setter methods have the final modifier
+   *
+   * @return true if the setter methods are final
+   */
+  protected boolean isSetterMethodFinal()
+  {
+    return false;
+  }
 
   public void writePropertyMembers(PrettyWriter out, Collection components) throws IOException
   {
@@ -243,6 +261,8 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
 
     Iterator properties = all.iterator();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
+    properties = new FilteredIterator(properties, new NonOverriddenFilter());
+
     if (properties.hasNext() || special)
     {
       out.println();
@@ -292,4 +312,13 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
                                                      String componentClass,
                                                      Iterator properties) throws IOException;
 
+  protected static class NonOverriddenFilter
+    extends PropertyFilter
+  {
+    protected boolean accept(
+      PropertyBean property)
+    {
+      return (!property.isOverride());
+    }
+  }
 }

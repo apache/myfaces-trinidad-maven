@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,6 +18,13 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib;
 
+import java.io.IOException;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.apache.myfaces.trinidadbuild.plugin.faces.generator.GeneratorHelper;
 import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
@@ -26,11 +33,6 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * TODO: comment this!
@@ -135,11 +137,11 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
       {
         imports.add(propertyClass);
       }
-      
+
       if (property.isNoOp())
       {
         imports.add("org.apache.myfaces.trinidad.logging.TrinidadLogger");
-      }  
+      }
     }
   }
 
@@ -179,10 +181,10 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     out.indent();
     if (property.isNoOp())
     {
-      out.println("TrinidadLogger log = TrinidadLogger.createTrinidadLogger(this.getClass());");  
+      out.println("TrinidadLogger log = TrinidadLogger.createTrinidadLogger(this.getClass());");
       out.print("log.warning(\"property \\\"" + propName + "\\\" setter is ");
       out.print("using a no-op implementation. Used in extreme cases when the property value, beyond the default value, results in unwanted behavior.");
-      out.println("\");");  
+      out.println("\");");
     }
     else
     {
@@ -218,6 +220,7 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
 
     Iterator properties = all.iterator();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
+    properties = new FilteredIterator(properties, new NonOverriddenFilter());
 
     if (properties.hasNext())
     {
@@ -250,6 +253,12 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     }
   }
 
+  @Override
+  protected boolean isSetterMethodFinal()
+  {
+    return true;
+  }
+
   private void _writeSetPropertiesCase(
       PrettyWriter out,
       String componentClass,
@@ -258,7 +267,7 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     String propName = property.getPropertyName();
     String propClass = property.getPropertyClass();
     String propVar = "_" + propName;
-   
+
     if (property.isVirtual())
     {
       _writeVirtualSetMethod(out, componentClass, propName);
@@ -291,16 +300,16 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     {
       _writeSetColor(out, componentClass, propName, false);
     }
-    else if (GeneratorHelper.isKnownTypeList(propClass,  
+    else if (GeneratorHelper.isKnownTypeList(propClass,
                                     property.getPropertyClassParameters()))
     {
-      _writeSetKnownTypeList (out, componentClass, propName, 
+      _writeSetKnownTypeList (out, componentClass, propName,
                      property.getPropertyClassParameters()[0]);
     }
-    else if (GeneratorHelper.isKnownTypeSet(propClass,  
+    else if (GeneratorHelper.isKnownTypeSet(propClass,
                                     property.getPropertyClassParameters()))
     {
-      _writeSetKnownTypeSet (out, componentClass, propName, 
+      _writeSetKnownTypeSet (out, componentClass, propName,
                      property.getPropertyClassParameters()[0]);
     }
     else if (GeneratorHelper.isConverter(propClass))
@@ -869,17 +878,17 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
   {
     String propKey = Util.getConstantNameFromProperty(propName, "_KEY");
     String propVar = "_" + propName;
-    
+
     String propClass = Util.getClassFromFullClass(propFullClass);
     String boxedClass = Util.getBoxedClass(propClass);
 
     System.out.println ("_writeSetList: propFullClass = " + propFullClass +
-                        " propClass= " + propClass + 
+                        " propClass= " + propClass +
                         " boxedClass=" + boxedClass);
     if (_is12)
     {
-      out.println("set" + boxedClass + "ListProperty" + 
-                  "(bean, " + componentClass + "." + propKey + 
+      out.println("set" + boxedClass + "ListProperty" +
+                  "(bean, " + componentClass + "." + propKey +
                   ", " + propVar + ");");
     }
     else
@@ -926,17 +935,17 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
   {
     String propKey = Util.getConstantNameFromProperty(propName, "_KEY");
     String propVar = "_" + propName;
-    
+
     String propClass = Util.getClassFromFullClass(propFullClass);
     String boxedClass = Util.getBoxedClass(propClass);
 
     System.out.println ("_writeSetSet: propFullClass = " + propFullClass +
-                        " propClass= " + propClass + 
+                        " propClass= " + propClass +
                         " boxedClass=" + boxedClass);
     if (_is12)
     {
-      out.println("set" + boxedClass + "SetProperty" + 
-                  "(bean, " + componentClass + "." + propKey + 
+      out.println("set" + boxedClass + "SetProperty" +
+                  "(bean, " + componentClass + "." + propKey +
                   ", " + propVar + ");");
     }
     else

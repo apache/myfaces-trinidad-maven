@@ -722,9 +722,9 @@ public class ComponentBean extends AbstractTagBean
    * Parses the string of satisfied contracts into a String array
    * using space as the separator between values.
    * In the component metadata file, the satisfied contracts are noted
-   * with satisfied-contracts markup.  As an example, af:popup 
+   * with satisfied-contracts markup.  As an example, af:popup
    * (oracle.adf.view.rich.component.rich.RichPopup) supports
-   * oracle-adf-richmenu-holder, oracle-adf-richdialog-holder, 
+   * oracle-adf-richmenu-holder, oracle-adf-richdialog-holder,
    * oracle-adf-richnotewindow-holder, and oracle-adf-richpanelwindow-holder
    * contracts.  The satisfied contracts of a given component are matched
    * with the required ancestor contracts of other components to determine
@@ -741,14 +741,14 @@ public class ComponentBean extends AbstractTagBean
   /**
    * Sets the possible values for this property.
    * In the component metadata file, the satisfied contracts are noted
-   * with satisfied-contracts markup.  As an example, af:popup 
+   * with satisfied-contracts markup.  As an example, af:popup
    * (oracle.adf.view.rich.component.rich.RichPopup) supports
-   * oracle-adf-richmenu-holder, oracle-adf-richdialog-holder, 
+   * oracle-adf-richmenu-holder, oracle-adf-richdialog-holder,
    * oracle-adf-richnotewindow-holder, and oracle-adf-richpanelwindow-holder
    * contracts.  The satisfied contracts of a given component are matched
    * with the required ancestor contracts of other components to determine
    * if a component hierarchy is legally assembled.
-   * 
+   *
    * @param satisfiedContracts  a string array of the satisfied contracts
    */
   public void setSatisfiedContracts(
@@ -760,22 +760,22 @@ public class ComponentBean extends AbstractTagBean
   /**
    * Returns an iterator of the satisfied contracts for this component.
    * In the component metadata file, the satisfied contracts are noted
-   * with satisfied-contracts markup.  As an example, af:popup 
+   * with satisfied-contracts markup.  As an example, af:popup
    * (oracle.adf.view.rich.component.rich.RichPopup) supports
-   * oracle-adf-richmenu-holder, oracle-adf-richdialog-holder, 
+   * oracle-adf-richmenu-holder, oracle-adf-richdialog-holder,
    * oracle-adf-richnotewindow-holder, and oracle-adf-richpanelwindow-holder
    * contracts.  The satisfied contracts of a given component are matched
    * with the required ancestor contracts of other components to determine
    * if a component hierarchy is legally assembled.
-   * 
-   * @return  a java.util.Iterator of Strings, where each string is the name of a 
+   *
+   * @return  a java.util.Iterator of Strings, where each string is the name of a
    *          satisfied contract
    */
   public Iterator<String> satisfiedContracts()
   {
     return _satisfiedContracts.iterator();
-  }  
-  
+  }
+
   /**
    * Returns true if this component has any satisfied contracts.
    *
@@ -786,17 +786,17 @@ public class ComponentBean extends AbstractTagBean
   {
     return (!_satisfiedContracts.isEmpty());
   }
-  
+
   /**
    * Parses the string of required ancestor contracts into a String array
    * using space as the separator between values.
    * In the component metadata file, the required ancestors are noted
    * with required-ancestor-contracts markup. This indicates that an
-   * ancestor (e.g. parent or grandparent) tag must be have satisfied-contracts 
+   * ancestor (e.g. parent or grandparent) tag must be have satisfied-contracts
    * metadata matching the required-ancestor-contracts metadata of this tag.
    * As an example, af:dialog
    * (oracle.adf.view.rich.component.rich.RichDialog) lists
-   * oracle-adf-richdialog-holder as a required ancestor contract, and 
+   * oracle-adf-richdialog-holder as a required ancestor contract, and
    * af:popup (oracle.adf.view.rich.component.rich.RichPopup) lists
    * oracle-adf-richdialog-holder as a satisified contract.
    *
@@ -812,14 +812,14 @@ public class ComponentBean extends AbstractTagBean
    * Sets the possible values for this property.
    * In the component metadata file, the required ancestors are noted
    * with required-ancestor-contracts markup. This indicates that an
-   * ancestor (e.g. parent or grandparent) tag must be have satisfied-contracts 
+   * ancestor (e.g. parent or grandparent) tag must be have satisfied-contracts
    * metadata matching the required-ancestor-contracts metadata of this tag.
    * As an example, af:dialog
    * (oracle.adf.view.rich.component.rich.RichDialog) lists
-   * oracle-adf-richdialog-holder as a required ancestor contract, and 
+   * oracle-adf-richdialog-holder as a required ancestor contract, and
    * af:popup (oracle.adf.view.rich.component.rich.RichPopup) lists
    * oracle-adf-richdialog-holder as a satisified contract.
-   * 
+   *
    * @param requiredAncestorContracts  a string array of the required ancestor contracts
    */
   public void setRequiredAncestorContracts(
@@ -832,21 +832,21 @@ public class ComponentBean extends AbstractTagBean
    * Returns the required ancestor contracts for this component.
    * In the component metadata file, the required ancestors are noted
    * with required-ancestor-contracts markup. This indicates that an
-   * ancestor (e.g. parent or grandparent) tag must be have satisfied-contracts 
+   * ancestor (e.g. parent or grandparent) tag must be have satisfied-contracts
    * metadata matching the required-ancestor-contracts metadata of this tag.
    * As an example, af:dialog
    * (oracle.adf.view.rich.component.rich.RichDialog) lists
-   * oracle-adf-richdialog-holder as a required ancestor contract, and 
+   * oracle-adf-richdialog-holder as a required ancestor contract, and
    * af:popup (oracle.adf.view.rich.component.rich.RichPopup) lists
    * oracle-adf-richdialog-holder as a satisified contract.
-   * 
+   *
    * @return  a java.util.Iterator of strings, where each string is the name
    *          of a required ancestor contract
    */
   public Iterator<String> requiredAncestorContracts()
   {
     return _requiredAncestorContracts.iterator();
-  }  
+  }
 
   /**
    * Returns true if this component has any required ancestor contracts.
@@ -858,7 +858,7 @@ public class ComponentBean extends AbstractTagBean
   {
     return (!_requiredAncestorContracts.isEmpty());
   }
-  
+
   /**
    * Adds a Java Language class modifier to the tag class.
    *

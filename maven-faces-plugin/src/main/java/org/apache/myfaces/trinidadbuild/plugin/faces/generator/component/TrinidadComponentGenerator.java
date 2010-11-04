@@ -94,6 +94,8 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     //  component property keys
     Iterator properties = component.properties();
     properties = new FilteredIterator(properties, new NonVirtualFilter());
+    properties = new FilteredIterator(properties, new NonOverriddenFilter());
+
     while (properties.hasNext())
     {
       PropertyBean property = (PropertyBean) properties.next();
