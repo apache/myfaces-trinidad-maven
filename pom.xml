@@ -21,7 +21,7 @@
     <groupId>org.apache.myfaces</groupId>
     <artifactId>myfaces</artifactId>
     <!-- Heck, we really need to go with 9, or later... -->
-    <version>6</version>
+    <version>9</version>
   </parent>
 
   <groupId>org.apache.myfaces.trinidadbuild</groupId>
