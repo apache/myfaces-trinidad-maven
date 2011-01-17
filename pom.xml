@@ -205,65 +205,13 @@
 
   <!--
     NOTE: When preparing the release (mvn release:prepare) you may get an error when the 
-          plugin is committing the TAG (file already exists (which is for sure not true))
+          plugin is committing the TAG
           There is an odd workaround for that:
 
-          # mvn release:prepare
+          # mvn release:prepare -Papache-release
           => fails
           # svn up -r head 
-          # mvn release:prepare -Dresume
+          # mvn release:prepare -Papache-release -Dresume
 
-         See http://jira.codehaus.org/browse/SCM-406 as well
-  --> 
-  <profiles>
-    <profile>
-      <id>release</id>
-      <!--
-      NOTE: Execute this profile like
-            mvn clean source:jar install deploy -DaltDeploymentRepository=matzew::default::file://FOLDER -Prelease
-       -->
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.2</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-scm-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>validate</phase>
-                <id>getting-scm.revision</id>
-                <goals>
-                  <goal>update</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+  -->
 </project>
