@@ -324,7 +324,8 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     {
       stream.writeNamespace("", "http://java.sun.com/xml/ns/javaee");
       stream.writeNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-      stream.writeAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd");
+      stream.writeAttribute("xsi:schemaLocation",
+           "http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd");
       stream.writeAttribute("version", "2.1");
     }
 
