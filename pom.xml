@@ -97,6 +97,7 @@
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <preparationGoals>clean verify install</preparationGoals>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
         </configuration>
       </plugin>
       <plugin>
