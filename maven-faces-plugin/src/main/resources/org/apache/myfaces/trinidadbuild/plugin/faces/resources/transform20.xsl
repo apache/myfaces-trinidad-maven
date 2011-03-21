@@ -35,6 +35,7 @@
   <xsl:param name="validatorPackageContains" />
   <xsl:param name="typePrefix" />
   <xsl:param name="removeRenderers" />
+  <xsl:param name="metadataComplete" />
 
 
 
@@ -76,6 +77,10 @@
       <xsl:copy-of select="exsl:node-set($mfp)//namespace::*"/>
       <xsl:copy-of select="exsl:node-set($mafp)//namespace::*"/>
       <xsl:attribute name="xsi:schemaLocation">http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd</xsl:attribute>
+      <xsl:if test="$metadataComplete">
+        <xsl:attribute name="metadata-complete">true</xsl:attribute>
+      </xsl:if>
+
       <xsl:attribute name="version">2.0</xsl:attribute>
       <xsl:apply-templates select="javaee:name" />
       <xsl:apply-templates select="javaee:ordering" />

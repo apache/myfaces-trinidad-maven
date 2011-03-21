@@ -165,6 +165,7 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
           Result mergedResult = new StreamResult(resultStream);
 
           URL xslURL;
+          boolean isJsf2 = false;
           JsfVersion usedVersion = JsfVersion.getVersion(jsfVersion);
           if (usedVersion == JsfVersion.JSF_1_2)
           {
@@ -173,6 +174,7 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
           else if (usedVersion == JsfVersion.JSF_2_0)
           {
             xslURL = getClass().getResource("resources/transform20.xsl");
+            isJsf2 = true;
           }
           else
           {
@@ -188,6 +190,11 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
                                    removeRenderers ? "true" : "false");
           transformer.setParameter("converterPackageContains", getParameter(converterPackageContains, packageContains));
           transformer.setParameter("validatorPackageContains", getParameter(validatorPackageContains, packageContains));
+          
+          if (isJsf2 && metadataComplete)
+          {
+            transformer.setParameter("metadataComplete", "true");
+          }
 
           transformer.transform(mergedSource, mergedResult);
           resultStream.close();
@@ -327,4 +334,9 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
    * @parameter
    */
   private String jsfVersion;
+  
+  /**
+   * @parameter
+   */
+  private boolean metadataComplete;
 }
