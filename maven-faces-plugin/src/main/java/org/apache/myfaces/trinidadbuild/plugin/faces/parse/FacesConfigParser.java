@@ -84,7 +84,7 @@ public class FacesConfigParser
     SAXParserFactory spf = SAXParserFactory.newInstance();
     spf.setNamespaceAware(true);
     // requires JAXP 1.3, in JavaSE 5.0
-    //spf.setXIncludeAware(true);
+    // spf.setXIncludeAware(true);
     Digester digester = new Digester(spf.newSAXParser());
     digester.setNamespaceAware(true);
 
@@ -295,6 +295,8 @@ public class FacesConfigParser
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/transient");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/literal-only",
                                    "literalOnly");
+    digester.addBeanPropertySetter("faces-config/component/property/property-extension/mutable",
+                                   "mutable");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/enum",
                                    "enum");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/alternate-class",

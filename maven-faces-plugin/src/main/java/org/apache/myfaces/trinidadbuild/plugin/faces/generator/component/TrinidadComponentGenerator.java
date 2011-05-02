@@ -421,6 +421,11 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
       caps.add("PropertyKey.CAP_LIST");
     }
 
+    if (property.isMutable())
+    {
+      caps.add("PropertyKey.CAP_MUTABLE");
+    }
+
     if (caps.isEmpty())
       return null;
 
