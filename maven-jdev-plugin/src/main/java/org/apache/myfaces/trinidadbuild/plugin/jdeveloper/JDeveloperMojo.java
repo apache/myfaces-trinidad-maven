@@ -420,9 +420,12 @@ public class JDeveloperMojo
       List compileSourceRoots =
         executionProject.getTestCompileSourceRoots();
 
-      for (int i = 0; i < testSourceRoots.length; i++)
+      if (testResourceRoots != null)
       {
-        compileSourceRoots.add(testSourceRoots[i].getAbsolutePath());
+        for (int i = 0; i < testSourceRoots.length; i++)
+        {
+          compileSourceRoots.add(testSourceRoots[i].getAbsolutePath());
+        }
       }
 
       List compileResourceRoots = executionProject.getTestResources();
