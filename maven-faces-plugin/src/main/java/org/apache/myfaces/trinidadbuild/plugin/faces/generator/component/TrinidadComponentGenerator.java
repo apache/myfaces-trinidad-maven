@@ -20,6 +20,7 @@ package org.apache.myfaces.trinidadbuild.plugin.faces.generator.component;
 
 import java.io.IOException;
 
+import java.lang.IllegalArgumentException;
 import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
@@ -134,12 +135,17 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
           propClass = "String";
         }
         String propDefault = property.getDefaultValue();
+        String propMutable = _getPropertyMutable(property);
 
         if (!"Object".equals(propClass) || propDefault != null)
         {
           // TODO: do not use boxed class here
           String boxedClass = Util.getBoxedClass(propClass);
           out.print(", " + boxedClass + ".class");
+        }
+        else if (propMutable != null)
+        {
+          out.print(", Object.class");
         }
 
         if (propDefault != null)
@@ -151,11 +157,26 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
           else
             out.print(", " + convertStringToBoxedLiteral(propClass, propDefault));
         }
+        else if (propMutable != null)
+        {
+          out.print(", null");
+        }
 
         // property capabilities
         String propCaps = _getPropertyCapabilities(property);
+
         if (propCaps != null)
           out.print(", " + propCaps);
+
+        if (propMutable != null)
+        {
+          if (propCaps == null )
+            out.print(", 0");
+
+          out.print(", " + propMutable);
+        }
+
+
         out.println(");");
       }
       out.unindent();
@@ -395,6 +416,31 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     out.println("}");
   }
 
+  private String _getPropertyMutable(
+    PropertyBean property)
+  {
+    String mutable = property.getMutable();
+
+    if (mutable == null || "immutable".equals(mutable))
+      return null;
+
+    if ("rarely".equals(mutable))
+    {
+      return "PropertyKey.Mutable.RARELY";
+    }
+    else if ("sometimes".equals(mutable))
+    {
+      return "PropertyKey.Mutable.SOMETIMES";
+    }
+    else if ("often".equals(mutable))
+    {
+      return "PropertyKey.Mutable.OFTEN";
+    }
+
+    throw new IllegalArgumentException("unknown mutable property \"" + mutable + "\", supported types are immutable, rarely, sometimes, and often");
+
+  }
+
   private String _getPropertyCapabilities(
       PropertyBean property)
   {
@@ -419,11 +465,6 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     if (property.isList())
     {
       caps.add("PropertyKey.CAP_LIST");
-    }
-
-    if (property.isMutable())
-    {
-      caps.add("PropertyKey.CAP_MUTABLE");
     }
 
     if (caps.isEmpty())
