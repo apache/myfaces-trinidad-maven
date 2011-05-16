@@ -81,7 +81,6 @@ import org.codehaus.doxia.site.renderer.SiteRenderer;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-
 /**
  * Report for generating JSF tagdoc based on faces-config.xml parsing.
  * Note that this is not really an AbstractMavenMultiPageReport - the
@@ -143,6 +142,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     // The map is built using the getSatisfiedContracts method API on the component bean to determine
     // which contracts are satisfied for a given tagname
     Map<String, List<QName>> contractMap = new HashMap<String, List<QName>>();
+
     while (compIter.hasNext())
     {
       ComponentBean compBean = compIter.next();
@@ -356,14 +356,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
           sb.append(_getQualifiedName(tagName));
           sb.append("</a>");
           gotOne = true;
-          }
         }
       }
-      if (gotOne)
-      {
-        sb.append("<br/>\n");
-        formatted = sb.toString();
-      }
+    }
+    if (gotOne)
+    {
+      sb.append("<br/>\n");
+      formatted = sb.toString();
+    }
     return formatted;
   }
 
@@ -391,9 +391,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       // in a separate table cell, so no header text is passed into this method
       if (header != null && !header.isEmpty())
       {
-      sb.append("<b>");
-      sb.append(header);
-      sb.append(":</b> ");
+        sb.append("<b>");
+        sb.append(header);
+        sb.append(":</b> ");
       }
 
       boolean gotOne = false;
@@ -735,7 +735,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
                                                    null);
       out.write("<tr>\n");
       out.write("<td><b>Required Ancestor Tag(s):</b></td>");
-      out.write ("<td>" + formattedAncestors + "</td>");
+      out.write("<td>" + formattedAncestors + "</td>");
       out.write("</tr>\n");
     }
 
@@ -1299,8 +1299,11 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       if (facet.hasAllowedChildComponents())
       {
         String formattedChildComps = _formatTagList (facet.allowedChildComponents(), compTypeMap, "Allowed Child Components");
-        out.write (formattedChildComps);
-        out.write("<br/>");
+        if (formattedChildComps != null)
+        {
+          out.write(formattedChildComps);
+          out.write("<br/>");
+        }
       }
 
       out.write(facet.getDescription());
@@ -1866,7 +1869,6 @@ public class TagdocReport extends AbstractMavenMultiPageReport
    * @required
    */
   private File outputDirectory;
-
 
   /**
    * Directory where the original site is present.
