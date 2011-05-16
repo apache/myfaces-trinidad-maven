@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,9 +24,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -71,8 +73,10 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.PropertyFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.ValidatorFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
+
 import org.codehaus.doxia.sink.Sink;
 import org.codehaus.doxia.site.renderer.SiteRenderer;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -95,7 +99,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     factory.setSiteRenderer(getSiteRenderer());
     factory.setSiteDirectory(getOutputDirectory());
     setSinkFactory(factory);
-    
+
     processIndex(project, resourcePath);
     try
     {
@@ -123,18 +127,18 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     components = new FilteredIterator(components, new SkipFilter());
     components = new FilteredIterator(components, new ComponentTagFilter());
     components = new FilteredIterator(components, new ComponentNamespaceFilter());
-    
+
     Iterator<ComponentBean> compIter = facesConfig.components();
     compIter = new FilteredIterator(compIter, new SkipFilter());
     compIter = new FilteredIterator(compIter, new ComponentTagFilter());
     compIter = new FilteredIterator(compIter, new ComponentNamespaceFilter());
-    
+
     // compTypeMap holds a map of compononent types to tag names that implement that component type
-    // The map is built using getComponentType method on the component bean to determine the 
+    // The map is built using getComponentType method on the component bean to determine the
     // component type of a given tag name
     Map<String, List<QName>>  compTypeMap = new HashMap<String, List<QName>> ();
     // contractMap holds a map of contract name to tag names that satisify that contract.
-    // The map is built using the getSatisfiedContracts method API on the component bean to determine 
+    // The map is built using the getSatisfiedContracts method API on the component bean to determine
     // which contracts are satisfied for a given tagname
     Map<String, List<QName>> contractMap = new HashMap<String, List<QName>>();
 
@@ -144,21 +148,21 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       List<QName> tagNames;
       String compType = compBean.getComponentType();
       if (compType != null &&
-          compTypeMap.containsKey (compType) && 
-          compBean.getTagName() != null) 
+          compTypeMap.containsKey (compType) &&
+          compBean.getTagName() != null)
       {
         // the component type map already contains an entry for this component type
         tagNames = compTypeMap.get(compType);
-      } 
-      else 
+      }
+      else
       {
         // the component type map does not contain an entry for this component type
-        // so create a new ArrayList that will be used to store the tag names of 
+        // so create a new ArrayList that will be used to store the tag names of
         // component that have this component type
         tagNames = new ArrayList<QName>();
       }
       tagNames.add(compBean.getTagName());
-      compTypeMap.put (compType, tagNames);      
+      compTypeMap.put (compType, tagNames);
 
       if (compBean.hasSatisfiedContracts())
       {
@@ -168,12 +172,12 @@ public class TagdocReport extends AbstractMavenMultiPageReport
           String satContract = satContractsIter.next();
           if (contractMap.containsKey (satContract))
           {
-            // the contract map already contains an entry for this contract 
+            // the contract map already contains an entry for this contract
             tagNames = contractMap.get(satContract);
           }
           else
           {
-            // the contract map does not contain an entry for this contract, so 
+            // the contract map does not contain an entry for this contract, so
             // create a new ArrayList which will be used to store the tag names of
             // components that satisfy this contract
             tagNames = new ArrayList<QName>();
@@ -191,7 +195,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     Iterator<ConverterBean> converters = facesConfig.converters();
     converters = new FilteredIterator(converters, new ConverterTagFilter());
     converters = new FilteredIterator(converters, new ConverterNamespaceFilter());
-    
+
     // =-=AEW Note that only updating out-of-date components, etc. is
     // permanently tricky, even if we had proper detection in place,
     // because the index always has to have all docs
@@ -206,7 +210,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     Set componentPages = new TreeSet();
     Set converterPages = new TreeSet();
     Set validatorPages = new TreeSet();
-    
+
     int count = 0;
     while (components.hasNext())
     {
@@ -245,7 +249,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     sink.head();
     sink.title();
     sink.text("Tag library documentation");
-    sink.title_();    
+    sink.title_();
     sink.head_();
     sink.body();
 
@@ -289,8 +293,8 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   private Set _gatherOtherTags()
   {
     TreeSet set = new TreeSet();
-    String subDir = 
-      _platformAgnosticPath(_platformAgnosticPath("xdoc/" + 
+    String subDir =
+      _platformAgnosticPath(_platformAgnosticPath("xdoc/" +
                                                   _DOC_SUBDIRECTORY));
     File siteSubDir = new File(siteDirectory, subDir);
     if (siteSubDir.exists())
@@ -315,7 +319,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     String header)
   {
     String formatted = null;
-    
+
     // Don't know how long this will be, but 300 should be plenty.
     StringBuffer sb = new StringBuffer(300);
     sb.append("\n");
@@ -330,7 +334,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       sb.append(":</b> ");
     }
 
-    boolean gotOne = false;    
+    boolean gotOne = false;
     while (strIter.hasNext())
     {
       List<QName> tagNameList = pMap.get(strIter.next());
@@ -364,7 +368,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   }
 
   private String _formatPropList(
-    String[] pList, 
+    String[] pList,
     String   header)
   {
     String[] nullList = {};
@@ -372,7 +376,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   }
 
   private String _formatPropList(
-    String[] pList, 
+    String[] pList,
     String   header,
     String[] ignores)
   {
@@ -440,24 +444,24 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     sink.text("Tag Name");
     sink.tableHeaderCell_();
     sink.tableRow_();
-    
+
     Iterator<String> iter = pages.iterator();
     while (iter.hasNext())
     {
       sink.tableRow();
       sink.tableCell();
-      
+
       String name = iter.next();
       String tagName = "<" + name.replace('_', ':') + ">";
-      
+
       sink.link(_DOC_SUBDIRECTORY + "/" + name + ".html");
       sink.text(tagName);
       sink.link_();
-      
+
       sink.tableCell_();
       sink.tableRow_();
     }
-    
+
     sink.table_();
     sink.section1_();
   }
@@ -471,7 +475,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   {
     return _getPrefix(qName) + "_" + qName.getLocalPart();
   }
-  
+
   private String _getQualifiedName(QName qName)
   {
     return _getPrefix(qName) + ":" + qName.getLocalPart();
@@ -481,7 +485,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   {
     if ((qName.getPrefix() != null) && !"".equals(qName.getPrefix()))
       return qName.getPrefix();
-    
+
     String namespace = qName.getNamespaceURI();
     if (namespace == null)
       return null;
@@ -505,8 +509,8 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
     String pageName = _toPageName(component.getTagName());
 
-    File targetDir = new File(outputDirectory.getParentFile(), 
-                              _platformAgnosticPath("generated-site/xdoc/" + 
+    File targetDir = new File(outputDirectory.getParentFile(),
+                              _platformAgnosticPath("generated-site/xdoc/" +
                                                       _DOC_SUBDIRECTORY));
     targetDir.mkdirs();
     File targetFile = new File(targetDir, pageName + ".xml");
@@ -542,7 +546,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
         out.write(" </p>\n");
         out.write(" </section>\n");
       }
-      
+
       if (component.hasFacets(true))
       {
         out.write(" <section name=\"Supported Facets\">\n");
@@ -551,7 +555,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
         out.write(" </p>\n");
         out.write(" </section>\n");
       }
-      
+
       out.write(" <section name=\"Attributes\">\n");
       _writeComponentAttributes(out, component);
       out.write(" </section>\n");
@@ -566,7 +570,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     return pageName;
   }
-  
+
   private String _generateConverterDoc(ConverterBean converter) throws IOException
   {
     if (converter.getTagName() == null)
@@ -576,8 +580,8 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     String pageName = _toPageName(converter.getTagName());
 
-    File targetDir = new File(outputDirectory.getParentFile(), 
-                              _platformAgnosticPath("generated-site/xdoc/" + 
+    File targetDir = new File(outputDirectory.getParentFile(),
+                              _platformAgnosticPath("generated-site/xdoc/" +
                                                      _DOC_SUBDIRECTORY));
     targetDir.mkdirs();
     File targetFile = new File(targetDir, pageName + ".xml");
@@ -627,8 +631,8 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     String pageName = _toPageName(validator.getTagName());
 
-    File targetDir = new File(outputDirectory.getParentFile(), 
-                              _platformAgnosticPath("generated-site/xdoc/" + 
+    File targetDir = new File(outputDirectory.getParentFile(),
+                              _platformAgnosticPath("generated-site/xdoc/" +
                                                       _DOC_SUBDIRECTORY));
     targetDir.mkdirs();
     File targetFile = new File(targetDir, pageName + ".xml");
@@ -681,7 +685,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     // 5. Required ancestors (optional)
     // 6. Naming container (optional)
     // 7. Unsupported agents (optional)
-    
+
     out.write("<div class=\'summary\'>\n");
     out.write("<table>\n");
     out.write("<tr>\n");
@@ -719,25 +723,25 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     if (bean.hasRequiredAncestorContracts())
     {
-      String formattedAncestors = _formatTagList ( bean.requiredAncestorContracts(), 
+      String formattedAncestors = _formatTagList ( bean.requiredAncestorContracts(),
                                                    contractMap,
                                                    null);
       out.write("<tr>\n");
       out.write("<td><b>Required Ancestor Tag(s):</b></td>");
-      out.write ("<td>" + formattedAncestors + "</td>");
+      out.write("<td>" + formattedAncestors + "</td>");
       out.write("</tr>\n");
     }
 
     if (_isNamingContainer(bean))
     {
       out.write("<tr>\n");
-      out.write("<td><b>Naming Container:</b></td>"); 
+      out.write("<td><b>Naming Container:</b></td>");
       out.write("<td>Yes.  When referring to children of this " +
                 "component (\"partialTriggers\", <code>findComponent()</code>, etc.), " +
                 "you must prefix the child's ID with this component's ID and a colon (':').</td>");
       out.write("</tr>\n");
     }
-      
+
     String fmtd = _formatPropList(bean.getUnsupportedAgents(),
                                   null,
                                   _NON_DOCUMENTED_AGENTS);
@@ -748,7 +752,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       out.write("<td>" + fmtd + "</td>");
       out.write("</tr>\n");
     }
-    
+
     out.write("</table>\n");
     out.write("</div>\n");
 
@@ -781,7 +785,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("<td><b>Tag Name:</b></td>");
     out.write("<td>" + _getQualifiedName(bean.getTagName()) + "&gt;</td>\n");
     out.write("</tr>\n");
-    
+
     out.write("<tr>\n");
     out.write("<td><b>Type:</b></td>");
     out.write("<td>" + bean.getValidatorId() +  "</td>\n");
@@ -807,7 +811,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("<td><b>Tag Name:</b></td>");
     out.write("<td>" + _getQualifiedName(bean.getTagName()) + "&gt;</td>\n");
     out.write("</tr>\n");
-    
+
     out.write("<tr>\n");
     out.write("<td><b>Type:</b></td>");
     out.write("<td>" + bean.getConverterId() +  "</td>\n");
@@ -901,7 +905,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       String attrName = iter.next();
       list.add(bean.findProperty(attrName, true));
     }
-    
+
     TreeSet<String> groups = new TreeSet<String>(new GroupComparator());
     /* No current support for grouping
     // Make sure "null" is the representative for unknown groups
@@ -949,7 +953,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       String attrName = iter.next();
       list.add(bean.findProperty(attrName));
     }
-    
+
     _writeComponentAttributes(out,
                               list.iterator(),
                               bean.getConverterClass(),
@@ -978,7 +982,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       String attrName = iter.next();
       list.add(bean.findProperty(attrName));
     }
-    
+
     _writeComponentAttributes(out,
                               list.iterator(),
                               bean.getValidatorClass(),
@@ -997,7 +1001,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     while (attributes.hasNext())
     {
       PropertyBean attr = attributes.next();
-      
+
       /*
       if ((group == null) || "Ungrouped".equals(group))
       {
@@ -1053,7 +1057,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       String elSupported;
       // MethodBindings, "binding", and some other attributes
       // require EL support
-      if (attr.isMethodBinding() || 
+      if (attr.isMethodBinding() ||
           attr.isMethodExpression() ||
           "binding".equals(propertyName))
       {
@@ -1097,44 +1101,44 @@ public class TagdocReport extends AbstractMavenMultiPageReport
         {
           out.write("<td>\n");
         }
-        
+
         //        out.write(EscapeUtils.escapeElementValue(doc.doc));
         if (valStr != null)
         {
           out.write(valStr);
         }
-        
+
         if (defaultValueStr != null)
         {
           out.write(defaultValueStr);
         }
-        
-        // if we print out a list of possible values and/or a default value for the attribute, 
+
+        // if we print out a list of possible values and/or a default value for the attribute,
         // then enter a line break before printing out other information about the attribute.
-        if (valStr != null || defaultValueStr != null) 
+        if (valStr != null || defaultValueStr != null)
         {
           out.write("<br/>");
         }
-        
-        if (attr.getDeprecated() != null) 
+
+        if (attr.getDeprecated() != null)
         {
           out.write("<b>");
           out.write(attr.getDeprecated());
           out.write("</b>");
         }
-        
-        if (attr.isNoOp()) 
+
+        if (attr.isNoOp())
         {
           out.write("<b>");
           out.write("This property has a no-op setter for both the client and server components effectively making it a read-only property.");
-          out.write("</b>");            
+          out.write("</b>");
         }
-        
-        if (attr.isNoOp() || attr.getDeprecated() != null) 
+
+        if (attr.isNoOp() || attr.getDeprecated() != null)
         {
           out.write("<br/><br/>");
         }
-        
+
         out.write(attr.getDescription());
         if (unsupAgentsStr != null)
         {
@@ -1253,8 +1257,11 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       if (facet.hasAllowedChildComponents())
       {
         String formattedChildComps = _formatTagList (facet.allowedChildComponents(), compTypeMap, "Allowed Child Components");
-        out.write (formattedChildComps);
-        out.write("<br/>");
+        if (formattedChildComps != null)
+        {
+          out.write(formattedChildComps);
+          out.write("<br/>");
+        }
       }
 
       out.write(facet.getDescription());
@@ -1265,20 +1272,18 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("</table>\n");
   }
 
-
-
   private void _writeExamples(Writer out, AbstractTagBean bean) throws IOException
   {
     if (!bean.hasExamples())
       return;
-    
+
     ExampleBean exBean = null;
 
     // Write header
     out.write(" <section name=\"Code Example(s)\">\n");
-    out.write(" <p>\n");    
+    out.write(" <p>\n");
     out.write("   <html>\n");
-    
+
     // Go through each example, write its description
     // followed by the example source code.
     Iterator<ExampleBean> iter = bean.examples();
@@ -1287,12 +1292,12 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       exBean = iter.next();
       String desc   = exBean.getSourceDescription();
       String source = exBean.getSourceCode();
-      
+
       if (desc != null)
       {
         desc = desc.replaceAll("<", "&lt;");
         desc = desc.replaceAll(">", "&gt;");
-        
+
         if (!"".equals(desc))
           out.write("   <p>" + desc + "</p>");
       }
@@ -1311,14 +1316,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
     out.write("   </html>\n");
     out.write(" </p>\n");
-    out.write(" </section>\n");    
+    out.write(" </section>\n");
   }
 
   private void _writeScreenshots(Writer out, AbstractTagBean bean) throws IOException
   {
     if (!bean.hasScreenshots())
       return;
-    
+
     ScreenshotBean ssBean = null;
 
     // Write header
@@ -1355,10 +1360,10 @@ public class TagdocReport extends AbstractMavenMultiPageReport
           out.write("<br/>");
           out.write(desc + "\n");
         }
-      }      
-      out.write("    </div>\n");    
+      }
+      out.write("    </div>\n");
 
-      // create extra space between each screenshot to ensure it is clear which description 
+      // create extra space between each screenshot to ensure it is clear which description
       // text belongs to which image
       if (iter.hasNext())
       {
@@ -1382,7 +1387,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   // guidelines
   private void _writeAccessibilityGuidelines(Writer out, ComponentBean bean) throws IOException
   {
-    // accAttributes and accFacets are sorted lists of attributes and facets, respectively, 
+    // accAttributes and accFacets are sorted lists of attributes and facets, respectively,
     // that have an associated accessibility guideline
     TreeSet<PropertyBean> accAttributes = new TreeSet<PropertyBean>();
     TreeSet<String> accFacets = new TreeSet<String>();
@@ -1399,7 +1404,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
     // see if any of the component's facets has an associated accessibility guideline
-    if (bean.hasFacets()) 
+    if (bean.hasFacets())
     {
       Iterator<FacetBean> facets = bean.facets(true);
       while (facets.hasNext())
@@ -1490,11 +1495,11 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     out.write("    <div class=\'accGuideline\'>\n");
     out.write("<li>");
 
-    if (!"".equals(referenceName)) 
+    if (!"".equals(referenceName))
     {
       out.write("<b>");
       out.write(referenceName);
-      out.write("</b>: ");    
+      out.write("</b>: ");
     }
 
     if (desc != null)
@@ -1503,7 +1508,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       {
         out.write(desc + "\n");
       }
-    } 
+    }
 
     out.write("</li>");
     out.write("    </div>\n");
@@ -1513,7 +1518,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   {
     return project;
   }
-  
+
   protected String getOutputDirectory()
   {
     return outputDirectory.getAbsolutePath();
@@ -1822,7 +1827,6 @@ public class TagdocReport extends AbstractMavenMultiPageReport
    * @required
    */
   private File outputDirectory;
-  
 
   /**
    * Directory where the original site is present.
@@ -1830,9 +1834,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
    * the string for some reason.  TRIED using ${siteDirectory},
    * which was undefined.  TRIED ${project.directory}src/site; which also
    * inserted a null.  ${project.build.directory}/../src/site seems to work,
-   * though it assumes that ${project.build.directory} is 
+   * though it assumes that ${project.build.directory} is
    * ${project.directory}/target.
-   * 
+   *
    * @parameter default-value="${project.build.directory}/../src/site/"
    * @required
    */
