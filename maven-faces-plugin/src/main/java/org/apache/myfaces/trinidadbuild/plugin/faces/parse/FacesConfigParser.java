@@ -226,6 +226,9 @@ public class FacesConfigParser
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/required");
     digester.addBeanPropertySetter("faces-config/component/property/property-extension/property-metadata/value-expression", "valueExpression");
 
+    // faces-config/component/component-extension/component-metadata/deprecated
+    digester.addBeanPropertySetter("faces-config/component/component-extension/component-metadata/deprecated");
+
     // faces-config/component/facet/facet-extension/facet-metadata/allowed-child-components
     digester.addCallMethod("faces-config/component/facet/facet-extension/facet-metadata/allowed-child-components",
                            "parseAllowedChildComponents", 1);
