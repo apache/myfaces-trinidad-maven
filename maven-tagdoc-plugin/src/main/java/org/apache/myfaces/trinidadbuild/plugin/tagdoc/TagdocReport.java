@@ -762,6 +762,15 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     out.write("</table>\n");
     out.write("</div>\n");
+    
+    String deprecatedMessage = bean.getDeprecated();
+    if (deprecatedMessage != null)
+    {
+      out.write("\n");
+      out.write("<b>DEPRECATED: </b>");
+      out.write(_preToSource(deprecatedMessage));
+      out.write("\n");
+    }
 
     String doc = bean.getLongDescription();
     if (doc == null)

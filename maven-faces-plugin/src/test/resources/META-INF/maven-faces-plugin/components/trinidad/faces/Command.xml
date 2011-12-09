@@ -22,7 +22,8 @@
               xmlns:af="http://myfaces.apache.org/trinidad"
               xmlns:xi="http://www.w3.org/2001/XInclude"
               xmlns:md="http://myfaces.apache.org/bali/xml/metadata"
-              xmlns:mfp="http://myfaces.apache.org/maven-faces-plugin">
+              xmlns:mfp="http://myfaces.apache.org/maven-faces-plugin"
+              xmlns:fmd="http://java.sun.com/xml/ns/javaee/faces/design-time-metadata">
 
   <component>
 
@@ -152,6 +153,10 @@
 
       <mfp:jsp-tag-class>org.apache.myfaces.trinidadinternal.taglib.UIXCommandTag</mfp:jsp-tag-class>
       <mfp:jsp-tag-name>af:command</mfp:jsp-tag-name>
+
+      <fmd:component-metadata>
+        <fmd:deprecated>The imaginary component has been deprecated. Use the real component instead.</fmd:deprecated>
+      </fmd:component-metadata>
 
       <!-- <mfp:implementation-type>trinidad</mfp:implementation-type> -->
 

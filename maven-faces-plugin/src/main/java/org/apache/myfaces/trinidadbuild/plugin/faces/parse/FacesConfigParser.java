@@ -236,6 +236,9 @@ public class FacesConfigParser
                            "parseEventNames", 1);
     digester.addCallParam("faces-config/component/component-extension/component-metadata/event-names", 0);
 
+    // faces-config/component/component-extension/component-metadata/deprecated
+    digester.addBeanPropertySetter("faces-config/component/component-extension/component-metadata/deprecated");
+
     // faces-config/component/facet/facet-extension/facet-metadata/allowed-child-components
     digester.addCallMethod("faces-config/component/facet/facet-extension/facet-metadata/allowed-child-components",
                            "parseAllowedChildComponents", 1);

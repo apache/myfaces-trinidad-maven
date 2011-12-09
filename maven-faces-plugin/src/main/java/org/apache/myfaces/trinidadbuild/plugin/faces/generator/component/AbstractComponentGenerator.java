@@ -136,7 +136,17 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       out.println(" * It does not support any children.");
     }
 
+    String deprecatedMessage = component.getDeprecated();
+    if (deprecatedMessage != null)
+    {
+      out.println(" * @deprecated " + convertMultilineComment(deprecatedMessage));
+    }
     out.println(" */");
+
+    if (deprecatedMessage != null)
+    {
+      out.println("@Deprecated");
+    }
 
     // TODO: eliminate <mfp:component-class-modifier> metadata
     int modifiers = component.getComponentClassModifiers();
