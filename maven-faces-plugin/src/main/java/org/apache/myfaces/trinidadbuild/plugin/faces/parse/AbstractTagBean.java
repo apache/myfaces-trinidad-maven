@@ -30,6 +30,7 @@ public class AbstractTagBean extends ObjectBean {
   private List<String> _accessibilityGuidelines = new ArrayList<String>();
   private String       _description;
   private String       _longDescription;
+  private String       _deprecated;
   private QName        _tagName;
   private String       _tagClass;
   protected Map<String, PropertyBean> _properties;
@@ -98,6 +99,23 @@ public class AbstractTagBean extends ObjectBean {
   public String getLongDescription()
   {
     return _longDescription;
+  }
+
+  /**
+   * Sets the component deprecated flag
+   * @param deprecated
+   */
+  public void setDeprecated(String deprecated)
+  {
+    this._deprecated = deprecated;
+  }
+
+  /**
+   * Value is provided through the deprecated extended property metadata.
+   * @return deprecated description if the component should be deprecated
+   */
+  public String getDeprecated() {
+    return _deprecated;
   }
 
   /**
