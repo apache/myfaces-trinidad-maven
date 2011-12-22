@@ -319,6 +319,51 @@ public class ComponentBean extends AbstractTagBean
     return _namingContainer;
   }
 
+  public boolean isClientBehaviorHolder()
+  {
+    return _eventNames != null && _eventNames.length > 0;
+  }
+
+  public void setDefaultEventName(String defaultEventName)
+  {
+    this._defaultEventName = defaultEventName;
+  }
+
+  public String getDefaultEventName()
+  {
+    return _defaultEventName;
+  }
+
+  public void setEventNames(String[] eventNames)
+  {
+    this._eventNames = eventNames;
+  }
+
+  public String[] getEventNames()
+  {
+    return _eventNames;
+  }
+
+  public void parseEventNames(String value)
+  {
+    if (value != null)
+    {
+      String[] names = value.trim().split("\\s+");
+      // combine event names if given more than once (to make importing from another XML file more easy)
+      if (_eventNames == null)
+      {
+        _eventNames = names;
+      }
+      else
+      {
+        String[] currEventNames = _eventNames;
+        _eventNames = new String[_eventNames.length + names.length];
+        System.arraycopy(currEventNames, 0, _eventNames, 0, currEventNames.length);
+        System.arraycopy(names, 0, _eventNames, currEventNames.length, names.length);
+      }
+    }
+  }
+
   /**
    * Sets the component supertype for this component.
    *
@@ -445,7 +490,6 @@ public class ComponentBean extends AbstractTagBean
     return prop;
   }
 
-
   /**
    * Returns true if this component has any properties.
    *
@@ -560,7 +604,6 @@ public class ComponentBean extends AbstractTagBean
   {
     return _facets.get(facetName);
   }
-
 
   public FacetBean findFacet(
     String facetName,
@@ -989,7 +1032,6 @@ public class ComponentBean extends AbstractTagBean
     return event;
   }
 
-
   /**
    * Returns an iterator for all events on this component only.
    *
@@ -1066,7 +1108,6 @@ public class ComponentBean extends AbstractTagBean
     ComponentBean parent = resolveSupertype();
     return (parent != null) ? parent.findRendererType() : null;
   }
-
 
   /**
    * Finds the component superclass in the component inheritance
@@ -1201,6 +1242,7 @@ public class ComponentBean extends AbstractTagBean
   private String  _tagSuperclass;
   private String  _localName;
   private String  _nodeClass;
+  private String  _defaultEventName;
   private boolean _namingContainer;
   private boolean _children = true;
   private Map<String, PropertyBean> _properties;
@@ -1211,6 +1253,8 @@ public class ComponentBean extends AbstractTagBean
   private String[] _unsupportedAgents = new String[0];
   private List<String> _requiredAncestorContracts = new ArrayList<String>();
   private List<String> _satisfiedContracts = new ArrayList<String>();
+
+  private String[] _eventNames;
 
   static private final String _TRINIDAD_COMPONENT_BASE =
                          "org.apache.myfaces.trinidad.component.UIXComponentBase";

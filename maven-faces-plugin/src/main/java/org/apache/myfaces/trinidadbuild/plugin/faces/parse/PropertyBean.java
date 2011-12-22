@@ -130,6 +130,27 @@ public class PropertyBean extends AttributeBean
   }
 
   /**
+   * Sets the mutable value of this property.
+   *
+   * @param mutable  the property mutable value
+   */
+  public void setMutable(
+    String mutable)
+  {
+    _mutable = mutable;
+  }
+
+  /**
+   * Returns mutable value of this property.
+   *
+   * @return  the property mutable value
+   */
+  public String getMutable()
+  {
+    return _mutable;
+  }
+
+  /**
    * Sets the transient flag of this property.
    *
    * @param transient_ the property transient flag
@@ -551,6 +572,7 @@ public class PropertyBean extends AttributeBean
   private boolean _stateHolder;
   private boolean _transient;
   private boolean _list;
+  private String  _mutable;
   private boolean _tagAttributeExcluded;
   private boolean _enum;
   private boolean _useMaxTime;

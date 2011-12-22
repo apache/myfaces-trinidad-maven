@@ -49,7 +49,7 @@ public abstract class AbstractValidatorTagGenerator extends AbstractTagGenerator
 
       StringWriter sw = new StringWriter();
       PrettyWriter out = new PrettyWriter(sw);
-      Set imports = createImports(validator);
+      Set<String> imports = createImports(validator);
       writeHeader(out, validator, imports);
 
       writeClass(out, validator);
@@ -81,9 +81,10 @@ public abstract class AbstractValidatorTagGenerator extends AbstractTagGenerator
     }
   }
 
-  protected abstract Set createImports(ValidatorBean validator);
+  protected abstract Set<String> createImports(ValidatorBean validator);
 
-  protected void writeClass(PrettyWriter out, AbstractTagBean abstractTag) {
+  protected void writeClass(PrettyWriter out, AbstractTagBean abstractTag)
+  {
     String className = Util.getClassFromFullClass(abstractTag.getTagClass());
     if (is12())
     {

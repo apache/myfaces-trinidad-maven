@@ -48,7 +48,7 @@ public abstract class AbstractConverterTagGenerator extends AbstractTagGenerator
       StringWriter sw = new StringWriter();
       PrettyWriter out = new PrettyWriter(sw);
 
-      Set imports = createImports(converter);
+      Set<String> imports = createImports(converter);
       writeHeader(out, converter, imports);
 
       writeClass(out, converter);
@@ -79,7 +79,7 @@ public abstract class AbstractConverterTagGenerator extends AbstractTagGenerator
     }
   }
 
-  protected abstract Set createImports(ConverterBean converter);
+  protected abstract Set<String> createImports(ConverterBean converter);
   protected abstract void writeSetProperty(PrettyWriter out, PropertyBean property);
 
 
@@ -174,7 +174,8 @@ public abstract class AbstractConverterTagGenerator extends AbstractTagGenerator
     }
 
 
-  private void writeClass(PrettyWriter out, AbstractTagBean abstractTag) {
+  protected void writeClass(PrettyWriter out, AbstractTagBean abstractTag)
+  {
     String className = Util.getClassFromFullClass(abstractTag.getTagClass());
     if (is12())
     {

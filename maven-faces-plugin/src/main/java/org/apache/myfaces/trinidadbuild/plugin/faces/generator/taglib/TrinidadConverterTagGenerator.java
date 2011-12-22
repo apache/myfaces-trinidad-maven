@@ -20,6 +20,7 @@ package org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib;
 
 import org.apache.maven.plugin.logging.Log;
 import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.AbstractTagBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ConverterBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
@@ -33,12 +34,12 @@ public class TrinidadConverterTagGenerator extends AbstractConverterTagGenerator
     super(is12, licenseHeader, log);
   }
 
-  protected Set createImports(ConverterBean converter) {
-    Set imports = new TreeSet();
+  protected Set<String> createImports(ConverterBean converter) {
+    Set<String> imports = new TreeSet<String>();
 
     if (is12())
     {
-      imports.add("javax.faces.webapp.ConverterELTag");
+      imports.add("org.apache.myfaces.trinidad.webapp.TrinidadConverterELTag");
       imports.add("javax.faces.context.FacesContext");
       imports.add("javax.faces.application.Application");
     }
@@ -66,7 +67,23 @@ public class TrinidadConverterTagGenerator extends AbstractConverterTagGenerator
     return imports;
   }
 
-
+  @Override
+  protected void writeClass(PrettyWriter out, AbstractTagBean abstractTag)
+  {
+    String className = Util.getClassFromFullClass(abstractTag.getTagClass());
+    if (is12())
+    {
+      out.println("public class " + className +
+                  " extends TrinidadConverterELTag");
+      out.println("{");
+      out.indent();
+    }
+    else
+    {
+      // non 1.2
+      super.writeClass(out, abstractTag);
+    }
+  }
 
 
   protected void writeSetProperty(

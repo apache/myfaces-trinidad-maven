@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.myfaces.trinidadbuild</groupId>
     <artifactId>maven-plugin-parent</artifactId> 
-    <version>1.2.14-SNAPSHOT</version>
+    <version>2.0.8-SNAPSHOT</version>
   </parent>
 
   <groupId>org.apache.myfaces.trinidadbuild</groupId>
@@ -55,7 +55,7 @@
     <dependency>
       <groupId>commons-digester</groupId>
       <artifactId>commons-digester</artifactId>
-      <version>1.7</version>
+      <version>1.8.1</version>
     </dependency>
     <dependency>
       <groupId>saxon</groupId>
@@ -80,5 +80,20 @@
       <version>1.2.0_rc2-dev</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.myfaces.trinidadbuild</groupId>
+        <artifactId>maven-jdev-plugin</artifactId>
+        <configuration>
+          <projectHasTests>true</projectHasTests>
+          <testSourceRoots>
+            <file>${project.basedir}/src/test</file>
+          </testSourceRoots>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

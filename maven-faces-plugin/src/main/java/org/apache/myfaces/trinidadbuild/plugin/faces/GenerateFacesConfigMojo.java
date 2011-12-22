@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,7 +25,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import java.net.URL;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,12 +50,15 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+
 
 /**
  * @version $Id$
@@ -160,10 +165,21 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
           Result mergedResult = new StreamResult(resultStream);
 
           URL xslURL;
-          if (_is12())
+          boolean isJsf2 = false;
+          JsfVersion usedVersion = JsfVersion.getVersion(jsfVersion);
+          if (usedVersion == JsfVersion.JSF_1_2)
+          {
             xslURL = getClass().getResource("resources/transform12.xsl");
+          }
+          else if (usedVersion == JsfVersion.JSF_2_0)
+          {
+            xslURL = getClass().getResource("resources/transform20.xsl");
+            isJsf2 = true;
+          }
           else
+          {
             xslURL = getClass().getResource("resources/transform.xsl");
+          }
 
           InputStream xsl = xslURL.openStream();
           StreamSource xslSource = new StreamSource(xsl);
@@ -174,6 +190,11 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
                                    removeRenderers ? "true" : "false");
           transformer.setParameter("converterPackageContains", getParameter(converterPackageContains, packageContains));
           transformer.setParameter("validatorPackageContains", getParameter(validatorPackageContains, packageContains));
+          
+          if (isJsf2 && metadataComplete)
+          {
+            transformer.setParameter("metadataComplete", "true");
+          }
 
           transformer.transform(mergedSource, mergedResult);
           resultStream.close();
@@ -202,7 +223,7 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
             tmpFile.delete();
           }
 
-          
+
           targetFile.setReadOnly();
 
           getLog().info("Generated " + targetPath);
@@ -225,11 +246,6 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
     {
       throw new MojoExecutionException("Error during generation", e);
     }
-  }
-
-  private boolean _is12()
-  {
-    return "1.2".equals(jsfVersion) || "12".equals(jsfVersion);
   }
 
   private String getParameter(String paramName, String defaultValue)
@@ -318,4 +334,9 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
    * @parameter
    */
   private String jsfVersion;
+  
+  /**
+   * @parameter
+   */
+  private boolean metadataComplete;
 }

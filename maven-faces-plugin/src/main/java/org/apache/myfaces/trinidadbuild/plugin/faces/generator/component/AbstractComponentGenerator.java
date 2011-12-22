@@ -6,9 +6,9 @@
  *  to you under the Apache License, Version 2.0 (the
  *  "License"); you may not use this file except in compliance
  *  with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,20 +18,35 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.generator.component;
 
+import java.io.IOException;
+
+import java.lang.reflect.Modifier;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.maven.plugin.logging.Log;
 import org.apache.myfaces.trinidadbuild.plugin.faces.generator.GeneratorHelper;
 import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
-import org.apache.myfaces.trinidadbuild.plugin.faces.parse.*;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.EventBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.EventRefBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacetBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.PropertyFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.SourceTemplate;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public abstract class AbstractComponentGenerator implements ComponentGenerator
 {
@@ -120,7 +135,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       out.println(" * <p>");
       out.println(" * It does not support any children.");
     }
-    
+
     String deprecatedMessage = component.getDeprecated();
     if (deprecatedMessage != null)
     {
@@ -147,6 +162,9 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
 
     if (component.isNamingContainer())
       interfaces.add("javax.faces.component.NamingContainer");
+
+    if (component.isClientBehaviorHolder())
+      interfaces.add("javax.faces.component.behavior.ClientBehaviorHolder");
 
     Iterator<EventRefBean> events = component.events();
     while (events.hasNext())
@@ -228,6 +246,18 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     // Detect NamingContainer
     if (component.isNamingContainer())
       imports.add("javax.faces.component.NamingContainer");
+
+    // Detect ClientBehaviorHolder
+    if (component.isClientBehaviorHolder())
+    {
+      imports.add("java.util.Arrays");
+      imports.add("java.util.Collection");
+      imports.add("java.util.Collections");
+      imports.add("java.util.List");
+      imports.add("java.util.Map");
+      imports.add("javax.faces.component.behavior.ClientBehavior");
+      imports.add("javax.faces.component.behavior.ClientBehaviorHolder");
+    }
 
     Iterator<PropertyBean> properties = component.properties();
     properties = new FilteredIterator(properties, new NonVirtualFilter());
@@ -446,7 +476,6 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     }
   }
 
-
   protected String convertVariableToBoxedForm(
     String  className,
     String  varName)
@@ -587,7 +616,6 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     writePropertyMethods(out, component, null);
   }
 
-
   public void writePropertyMethods(PrettyWriter out, ComponentBean component, Collection ignoreList)
       throws IOException
   {
@@ -683,20 +711,20 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     {
       out.println(" * @deprecated");
     }
-    
+
     if (property.getDeprecated() != null)
     {
       out.print(" * @deprecated ");
-      out.println(convertMultilineComment(property.getDeprecated()));      
+      out.println(convertMultilineComment(property.getDeprecated()));
     }
-    
+
     out.println(" */");
 
     if (property.getDeprecated() != null)
     {
       out.println("@Deprecated");
     }
- 
+
     if (isAccessorMethodFinal())
     {
       out.print("final ");
@@ -756,20 +784,20 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     {
       out.println(" * @deprecated");
     }
-    
+
     if (property.getDeprecated() != null)
     {
       out.print(" * @deprecated ");
       out.println(convertMultilineComment(property.getDeprecated()));
     }
-    
+
     out.println(" */");
 
     if (property.getDeprecated() != null)
     {
       out.println("@Deprecated");
     }
-  
+
     if (isUnchecked)
     {
       out.println("@SuppressWarnings(\"unchecked\")");
@@ -1002,9 +1030,106 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     out.println("}");
   }
 
-
   public abstract void writeStateManagementMethods(PrettyWriter out,
                                                    ComponentBean component) throws IOException;
+
+  @Override
+  public void writeClientBehaviorMethods(
+    PrettyWriter  out,
+    ComponentBean component
+    ) throws IOException
+  {
+    String defaultEventName = component.getDefaultEventName();
+    out.println();
+    out.println("@Override");
+    out.println("public String getDefaultEventName()");
+    out.println("{");
+    out.indent();
+    if (defaultEventName != null)
+    {
+      out.print("return \"");
+      out.print(defaultEventName);
+      out.println("\";");
+    }
+    else
+    {
+      out.println("return super.getDefaultEventName();");
+    }
+    out.unindent();
+    out.println("}");
+
+    out.println();
+    out.println("@Override"); // JDK 1.6 is a requirement for JSF2 so this is okay
+    out.println("public Collection<String> getEventNames()");
+    out.println("{");
+    out.indent();
+    out.println("return _EVENT_NAMES;");
+    out.unindent();
+    out.println("}");
+
+    out.println();
+    out.println("@Override");
+    out.println("public Map<String, List<ClientBehavior>> getClientBehaviors()");
+    out.println("{");
+    out.indent();
+    out.println("return super.getClientBehaviors();");
+    out.unindent();
+    out.println("}");
+
+    out.println();
+    out.println("@Override");
+    out.println("public void addClientBehavior(");
+    out.indent();
+    out.println("String         eventName,");
+    out.println("ClientBehavior behavior)");
+    out.unindent();
+    out.println("{");
+    out.indent();
+    out.println("super.addClientBehavior(eventName, behavior);");
+    out.unindent();
+    out.println("}");
+  }
+
+  @Override
+  public void writeClientBehaviorConstants(
+    PrettyWriter  out,
+    ComponentBean component
+    ) throws IOException
+  {
+    out.println("// Supported client events for client behaviors:");
+    out.println("private final static Collection<String> _EVENT_NAMES = Collections.unmodifiableCollection(");
+    out.indent();
+    out.println("Arrays.asList(");
+    out.indent();
+    boolean first = true;
+    int wrapAt = 5;
+    for (String eventName : component.getEventNames())
+    {
+      if (first)
+      {
+        first = false;
+      }
+      else
+      {
+        if (--wrapAt < 0)
+        {
+          out.println(",");
+          wrapAt = 5;
+        }
+        else
+        {
+          out.print(", ");
+        }
+      }
+      out.print("\"");
+      out.print(eventName);
+      out.print("\"");
+    }
+    out.println();
+    out.unindent();
+    out.println("));");
+    out.unindent();
+  }
 
   public void writeOther(
       PrettyWriter out, ComponentBean component) throws IOException
@@ -1016,8 +1141,8 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       String commentBody)
   {
    StringBuilder buff = new StringBuilder(commentBody.replaceAll("\n", "\n * "));
-   
-   
+
+
    // escape markup within <pre> blocks.  The tag doc gen plugin escapes the ampersand
    // making it not possible to escape causing issue with javadoc.
    int s = 0;
@@ -1033,12 +1158,12 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
        markup = markup.replaceAll(">", "&gt;");
        buff.delete(s, e);
        buff.insert(s, markup);
-       
+
        s = buff.indexOf("<pre>", s + markup.length() + "</pre>".length());
      }
    } while (s > 0);
-    
-   return buff.toString(); 
+
+   return buff.toString();
   }
 
   protected class ResolvableTypeFilter extends PropertyFilter
@@ -1077,7 +1202,6 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     return (String) _RESOLVABLE_TYPES.get(className);
   }
 
-
   static private Map _createResolvableTypes()
   {
     Map resolvableTypes = new HashMap();
@@ -1102,6 +1226,6 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
 
   static private final Pattern _GENERIC_TYPE = Pattern.compile("([^<]+)<(.+)>");
   static final private Map _RESOLVABLE_TYPES = _createResolvableTypes();
-  
-  
+
+
 }

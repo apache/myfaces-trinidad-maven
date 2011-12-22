@@ -48,8 +48,11 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ConverterBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ValidatorBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.parse.MethodSignatureBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib.TagAttributeFilter;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -160,10 +163,13 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
 
           TransformerFactory transFactory = TransformerFactory.newInstance();
           Transformer identity = transFactory.newTransformer();
-          identity.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,
-                                     _FACELETS_TAG_LIBRARY_DOCTYPE_PUBLIC);
-          identity.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
-                                     _FACELETS_TAG_LIBRARY_DOCTYPE_SYSTEM);
+          if (!_isJSF20PLus())
+          {
+            identity.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,
+                                       _FACELETS_TAG_LIBRARY_DOCTYPE_PUBLIC);
+            identity.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
+                                       _FACELETS_TAG_LIBRARY_DOCTYPE_SYSTEM);
+          }
           identity.transform(mergedSource, mergedResult);
 
           targetFile.setReadOnly();
@@ -244,10 +250,28 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
   {
     stream.writeStartDocument("1.0");
     stream.writeCharacters("\n");
-    stream.writeDTD(dtd);
-    stream.writeCharacters("\n");
+    
+    boolean isJSF20PLus = _isJSF20PLus();
+    
+    String ns = _FACELETS_NAMESPACE_URI_20;
+    
+    if (!isJSF20PLus)
+    {
+      ns = _FACELETS_NAMESPACE_URI;
+      stream.writeDTD(dtd);
+      stream.writeCharacters("\n");
+    }
+    
     stream.writeStartElement("facelet-taglib");
-    stream.writeDefaultNamespace(_FACELETS_NAMESPACE_URI);
+    stream.writeDefaultNamespace(ns);
+    
+    if (isJSF20PLus)
+    {
+      stream.writeNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+      stream.writeAttribute("http://www.w3.org/2001/XMLSchema-instance", "schemaLocation",
+                            "http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facelettaglibrary_2_0.xsd");
+      stream.writeAttribute("version", "2.0");
+    }
     stream.writeCharacters("\n  ");
   }
 
@@ -269,6 +293,17 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
   {
     stream.writeCharacters("\n  ");
     stream.writeStartElement("tag");
+    
+    boolean isJSF20PLus = _isJSF20PLus();
+    
+    if (isJSF20PLus && component.getDescription() != null)
+    {
+      stream.writeCharacters("\n    ");
+      stream.writeStartElement("description");
+      stream.writeCData(component.getDescription());
+      stream.writeEndElement();
+    }
+    
     stream.writeCharacters("\n    ");
     stream.writeStartElement("tag-name");
     stream.writeCharacters(component.getTagName().getLocalPart());
@@ -303,6 +338,22 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
 
     stream.writeCharacters("\n    ");
     stream.writeEndElement();
+    
+    if (isJSF20PLus)
+    {
+      Iterator properties = component.properties(true);
+      properties = new FilteredIterator(properties, new TagAttributeFilter());
+      while (properties.hasNext())
+      {
+        PropertyBean property = (PropertyBean)properties.next();
+        writeTagAttribute(stream,
+                           property.getPropertyName(),
+                           property.getDescription(),
+                           property.getUnsupportedAgents(),
+                           property);
+      }
+    }
+    
     stream.writeCharacters("\n  ");
     stream.writeEndElement();
   }
@@ -316,6 +367,17 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
   {
     stream.writeCharacters("\n  ");
     stream.writeStartElement("tag");
+    
+    boolean isJSF20PLus = _isJSF20PLus();
+    
+    if (isJSF20PLus && validator.getDescription() != null)
+    {
+      stream.writeCharacters("\n    ");
+      stream.writeStartElement("description");
+      stream.writeCData(validator.getDescription());
+      stream.writeEndElement();
+    }
+    
     stream.writeCharacters("\n    ");
     stream.writeStartElement("tag-name");
     stream.writeCharacters(validator.getTagName().getLocalPart());
@@ -341,6 +403,25 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
 
     stream.writeCharacters("\n    ");
     stream.writeEndElement();
+    
+    if (isJSF20PLus)
+    {
+      // validators need an id attribute
+      writeTagAttribute(stream, "id", "the identifier for the validator", null, null);
+  
+      Iterator properties = validator.properties();
+      properties = new FilteredIterator(properties, new TagAttributeFilter());
+      while (properties.hasNext())
+      {
+        PropertyBean property = (PropertyBean)properties.next();
+        writeTagAttribute(stream,
+                           property.getPropertyName(),
+                           property.getDescription(),
+                           property.getUnsupportedAgents(),
+                           property);
+      }
+    }
+    
     stream.writeCharacters("\n  ");
     stream.writeEndElement();
   }
@@ -354,6 +435,17 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
   {
     stream.writeCharacters("\n  ");
     stream.writeStartElement("tag");
+    
+    boolean isJSF20PLus = _isJSF20PLus();
+    
+    if (isJSF20PLus && converter.getDescription() != null)
+    {
+      stream.writeCharacters("\n    ");
+      stream.writeStartElement("description");
+      stream.writeCData(converter.getDescription());
+      stream.writeEndElement();
+    }
+    
     stream.writeCharacters("\n    ");
     stream.writeStartElement("tag-name");
     stream.writeCharacters(converter.getTagName().getLocalPart());
@@ -379,9 +471,130 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
 
     stream.writeCharacters("\n    ");
     stream.writeEndElement();
+    
+    if (isJSF20PLus)
+    {
+      // converters need an id attribute
+      writeTagAttribute(stream, "id", "the identifier for the converter", null, null);
+  
+      Iterator properties = converter.properties();
+      properties = new FilteredIterator(properties, new TagAttributeFilter());
+      while (properties.hasNext())
+      {
+        PropertyBean property = (PropertyBean)properties.next();
+        writeTagAttribute(stream,
+                           property.getPropertyName(),
+                           property.getDescription(),
+                           property.getUnsupportedAgents(),
+                           property);
+      }
+    }
+      
     stream.writeCharacters("\n  ");
     stream.writeEndElement();
   }
+  
+  protected void writeTagAttribute(
+      XMLStreamWriter stream,
+      String          propertyName,
+      String          description,
+      String[]        unsupportedAgents,
+      PropertyBean    property) throws XMLStreamException
+    {
+      stream.writeCharacters("\n    ");
+      stream.writeStartElement("attribute");
+    
+      _writeTagAttributeDescription(stream, description, unsupportedAgents);
+      
+      stream.writeCharacters("\n      ");
+      stream.writeStartElement("name");
+
+      if (property != null)
+        stream.writeCharacters(property.getJspPropertyName());
+      else
+        stream.writeCharacters(propertyName);
+    
+      stream.writeEndElement();
+      
+      if (property != null)
+      {
+        if (property.isRequired())
+        {
+          stream.writeCharacters("\n    ");
+          stream.writeStartElement("required");
+          stream.writeCharacters("true");
+          stream.writeEndElement();
+        }
+        
+        MethodSignatureBean sig = null;
+        if ((property.isMethodExpression() || property.isMethodBinding()) && (sig = property.getMethodBindingSignature()) != null)
+        {
+          stream.writeCharacters("\n      ");
+          stream.writeStartElement("method-signature");
+          stream.writeCharacters(sig.getReturnType());
+          stream.writeCharacters(" myMethod(");
+          String[] params = sig.getParameterTypes();
+          for (int i = 0; i < params.length; i++)
+          {
+            if (i > 0)
+              stream.writeCharacters(", ");
+            stream.writeCharacters(params[i]);
+          }
+
+          stream.writeCharacters(")");
+          stream.writeEndElement();
+        }
+        else
+        {
+          String propertyClass = property.getPropertyClass();
+          stream.writeCharacters("\n      ");
+          stream.writeStartElement("type");
+          stream.writeCharacters(propertyClass);
+          stream.writeEndElement();
+        }
+        
+      }
+
+      stream.writeCharacters("\n    ");
+      stream.writeEndElement();
+    }
+    
+    private void _writeTagAttributeDescription(
+      XMLStreamWriter stream,
+      String          description,
+      String[]        unsupportedAgents) throws XMLStreamException
+    {
+
+      if (description != null ||
+          unsupportedAgents.length > 0)
+      {
+        stream.writeCharacters("\n      ");
+        stream.writeStartElement("description");
+
+        if (unsupportedAgents != null &&
+            unsupportedAgents.length > 0)
+        {
+          if (description == null)
+            description = "";
+
+          description += "\n\n    This attribute is not supported on the following agent types:\n";
+
+          for (int i=0; i < unsupportedAgents.length; i++)
+          {
+            description += " " + unsupportedAgents[i];
+            description += (i < unsupportedAgents.length - 1) ? "," : ".";
+          }
+        }
+
+        stream.writeCData(description);
+        stream.writeEndElement();
+      }
+    }
+    
+    private boolean _isJSF20PLus()
+    {
+      return !(JsfVersion.isJSF11(jsfVersion) || JsfVersion.isJSF12(jsfVersion));
+    }
 
 
   /**
@@ -436,9 +649,17 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
    * @parameter
    */
   private boolean force;
+  
+  /**
+   * @parameter
+   */
+  private String jsfVersion;
 
   static private final String _FACELETS_NAMESPACE_URI =
               "http://java.sun.com/JSF/Facelet";
+  
+  static private final String _FACELETS_NAMESPACE_URI_20 =
+              "http://java.sun.com/xml/ns/javaee";
 
   static final private String _FACELETS_TAG_LIBRARY_DOCTYPE_PUBLIC =
               "-//Sun Microsystems, Inc.//DTD Facelet Taglib 1.0//EN";

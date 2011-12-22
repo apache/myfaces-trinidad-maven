@@ -236,7 +236,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
           TransformerFactory transFactory = TransformerFactory.newInstance();
           Transformer identity = transFactory.newTransformer();
-          if (!_is12())
+          if (JsfVersion.isJSF11(jsfVersion))
           {
             identity.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,
                                        _JSP_TAG_LIBRARY_DOCTYPE_PUBLIC);
@@ -255,7 +255,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
           XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
           XMLStreamWriter stream = outputFactory.createXMLStreamWriter(out);
 
-          _writeStartTagLibrary(stream, _is12() ? "2.1" : "1.2", shortName, namespaceURI);
+          _writeStartTagLibrary(stream, !JsfVersion.isJSF11(jsfVersion) ? "2.1" : "1.2", shortName, namespaceURI);
           while (components.hasNext())
           {
             ComponentBean component = (ComponentBean)components.next();
@@ -315,12 +315,12 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
   {
     stream.writeStartDocument("1.0");
     stream.writeCharacters("\n");
-    if (!_is12())
+    if (JsfVersion.isJSF11(jsfVersion))
       stream.writeDTD(dtd);
 
     stream.writeCharacters("\n");
     stream.writeStartElement("taglib");
-    if (_is12())
+    if (!JsfVersion.isJSF11(jsfVersion))
     {
       stream.writeNamespace("", "http://java.sun.com/xml/ns/javaee");
       stream.writeNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -357,7 +357,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeCharacters(tlibVersion);
     stream.writeEndElement();
 
-    if (!_is12())
+    if (JsfVersion.isJSF11(jsfVersion))
     {
       stream.writeCharacters("\n  ");
       stream.writeStartElement("jsp-version");
@@ -395,7 +395,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeCharacters("\n    ");
 
     // In JSP 2.1, description goes up top
-    if (_is12() && component.getDescription() != null)
+    if (!JsfVersion.isJSF11(jsfVersion) && component.getDescription() != null)
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("description");
@@ -412,7 +412,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeEndElement();
 
     // In JSP 2.1, body-content is not optional
-    if (_is12())
+    if (!JsfVersion.isJSF11(jsfVersion))
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("body-content");
@@ -423,7 +423,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     GenerateJspTaglibsMojo.this.writeCustomComponentTagDescriptorContent(stream, component);
 
     // In JSP 2.0, description goes just before the attributes
-    if (!_is12() && component.getDescription() != null)
+    if (JsfVersion.isJSF11(jsfVersion) && component.getDescription() != null)
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("description");
@@ -457,7 +457,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeCharacters("\n  ");
     stream.writeStartElement("tag");
     stream.writeCharacters("\n    ");
-    if (_is12() && converter.getDescription() != null)
+    if (!JsfVersion.isJSF11(jsfVersion) && converter.getDescription() != null)
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("description");
@@ -474,7 +474,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeEndElement();
 
     // In JSP 2.1, body-content is not optional
-    if (_is12())
+    if (!JsfVersion.isJSF11(jsfVersion))
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("body-content");
@@ -482,7 +482,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
       stream.writeEndElement();
     }
 
-    if (!_is12() && converter.getDescription() != null)
+    if (JsfVersion.isJSF11(jsfVersion) && converter.getDescription() != null)
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("description");
@@ -552,7 +552,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeStartElement("attribute");
 
     // In JSP 2.1, the description goes at the beginning
-    if (_is12())
+    if (!JsfVersion.isJSF11(jsfVersion))
       _writeTagAttributeDescription(stream, description, unsupportedAgents);
 
     stream.writeCharacters("\n      ");
@@ -565,7 +565,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
     stream.writeEndElement();
 
-    if (!_is12())
+    if (JsfVersion.isJSF11(jsfVersion))
     {
       stream.writeCharacters("\n      ");
       stream.writeStartElement("rtexprvalue");
@@ -668,7 +668,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeCharacters("\n  ");
     stream.writeStartElement("tag");
 
-    if (_is12() && validator.getDescription() != null)
+    if (!JsfVersion.isJSF11(jsfVersion) && validator.getDescription() != null)
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("description");
@@ -686,7 +686,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     stream.writeEndElement();
 
     // In JSP 2.1, body-content is not optional
-    if (_is12())
+    if (!JsfVersion.isJSF11(jsfVersion))
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("body-content");
@@ -694,7 +694,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
       stream.writeEndElement();
     }
 
-    if (!_is12() && validator.getDescription() != null)
+    if (JsfVersion.isJSF11(jsfVersion) && validator.getDescription() != null)
     {
       stream.writeCharacters("\n    ");
       stream.writeStartElement("description");
@@ -768,13 +768,13 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         AbstractValidatorTagGenerator validatorGen = null;
         if (type == null || "trinidad".equals(type))
         {
-          converterGen = new TrinidadConverterTagGenerator(is12(), getLicenseHeader(), getLog());
-          validatorGen = new TrinidadValidatorTagGenerator(is12(), getLicenseHeader(), getLog());
+          converterGen = new TrinidadConverterTagGenerator(!JsfVersion.isJSF11(jsfVersion), getLicenseHeader(), getLog());
+          validatorGen = new TrinidadValidatorTagGenerator(!JsfVersion.isJSF11(jsfVersion), getLicenseHeader(), getLog());
         }
         else
         {
-          converterGen = new MyFacesConverterTagGenerator(is12(), getLicenseHeader(), getLog());
-          validatorGen = new MyFacesValidatorTagGenerator(is12(), getLicenseHeader(), getLog());
+          converterGen = new MyFacesConverterTagGenerator(!JsfVersion.isJSF11(jsfVersion), getLicenseHeader(), getLog());
+          validatorGen = new MyFacesValidatorTagGenerator(!JsfVersion.isJSF11(jsfVersion), getLicenseHeader(), getLog());
         }
         int count = 0;
         while (components.hasNext())
@@ -847,11 +847,11 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
         if (component.isTrinidadComponent())
         {
-          generator = new TrinidadComponentTagGenerator(_is12());
+          generator = new TrinidadComponentTagGenerator(!JsfVersion.isJSF11(jsfVersion));
         }
         else
         {
-          generator = new MyFacesComponentTagGenerator(_is12());
+          generator = new MyFacesComponentTagGenerator(!JsfVersion.isJSF11(jsfVersion));
         }
 
         getLog().debug("Generating " + fullClassName+", with generator: "+generator.getClass().getName());
@@ -913,16 +913,6 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         getLog().error("Error generating " + fullClassName, e);
       }
     }
-  }
-
-  protected boolean is12()
-  {
-    return "1.2".equals(jsfVersion) || "12".equals(jsfVersion);
-  }
-
-  private boolean _is12()
-  {
-    return is12();
   }
 
   private class IfComponentModifiedFilter extends ComponentFilter

@@ -30,6 +30,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -326,8 +327,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     // In the case of the component summary, the header is written out in a separate table cell, and so no
     // header text is passed into this method
-    // TODO use !header.isEmpty() on jdk1.6
-    if (header != null && !(header.length() == 0))
+    if (header != null && !header.isEmpty())
     {
       sb.append("<b>");
       sb.append(header);
@@ -389,8 +389,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
       // In the case of the component summary section the header text is written out
       // in a separate table cell, so no header text is passed into this method
-      // TODO use !header.isEmpty() on jdk1.6
-      if (header != null && !(header.length() == 0))
+      if (header != null && !header.isEmpty())
       {
         sb.append("<b>");
         sb.append(header);
@@ -537,6 +536,15 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       _writeExamples(out, component);
 
       _writeAccessibilityGuidelines(out, component);
+
+      if (component.isClientBehaviorHolder())
+      {
+        out.write(" <section name=\"Supported Client Events for Client Behaviors\">\n");
+        out.write(" <p>\n");
+        _writeComponentClientEvents(out, component);
+        out.write(" </p>\n");
+        out.write(" </section>\n");
+      }
 
       if (component.hasEvents(true))
       {
@@ -704,8 +712,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     // Write out the corresponding Java Script class for this component with a link to its JavaScript doc
     String jsClass = bean.getJsComponentClass();
-    // TODO use !header.isEmpty() on jdk1.6
-    if (jsClass != null && !(jsClass.length() == 0)) 
+    if (jsClass != null && !jsClass.isEmpty())
     {
       out.write("<tr>\n");
       out.write("<td><b>JavaScript Class:</b></td>");
@@ -1197,6 +1204,41 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
     return type;
+  }
+
+  private void _writeComponentClientEvents(
+    Writer        out,
+    ComponentBean bean
+    ) throws IOException
+  {
+    String defaultEvent = bean.getDefaultEventName();
+
+    out.write("<table>\n<tbody>\n<tr>\n<td>\n<ul>\n");
+
+    String[] eventNames = bean.getEventNames();
+    int size = eventNames.length;
+    String[] dest = new String[size];
+    System.arraycopy(eventNames, 0, dest, 0, size);
+    Arrays.sort(dest);
+    // create 3 columns to better utilize the space on the page
+    int numRows = (int)Math.ceil(size / 3d);
+
+    for (int i = 0; i < size; ++i)
+    {
+      if (i > 0 && (i % numRows) == 0)
+      {
+        out.write("</ul>\n</td>\n<td>\n<ul>\n");
+      }
+      String eventName = dest[i];
+      out.write("<li>");
+      out.write(eventName);
+      if (eventName.equals(defaultEvent))
+      {
+        out.write(" <small>(default)</small>");
+      }
+      out.write("</li>\n");
+    }
+    out.write("</ul>\n</td>\n</tr>\n</tbody>\n</table>\n");
   }
 
   private void _writeComponentEvents(Writer out, ComponentBean bean) throws IOException

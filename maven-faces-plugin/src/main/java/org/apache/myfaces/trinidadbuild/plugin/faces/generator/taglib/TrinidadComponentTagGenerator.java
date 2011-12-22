@@ -882,9 +882,6 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     String propClass = Util.getClassFromFullClass(propFullClass);
     String boxedClass = Util.getBoxedClass(propClass);
 
-    System.out.println ("_writeSetList: propFullClass = " + propFullClass +
-                        " propClass= " + propClass +
-                        " boxedClass=" + boxedClass);
     if (_is12)
     {
       out.println("set" + boxedClass + "ListProperty" +
@@ -939,9 +936,6 @@ public class TrinidadComponentTagGenerator extends AbstractComponentTagGenerator
     String propClass = Util.getClassFromFullClass(propFullClass);
     String boxedClass = Util.getBoxedClass(propClass);
 
-    System.out.println ("_writeSetSet: propFullClass = " + propFullClass +
-                        " propClass= " + propClass +
-                        " boxedClass=" + boxedClass);
     if (_is12)
     {
       out.println("set" + boxedClass + "SetProperty" +
