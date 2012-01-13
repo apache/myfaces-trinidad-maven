@@ -1077,19 +1077,20 @@
     namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
     and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin'
     and namespace-uri() !='http://java.sun.com/xml/ns/javaee/faces/design-time-metadata']">
-    <xsl:copy>
-      <xsl:apply-templates select="@*|node()"/>
-      <xsl:value-of select="text()"/>
-    </xsl:copy>
+    <xsl:copy-of select="*"/>
   </xsl:template>
 
   <xsl:template match="mfp:component-metadata/*[
     namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
     and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']">
-    <xsl:copy>
-      <xsl:apply-templates select="@*|node()"/>
-      <xsl:value-of select="text()"/>
-    </xsl:copy>
+    <xsl:copy-of select="*"/>
+  </xsl:template>
+
+  <xsl:template match="fmd:global-metadata/*[
+    namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
+    and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin'
+    and namespace-uri() !='http://java.sun.com/xml/ns/javaee/faces/design-time-metadata']">
+    <xsl:copy-of select="*"/>
   </xsl:template>
 
   <xsl:template match="//*[
@@ -1123,7 +1124,7 @@
   </xsl:template>
 
   <xsl:template match="//javaee:faces-config-extension">
-        <xsl:apply-templates select="fmd:global-metadata"/>
+    <xsl:apply-templates select="fmd:global-metadata"/>
   </xsl:template>
 
   <!-- Rule for the jsr-276 (top level) global metadata extension -->
@@ -1134,6 +1135,10 @@
         <xsl:apply-templates select="fmd:component-category-definitions"/>
         <xsl:apply-templates select="fmd:property-category-definitions"/>
         <xsl:apply-templates select="fmd:faces-taglib-definitions"/>
+        <!-- Include non-metadata children -->
+        <xsl:apply-templates select="*[namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
+          and namespace-uri() != 'http://java.sun.com/xml/ns/javaee/faces/design-time-metadata'
+          and namespace-uri() != 'http://myfaces.apache.org/maven-faces-plugin']"/>
       </xsl:element>
     </xsl:element>
   </xsl:template>
