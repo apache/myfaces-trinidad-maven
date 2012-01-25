@@ -26,7 +26,8 @@ enum JsfVersion
 {
   JSF_1_1,
   JSF_1_2,
-  JSF_2_0;
+  JSF_2_0,
+  JSF_2_1;
   
   /**
    * Helper function to extract the used JSF version.
@@ -40,6 +41,10 @@ enum JsfVersion
     else if (isJSF20(jsfVersion))
     {
       return JsfVersion.JSF_2_0;  
+    }
+    else if (isJSF21(jsfVersion))
+    {
+      return JsfVersion.JSF_2_1;  
     }
     else
     {
@@ -58,5 +63,9 @@ enum JsfVersion
   static boolean isJSF20(String jsfVersion)
   {
     return ("2.0".equals(jsfVersion) || "20".equals(jsfVersion));
+  }
+  static boolean isJSF21(String jsfVersion)
+  {
+    return ("2.1".equals(jsfVersion) || "21".equals(jsfVersion));
   }
 }

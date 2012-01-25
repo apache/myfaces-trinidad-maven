@@ -176,6 +176,11 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
             xslURL = getClass().getResource("resources/transform20.xsl");
             isJsf2 = true;
           }
+          else if (usedVersion == JsfVersion.JSF_2_1)
+          {
+            xslURL = getClass().getResource("resources/transform21.xsl");
+            isJsf2 = true;
+          }
           else
           {
             xslURL = getClass().getResource("resources/transform.xsl");
@@ -183,6 +188,8 @@ public class GenerateFacesConfigMojo extends AbstractFacesMojo
 
           InputStream xsl = xslURL.openStream();
           StreamSource xslSource = new StreamSource(xsl);
+          //this resolver is to make sure imports of other stylesheets within the classpath get loaded
+          transFactory.setURIResolver(new JarResourceResolver());
           Transformer transformer = transFactory.newTransformer(xslSource);
           transformer.setParameter("packageContains", packageContains);
           transformer.setParameter("typePrefix", typePrefix);
