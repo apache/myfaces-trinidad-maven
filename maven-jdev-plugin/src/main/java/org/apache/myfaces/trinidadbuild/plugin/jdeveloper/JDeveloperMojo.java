@@ -156,41 +156,31 @@ public class JDeveloperMojo
   extends AbstractMojo
 {
   /**
-   * Libraries to include in Classpath.
-   * @parameter
+   * Append the version string to the workspace name if set
+   * @parameter default-value=false
+   *
    */
-  private String[] libraries;
+  private boolean appendVersion;
 
   /**
-   * List of source root directories
-   * @parameter
+   * Compiler to be used by JDeveloper. "Ojc" is the default.  
+   * If this parameter is absent or anything other than "Javac", "Ojc" will
+   * be used.
+   * @parameter expression="${jdev.compiler}" default-value="Ojc"
    */
-  private File[] sourceRoots;
+  private String compiler;
 
   /**
-   * Does project have tests? Used to determine if the
-   * maven-jdev-plugin needs to create a <project name>-test.jpr
-   * @parameter expression="${jdev.project.has.tests}" default-value="false"
+   * Context root name.
+   * @parameter expression="${j2ee.contextRoot}"
    */
-  private boolean projectHasTests;
-  
-  /**
-   * List of source root directories for the test project
-   * @parameter
-   */
-  private File[] testSourceRoots;
+  private String contextRoot;
 
   /**
-   * List of resource root directories
+   * Tag libraries and their properties.
    * @parameter
    */
-  private File[] resourceRoots;
-
-  /**
-   * List of resource root directories for the test project
-   * @parameter
-   */
-  private File[] testResourceRoots;
+  private Properties[] distributedTagLibraries;
 
   /**
    * Force the Mojo to use the default project.xml or
@@ -203,12 +193,18 @@ public class JDeveloperMojo
   private boolean force;
 
   /**
-   * Compiler to be used by JDeveloper. "Ojc" is the default.  
-   * If this parameter is absent or anything other than "Javac", "Ojc" will
-   * be used.
-   * @parameter expression="${jdev.compiler}" default-value="Ojc"
+   * JVM javaOptions found under 
+   * Project Properties->Run/Debug/Profile->Launch Settings->Java Options
+   * in JDeveloper. "-ea" is the default for "enableAssertions".  
+   * @parameter expression="${jdev.jvm.java.options}" default-value="-ea"
    */
-  private String compiler;
+  private String javaOptions;
+
+  /**
+   * Libraries to include in Classpath.
+   * @parameter
+   */
+  private String[] libraries;
 
   /**
    * Make the entire project before each run.  Running anything in the
@@ -219,19 +215,6 @@ public class JDeveloperMojo
   private boolean makeProject;
 
   /**
-   * Default file to be run when JDeveloper project is run.
-   * @parameter expression="${jdev.run.target}"
-   */
-  private String runTarget;
-
-  /**
-   * Create JDeveloper Workspace and Project Files that correspond to
-   * the format used
-   * @parameter expression="${jdev.release}" default-value="10.1.3.0.4"
-   */
-  private String release;
-
-  /**
    * Name of the Maven Project
    * @parameter expression="${project}"
    * @required
@@ -239,6 +222,28 @@ public class JDeveloperMojo
    */
   private MavenProject project;
 
+  /**
+   * Does project have tests? Used to determine if the
+   * maven-jdev-plugin needs to create a <project name>-test.jpr
+   * @parameter expression="${jdev.project.has.tests}" default-value="false"
+   */
+  private boolean projectHasTests;
+
+  /**
+   * To limit the sub-projects included in the generated workspace file,
+   * list any projects to exclude here.
+   *
+   * e.g. To keep the trinidad-blank and trinidad-build projects from showing
+   * up in the Trinidad workspace just list them:
+   *  <projectsExcluded>
+   *    <param>trinidad-blank</param>
+   *    <param>trinidad-build</param>
+   *  </projectsExcluded>
+   * 
+   * @parameter
+   */
+  private String[] projectsExcluded;
+  
   /**
    * List of reactorProjects
    * @parameter expression="${reactorProjects}"
@@ -248,6 +253,31 @@ public class JDeveloperMojo
   private List reactorProjects;
 
   /**
+   * Create JDeveloper Workspace and Project Files that correspond to
+   * the format used
+   * @parameter expression="${jdev.release}" default-value="10.1.3.0.4"
+   */
+  private String release;
+
+  /**
+   * List of resource root directories
+   * @parameter
+   */
+  private File[] resourceRoots;
+
+  /**
+   * Default file to be run when JDeveloper project is run.
+   * @parameter expression="${jdev.run.target}"
+   */
+  private String runTarget;
+
+  /**
+   * List of source root directories
+   * @parameter
+   */
+  private File[] sourceRoots;
+
+  /**
    * Tag library directory used by each distributed jsf tag library
    *
    * @parameter expression="${jdev.tag.lib.dir}"
@@ -255,18 +285,16 @@ public class JDeveloperMojo
   private String tagLibDirectory;
 
   /**
-   * Tag libraries and their properties.
+   * List of resource root directories for the test project
    * @parameter
    */
-  private Properties[] distributedTagLibraries;
+  private File[] testResourceRoots;
 
   /**
-   * JVM javaOptions found under 
-   * Project Properties->Run/Debug/Profile->Launch Settings->Java Options
-   * in JDeveloper. "-ea" is the default for "enableAssertions".  
-   * @parameter expression="${jdev.jvm.java.options}" default-value="-ea"
+   * List of source root directories for the test project
+   * @parameter
    */
-  private String javaOptions;
+  private File[] testSourceRoots;
 
   /**
    * Execute the Mojo.
@@ -276,17 +304,20 @@ public class JDeveloperMojo
   {
     _parseRelease();
 
-    if (_releaseMajor >= 11)
+    if (tagLibDirectory == null)
     {
-      tagLibDirectory = 
-        "@oracle.home@/modules/oracle.jsf_1.2.9/glassfish.jsf_1.2.9.0.jar!/META-INF";
+      if (_releaseMajor >= 11)
+      {
+        tagLibDirectory = 
+          "@oracle.home@/modules/oracle.jsf_1.2.9/glassfish.jsf_1.2.9.0.jar!/META-INF";
+      }
+      else
+      {
+        tagLibDirectory =
+          "@oracle.home@lib/java/shared/oracle.jsf/1.2/jsf-ri.jar!/META-INF";
+      }
     }
-    else
-    {
-      tagLibDirectory =
-        "@oracle.home@lib/java/shared/oracle.jsf/1.2/jsf-ri.jar!/META-INF";
-    }
-    
+
     try
     {
       generateWorkspace();
@@ -504,6 +535,27 @@ public class JDeveloperMojo
     for (Iterator i = project.getCollectedProjects().iterator(); i.hasNext(); )
     {
       MavenProject collectedProject = (MavenProject) i.next();
+      File projectFile = getJProjectFile(collectedProject);
+
+      boolean excluded = false;
+      String projName = projectFile.getName();
+        
+      // Don't put any excluded projects into the hash
+      if (projectsExcluded != null)
+      {
+        for (String excl: projectsExcluded)
+        {
+          if (projName.contains(excl))
+          {
+            getLog().info("Skipping excluded " + projName);
+            excluded = true;
+            break;
+          }
+        }
+      }
+      if (excluded)
+        continue;
+
       boolean projHasTests = false;
 
       // Added in V11
@@ -521,8 +573,6 @@ public class JDeveloperMojo
       // file.
       if (!"pom".equals(collectedProject.getPackaging()))
       {
-        File projectFile = getJProjectFile(collectedProject);
-        
         targetDOM.addChild(createProjectReferenceDOM(workspaceDir,
                                                      projectFile));
   
@@ -609,7 +659,13 @@ public class JDeveloperMojo
     webappNameDOM.setAttribute("v", projectName + "-webapp");
 
     // update the webapp context root
-    webappContextDOM.setAttribute("v", projectName + "-context-root");
+    
+    if (contextRoot == null)
+    {
+      contextRoot = projectName + "-context-root";
+    }
+    
+    webappContextDOM.setAttribute("v", contextRoot);
   }
 
   private void replaceSourcePaths(File projectDir, List sourceRoots,
@@ -1582,8 +1638,15 @@ public class JDeveloperMojo
    */
   private File getJWorkspaceFile(MavenProject project)
   {
-    String jwsName = project.getArtifactId() + ".jws";
-    return new File(project.getBasedir(), jwsName);
+    StringBuilder jwsName = new StringBuilder(project.getArtifactId());    
+
+    if (appendVersion)
+    {
+      jwsName.append("-");
+      jwsName.append(release);
+    }
+    jwsName.append(".jws");
+    return new File(project.getBasedir(), jwsName.toString());
   }
 
   /**
