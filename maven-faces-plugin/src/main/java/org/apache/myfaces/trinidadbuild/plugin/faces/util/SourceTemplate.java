@@ -33,12 +33,12 @@ public class SourceTemplate
     _substitutions.put(in, out);
   }
 
-  public Set getImports()
+  public Set<String> getImports()
   {
     return Collections.unmodifiableSet(_imports);
   }
 
-  public Set getImplements()
+  public Set<String> getImplements()
   {
     return Collections.unmodifiableSet(_implements);
   }
@@ -74,7 +74,7 @@ public class SourceTemplate
           String className = interfaces[i];
           if (!Util.isFullClass(className))
           {
-            String importedName = (String)_fqcnMap.get(className);
+            String importedName = _fqcnMap.get(className);
             if (importedName != null)
               className = importedName;
           }
@@ -119,12 +119,9 @@ public class SourceTemplate
 
   private String _substitute(String in)
   {
-    Iterator keys = _substitutions.keySet().iterator();
-    while (keys.hasNext())
+    for (Map.Entry<String, String> entry : _substitutions.entrySet())
     {
-      String key = (String) keys.next();
-      String value = (String) _substitutions.get(key);
-      in = _substitute(in, key, value);
+      in = _substitute(in, entry.getKey(), entry.getValue());
     }
 
     return in;
@@ -150,13 +147,13 @@ public class SourceTemplate
 		return _ignoreMethods;
 	}
 
-	private File           _file;
-  private BufferedReader _reader;
-  private Set            _imports = new HashSet();
-  private Map            _fqcnMap = new HashMap();
-  private Set            _implements = new HashSet();
-  private Map            _substitutions = new HashMap();
-  private Set            _ignoreMethods = new HashSet();
+	private File                _file;
+  private BufferedReader      _reader;
+  private Set<String>         _imports = new HashSet<String>();
+  private Map<String, String> _fqcnMap = new HashMap<String, String>();
+  private Set<String>         _implements = new HashSet<String>();
+  private Map<String, String> _substitutions = new HashMap<String, String>();
+  private Set<String>         _ignoreMethods = new HashSet<String>();
 
   // Magic syntax indicating "please ignore this line"
   static private final String _IGNORE_PREFIX = "/**/";

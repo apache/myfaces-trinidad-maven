@@ -121,7 +121,7 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
     }
   }
 
-
+  @Override
   protected void writePropertyDeclaration(PrettyWriter out,
                                           PropertyBean property) throws IOException
   {
@@ -132,6 +132,7 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
     out.println("private " + jspPropType + " " + fieldPropName + ";");
   }
 
+  @Override
   protected void writePropertySetter(PrettyWriter out,
                                      PropertyBean property) throws IOException
   {
@@ -150,6 +151,7 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
     out.println("}");
   }
 
+  @Override
   public void writeGetComponentType(PrettyWriter out,
                                     ComponentBean component) throws IOException
   {
@@ -170,6 +172,7 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
     out.println("}");
   }
 
+  @Override
   public void writeSetPropertiesMethod(PrettyWriter out,
                                        String componentClass,
                                        ComponentBean component) throws IOException
@@ -214,6 +217,7 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
     out.println("}");
   }
 
+  @Override
   protected void writeSetPropertyMethodBody(PrettyWriter out,
                                             String componentClass,
                                             Iterator properties) throws IOException
@@ -571,5 +575,4 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
   {
     return (sig != null && "java.lang.String".equals(sig.getReturnType()));
   }
-
 }

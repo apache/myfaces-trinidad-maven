@@ -65,13 +65,18 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     return _log;
   }
 
+  @Override
   public void writeClassBegin(
       PrettyWriter out,
       String className,
       String superclassName,
       ComponentBean component,
-      SourceTemplate template)
+      SourceTemplate template,
+      boolean createSuperclass)
   {
+    if (className == null)
+      throw new NullPointerException();
+    
     out.println("/**");
 
     // TODO: restore description (needs escaping?)
@@ -150,6 +155,25 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
 
     // TODO: eliminate <mfp:component-class-modifier> metadata
     int modifiers = component.getComponentClassModifiers();
+    
+    // make abstract superclass classes abstract and package private
+    if (createSuperclass)
+    {
+      // remove all of the access modifiers to make this package provate
+      modifiers &= ~(Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED);
+      
+      // force abstract on
+      modifiers |= Modifier.ABSTRACT;
+    }
+    else
+    {
+      // if no modifier is specified, default to public
+      if ((modifiers & (Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
+      {
+        modifiers |= Modifier.PUBLIC;
+      }
+    }
+    
     String classStart = Modifier.toString(modifiers);
     // TODO: use canonical ordering
     classStart = classStart.replaceAll("public abstract", "abstract public");
@@ -215,6 +239,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     out.indent();
   }
 
+  @Override
   public void writeClassEnd(
       PrettyWriter out)
   {
@@ -222,13 +247,14 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     out.println("}");
   }
 
-
+  @Override
   public void writeImports(PrettyWriter out, SourceTemplate template, String packageName, String fullSuperclassName,
                            String superclassName, Collection components)
   {
     throw new UnsupportedOperationException("not implemented");
   }
 
+  @Override
   public void writeImports(
       PrettyWriter out,
       SourceTemplate template,
@@ -361,6 +387,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     }
   }
 
+  @Override
   public void writeGenericConstants(
       PrettyWriter out,
       String componentFamily,
@@ -373,6 +400,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     out.println("  \"" + componentType + "\";");
   }
 
+  @Override
   public void writePropertyConstants(
       PrettyWriter out,
       String superclassName,
@@ -381,6 +409,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     // nothing
   }
 
+  @Override
   public void writePropertyValueConstants(
       PrettyWriter out,
       ComponentBean component) throws IOException
@@ -514,41 +543,31 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     }
   }
 
+  @Override
   public void writeConstructor(
       PrettyWriter out,
       ComponentBean component,
+      String overrideClassName,
       int modifiers) throws IOException
   {
-    String fullClassName = component.getComponentClass();
-    String className = Util.getClassFromFullClass(fullClassName);
-
-    if (Modifier.isPublic(modifiers))
+    String className;
+        
+    if (overrideClassName != null)
     {
-      // TODO: eliminate this inconsistency
-      if (!Modifier.isAbstract(component.getComponentClassModifiers()))
-      {
-        String rendererType = component.getRendererType();
-
-        if (rendererType != null)
-          rendererType = convertStringToBoxedLiteral("String", rendererType);
-
-        out.println();
-        out.println("/**");
-        // TODO: restore this correctly phrased comment (tense vs. command)
-        //out.println(" * Constructs an instance of " + className + ".");
-        out.println(" * Construct an instance of the " + className + ".");
-        out.println(" */");
-        out.println("public " + className + "()");
-        out.println("{");
-        out.indent();
-
-        writeConstructorContent(out, component, modifiers, rendererType);
-
-        out.unindent();
-        out.println("}");
-      }
+      className  = overrideClassName;
     }
-    else if (Modifier.isProtected(modifiers))
+    else
+    {
+      String fullClassName = component.getComponentClass();
+      className            = Util.getClassFromFullClass(fullClassName);
+    }
+    
+    int classModifiers = component.getComponentClassModifiers();
+    boolean isAbstract = Modifier.isAbstract(classModifiers);
+    boolean isPackagePrivate = (modifiers & 
+                                (Modifier.PRIVATE |  Modifier.PROTECTED | Modifier.PUBLIC)) == 0;
+    
+    if (Modifier.isProtected(modifiers))
     {
       out.println();
       out.println("/**");
@@ -573,7 +592,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       out.println("}");
 
       // TODO: eliminate this inconsistency
-      if (Modifier.isAbstract(component.getComponentClassModifiers()))
+      if (isAbstract)
       {
         out.println();
         out.println("/**");
@@ -588,6 +607,33 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
         out.unindent();
         out.println("}");
       }
+    }
+    else if ((Modifier.isPublic(modifiers) && !isAbstract) || isPackagePrivate)
+    {
+      String accessControl = Modifier.isPublic(modifiers)
+        ? (isAbstract) ? "protected " : "public "
+        : ""; // package private
+      
+      String rendererType = component.getRendererType();
+
+      if (rendererType != null)
+        rendererType = convertStringToBoxedLiteral("String", rendererType);
+
+      out.println();
+      out.println("/**");
+      // TODO: restore this correctly phrased comment (tense vs. command)
+      //out.println(" * Constructs an instance of " + className + ".");
+      out.println(" * Construct an instance of the " + className + ".");
+      out.println(" */");
+            
+      out.println(accessControl + className + "()");
+      out.println("{");
+      out.indent();
+
+      writeConstructorContent(out, component, modifiers, rendererType);
+
+      out.unindent();
+      out.println("}");
     }
   }
 
@@ -832,6 +878,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       PrettyWriter out,
       PropertyBean property) throws IOException;
 
+  @Override
   public void writeFacetMethods(
       PrettyWriter out,
       ComponentBean component) throws IOException
@@ -918,6 +965,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     out.println("}");
   }
 
+  @Override
   public void writeListenerMethods(
       PrettyWriter out,
       ComponentBean component) throws IOException
@@ -1132,7 +1180,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
   }
 
   public void writeOther(
-      PrettyWriter out, ComponentBean component) throws IOException
+      PrettyWriter out, ComponentBean component, String overrideClassName) throws IOException
   {
     // nothing
   }
@@ -1168,6 +1216,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
 
   protected class ResolvableTypeFilter extends PropertyFilter
   {
+    @Override
     protected boolean accept(
         PropertyBean property)
     {
@@ -1179,6 +1228,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
 
   protected class NonVirtualFilter extends PropertyFilter
   {
+    @Override
     protected boolean accept(
         PropertyBean property)
     {
@@ -1189,6 +1239,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
   protected static class NonOverriddenFilter
     extends PropertyFilter
   {
+    @Override
     protected boolean accept(
       PropertyBean property)
     {
@@ -1204,7 +1255,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
 
   static private Map _createResolvableTypes()
   {
-    Map resolvableTypes = new HashMap();
+    Map<String, String> resolvableTypes = new HashMap<String, String>();
 
     resolvableTypes.put("boolean", "Boolean");
     resolvableTypes.put("char", "Character");
@@ -1226,6 +1277,4 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
 
   static private final Pattern _GENERIC_TYPE = Pattern.compile("([^<]+)<(.+)>");
   static final private Map _RESOLVABLE_TYPES = _createResolvableTypes();
-
-
 }

@@ -46,7 +46,7 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
  */
 public abstract class AbstractComponentTagGenerator implements ComponentTagGenerator
 {
-
+  @Override
   public void writeImports(PrettyWriter out,
                            SourceTemplate template,
                            String packageName,
@@ -60,6 +60,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
   }
 
 
+  @Override
   public void writeImports(PrettyWriter out, SourceTemplate template, String packageName, String fullSuperclassName,
                            String superclassName, Collection components)
   {
@@ -117,11 +118,13 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
     GeneratorHelper.writeImports(out, packageName, imports);
   }
 
+  @Override
   public void writeClassBegin(PrettyWriter out,
                               String className,
                               String superclassName,
                               ComponentBean component,
-                              SourceTemplate template)
+                              SourceTemplate template,
+                              boolean hasTemplate)
   {
     int modifiers = component.getTagClassModifiers();
     String classStart = Modifier.toString(modifiers);
@@ -139,12 +142,24 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
   }
 
 
+  @Override
   public void writeConstructor(PrettyWriter out,
                                ComponentBean component,
+                               String overrideClassName,
                                int modifiers) throws IOException
   {
-    String fullClassName = component.getTagClass();
-    String className = Util.getClassFromFullClass(fullClassName);
+    String className;
+    
+    if (overrideClassName != null)
+    {
+      className = overrideClassName;
+    }
+    else
+    {
+      String fullClassName = component.getTagClass();
+      className = Util.getClassFromFullClass(fullClassName);
+    }
+    
     out.println();
     out.println("/**");
     // TODO: restore this correctly phrased comment (tense vs. command)
@@ -156,6 +171,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
     out.println("}");
   }
 
+  @Override
   public void writeGetComponentType(
       PrettyWriter out,
       ComponentBean component) throws IOException
@@ -173,6 +189,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
     out.println("}");
   }
 
+  @Override
   public void writeGetRendererType(
       PrettyWriter out,
       ComponentBean component) throws IOException
@@ -190,6 +207,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
     out.println("}");
   }
 
+  @Override
   public void writeClassEnd(PrettyWriter out)
   {
     out.unindent();
@@ -225,6 +243,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
     return false;
   }
 
+  @Override
   public void writePropertyMembers(PrettyWriter out, Collection components) throws IOException
   {
     for (Iterator<ComponentBean> lIterator = components.iterator(); lIterator.hasNext();)
@@ -233,6 +252,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
     }
   }
 
+  @Override
   public void writeReleaseMethod(PrettyWriter out,
                                  ComponentBean component) throws IOException
   {
@@ -242,6 +262,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
   }
 
 
+  @Override
   public void writeReleaseMethod(
     PrettyWriter out, Collection components) throws IOException
   {

@@ -81,7 +81,7 @@ public interface ComponentGenerator extends ClassGenerator
       ComponentBean component) throws IOException;
 
   void writeOther(
-      PrettyWriter out, ComponentBean component) throws IOException;
+      PrettyWriter out, ComponentBean component, String overrideClassName) throws IOException;
 
 
   void writePropertyMethods(PrettyWriter out,

@@ -20,7 +20,6 @@ package org.apache.myfaces.trinidadbuild.plugin.faces.generator.component;
 
 import java.io.IOException;
 
-import java.lang.IllegalArgumentException;
 import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
@@ -371,11 +370,13 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     out.println("}");
   }
 
-  public void writeOther(PrettyWriter out, ComponentBean component) throws IOException
+  @Override
+  public void writeOther(PrettyWriter out, ComponentBean component, String overrideClassName) 
+  throws IOException
   {
     _writeGetBeanType(out);
 
-    writeConstructor(out, component, Modifier.PROTECTED);
+    writeConstructor(out, component, overrideClassName, Modifier.PROTECTED);
 
     _writeTypeLock(out, component);
   }

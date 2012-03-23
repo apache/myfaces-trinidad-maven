@@ -19,11 +19,15 @@
 package org.apache.myfaces.trinidadbuild.plugin.faces;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 
 import java.lang.reflect.Modifier;
+
+import java.nio.channels.FileChannel;
 
 import java.util.Iterator;
 
@@ -111,6 +115,48 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
   }
 
   /**
+   * Copies the contents of sourceFile to destFile
+   * @param sourceFile
+   * @param destFile
+   * @throws IOException
+   */
+  private static void _copyFile(File sourceFile, File destFile) throws IOException
+  {
+    // make sure that the directories exist
+    destFile.getParentFile().mkdirs();
+
+    if (!destFile.exists())
+    {
+      destFile.createNewFile();
+    }
+    else
+    {
+      // make sure we can copy over the file
+      destFile.setWritable(true);
+    }
+   
+    FileChannel source = null;
+    FileChannel destination = null;
+    
+    try
+    {
+      source      = new FileInputStream(sourceFile).getChannel();
+      destination = new FileOutputStream(destFile).getChannel();
+      
+      destination.transferFrom(source, 0, source.size());
+    }
+    finally
+    {
+      if (source != null)
+        source.close();
+      
+      if (destination != null)
+       destination.close();
+    }
+  }
+
+
+  /**
    * Generates a parsed component.
    *
    * @param component  the parsed component metadata
@@ -137,11 +183,9 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
 
     try
     {
-      getLog().debug("Generating " + fullClassName+", with generator: "+generator.getClass().getName());
-
-      String sourcePath = Util.convertClassToSourcePath(fullClassName, ".java");
-      File targetFile = new File(generatedSourceDirectory, sourcePath);
-
+      getLog().debug("Generating " + fullClassName +
+                     ", with generator: " + generator.getClass().getName());
+      
       StringWriter sw = new StringWriter();
       PrettyWriter out = new PrettyWriter(sw);
 
@@ -176,18 +220,61 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
 
         String componentType = component.getComponentType();
 
+        // Handle both the case where we have the old-style FooTemplate.java that will be
+        // flattened into a single class Foo and the new style Foo.java subclass of
+        // PartialFoo, in which case we generate the package-private PartialFoo class.
+        
         // Use template file if it exists
         String templatePath = Util.convertClassToSourcePath(fullClassName, "Template.java");
         File templateFile = new File(templateSourceDirectory, templatePath);
+        boolean hasTemplate = templateFile.exists();
 
+        String subclassPath = Util.convertClassToSourcePath(fullClassName, ".java");
+        File subclassFile = new File(templateSourceDirectory, subclassPath);
+        boolean hasSubclass = subclassFile.exists();
+    
+        // we should never have both the tempalte and the subclass
+        if (hasTemplate && hasSubclass)
+          throw new IllegalStateException("Both old style " + templatePath + " and new style " +
+                                          subclassPath + " component templates exist!");
+        
         SourceTemplate template = null;
-        if (templateFile.exists())
+        
+        String outClassName;
+        String outFullClassName;
+        int    defaultConstructorModifier;
+        
+        if (hasSubclass)
         {
-          getLog().debug("Using template " + templatePath);
-          template = new SourceTemplate(templateFile);
-          template.substitute(className + "Template", className);
-          template.readPreface();
+          getLog().debug("Using subclass " + subclassPath);
+
+          outClassName     = "Partial" + className;
+          outFullClassName = Util.getPackageFromFullClass(fullClassName) + '.' + outClassName;
+          defaultConstructorModifier = 0; // package pivate
+          
+          // copy the file template to the destination directory
+          File destFile = new File(generatedSourceDirectory, subclassPath);
+            
+          _copyFile(subclassFile, destFile);
+          destFile.setReadOnly();
         }
+        else
+        {
+          outClassName               = className;
+          outFullClassName           = fullClassName;
+          defaultConstructorModifier = Modifier.PUBLIC;
+          
+          if (hasTemplate)
+          {
+            getLog().debug("Using template " + templatePath);
+            template = new SourceTemplate(templateFile);
+            template.substitute(className + "Template", className);
+            template.readPreface();            
+          }
+        }
+
+        String sourcePath = Util.convertClassToSourcePath(outFullClassName, ".java");
+        File targetFile = new File(generatedSourceDirectory, sourcePath);
 
         // header/copyright
         writePreamble(out);
@@ -202,7 +289,7 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
                       component);
 
         // class
-        generator.writeClassBegin(out, className, superclassName, component, template);
+        generator.writeClassBegin(out, outClassName, superclassName, component, template, hasSubclass);
 
         // static final constants
         generator.writePropertyValueConstants(out, component);
@@ -215,7 +302,7 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
         }
 
         // public constructors and methods
-        generator.writeConstructor(out, component, Modifier.PUBLIC);
+        generator.writeConstructor(out, component, outClassName, defaultConstructorModifier);
 
         // insert template code
         if (template != null)
@@ -248,7 +335,7 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
         // protected constructors and methods
         // TODO: reverse this order, to make protected constructor go first
         //       for now we want consistency with previous code generation
-        generator.writeOther(out, component);
+        generator.writeOther(out, component, outClassName);
 
         generator.writeClassEnd(out);
 
@@ -323,10 +410,10 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
    * @parameter
    * @required
    */
-    private String typePrefix;
+  private String typePrefix;
 
   /**
-   * @parameter
+   * @parameter default-value=false
    */
   private boolean force;
 

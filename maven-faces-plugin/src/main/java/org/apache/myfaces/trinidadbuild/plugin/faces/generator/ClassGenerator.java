@@ -54,11 +54,13 @@ public interface ClassGenerator
       String className,
       String superclassName,
       ComponentBean component,
-      SourceTemplate template);
+      SourceTemplate template,
+      boolean hasSubclass);
 
   void writeConstructor(
       PrettyWriter out,
       ComponentBean component,
+      String overrideClassName,
       int modifiers) throws IOException;
 
   void writeClassEnd(

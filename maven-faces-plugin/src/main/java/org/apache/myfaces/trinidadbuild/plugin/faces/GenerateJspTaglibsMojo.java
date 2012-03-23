@@ -877,10 +877,10 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
         generator.writeImports(out, null, packageName, fullSuperclassName, superclassName, componentList);
 
-        generator.writeClassBegin(out, className, superclassName, component, null);
+        generator.writeClassBegin(out, className, superclassName, component, null, false);
 
         int modifiers = component.getTagClassModifiers();
-        generator.writeConstructor(out, component, modifiers);
+        generator.writeConstructor(out, component, null, modifiers);
 
 
         if (!Modifier.isAbstract(modifiers))

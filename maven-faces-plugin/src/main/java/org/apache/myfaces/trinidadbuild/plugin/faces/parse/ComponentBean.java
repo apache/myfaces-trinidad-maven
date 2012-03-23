@@ -555,16 +555,15 @@ public class ComponentBean extends AbstractTagBean
     }
   }
 
-  protected Map getFlattenedProperties()
+  protected Map<String, PropertyBean> getFlattenedProperties()
   {
-    Map props = new HashMap(_properties);
+    Map<String, PropertyBean> props = new HashMap<String, PropertyBean>(_properties);
     ComponentBean parent = resolveSupertype();
     if (parent != null)
     {
-      Map superProps = parent.getFlattenedProperties();
-      for (Iterator<Map.Entry> iter = superProps.entrySet().iterator(); iter.hasNext(); )
+      Map<String, PropertyBean> superProps = parent.getFlattenedProperties();
+      for (Map.Entry<String, PropertyBean> entry : superProps.entrySet())
       {
-        Map.Entry entry = iter.next();
         if (!props.containsKey(entry.getKey()))
         {
           props.put(entry.getKey(), entry.getValue());
@@ -685,16 +684,15 @@ public class ComponentBean extends AbstractTagBean
     }
   }
 
-  protected Map getFlattenedFacets()
+  protected Map<String, FacetBean> getFlattenedFacets()
   {
-    Map facets = new HashMap(_facets);
+    Map<String, FacetBean> facets = new HashMap<String, FacetBean>(_facets);
     ComponentBean parent = resolveSupertype();
     if (parent != null)
     {
-      Map superFacets = parent.getFlattenedFacets();
-      for (Iterator<Map.Entry> iter = superFacets.entrySet().iterator(); iter.hasNext(); )
+      Map<String, FacetBean> superFacets = parent.getFlattenedFacets();
+      for (Map.Entry<String, FacetBean> entry : superFacets.entrySet())
       {
-        Map.Entry entry = iter.next();
         if (!facets.containsKey(entry.getKey()))
         {
           facets.put(entry.getKey(), entry.getValue());
