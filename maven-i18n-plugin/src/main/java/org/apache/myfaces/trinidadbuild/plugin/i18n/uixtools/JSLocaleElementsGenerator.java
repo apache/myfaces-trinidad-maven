@@ -39,9 +39,7 @@ import java.util.ResourceBundle;
  */
 public class JSLocaleElementsGenerator
 {
-  public static void main(
-    String[] args
-    )
+  public static void main(String[] args)
   {
 
     if ((args.length == 1) && ("?".equals(args[0])))
