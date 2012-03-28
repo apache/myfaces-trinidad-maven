@@ -26,6 +26,7 @@
                 xmlns:mfp="http://myfaces.apache.org/maven-faces-plugin"
                 xmlns:fmd="http://java.sun.com/xml/ns/javaee/faces/design-time-metadata"
                 xmlns:exsl="http://exslt.org/common"
+                xmlns:bridge="http://www.apache.org/myfaces/xml/ns/bridge/bridge-extension"
                 exclude-result-prefixes="xsl xs javaee mfp fmd"
                 version="1.0">
 
@@ -41,6 +42,7 @@
       <xsl:copy-of select="exsl:node-set($fmd)//namespace::*"/>
       <xsl:copy-of select="exsl:node-set($mfp)//namespace::*"/>
       <xsl:copy-of select="exsl:node-set($mafp)//namespace::*"/>
+      <xsl:copy-of select="exsl:node-set($bridge)//namespace::*"/>
       <xsl:attribute name="xsi:schemaLocation">http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_1.xsd</xsl:attribute>
       <xsl:if test="$metadataComplete">
         <xsl:attribute name="metadata-complete">true</xsl:attribute>
@@ -85,6 +87,22 @@
       <xsl:apply-templates select="javaee:lifecycle[contains(javaee:phase-listener, $packageContains)]" />
       <xsl:apply-templates select="javaee:validator[contains(javaee:validator-class, $validatorPackageContains)]" />
       <xsl:apply-templates select="javaee:faces-config-extension" />
+    </xsl:element>
+  </xsl:template>
+  
+  
+  <xsl:template match="//javaee:faces-config-extension">
+    <xsl:apply-templates select="fmd:global-metadata"/>
+    <xsl:if test="count(javaee:facelets-processing)>0">
+      <xsl:element name="faces-config-extension">
+        <xsl:apply-templates select="javaee:facelets-processing"/>
+      </xsl:element>
+    </xsl:if>
+  </xsl:template>
+  
+  <xsl:template match="//javaee:facelets-processing">
+    <xsl:element name="facelets-processing">
+     <xsl:copy-of select="*"/>
     </xsl:element>
   </xsl:template>
 

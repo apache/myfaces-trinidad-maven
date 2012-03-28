@@ -26,6 +26,7 @@
                 xmlns:mfp="http://myfaces.apache.org/maven-faces-plugin"
                 xmlns:fmd="http://java.sun.com/xml/ns/javaee/faces/design-time-metadata"
                 xmlns:exsl="http://exslt.org/common"
+                xmlns:bridge="http://www.apache.org/myfaces/xml/ns/bridge/bridge-extension"
                 exclude-result-prefixes="xsl xs javaee mfp fmd"
                 version="1.0">
 
@@ -66,6 +67,9 @@
   <xsl:variable name="mafp">
     <xsl:element name="mafp:xxx" namespace="http://xmlns.oracle.com/maven-adf-faces-plugin"/>
   </xsl:variable>
+  <xsl:variable name="bridge">
+    <xsl:element name="bridge:xxx" namespace="http://www.apache.org/myfaces/xml/ns/bridge/bridge-extension"/>
+  </xsl:variable>
 
   <xsl:template match="/javaee:faces-config" >
     <xsl:element name="faces-config"
@@ -76,6 +80,7 @@
       <xsl:copy-of select="exsl:node-set($fmd)//namespace::*"/>
       <xsl:copy-of select="exsl:node-set($mfp)//namespace::*"/>
       <xsl:copy-of select="exsl:node-set($mafp)//namespace::*"/>
+      <xsl:copy-of select="exsl:node-set($bridge)//namespace::*"/>
       <xsl:attribute name="xsi:schemaLocation">http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd</xsl:attribute>
       <xsl:if test="$metadataComplete">
         <xsl:attribute name="metadata-complete">true</xsl:attribute>
@@ -330,6 +335,7 @@
       <xsl:apply-templates select="javaee:default-validators" />
       <xsl:apply-templates select="javaee:locale-config" />
       <xsl:apply-templates select="javaee:resource-bundle" />
+      <xsl:apply-templates select="javaee:application-extension" />
     </xsl:element>
   </xsl:template>
 
@@ -857,6 +863,12 @@
   <xsl:template match="//javaee:referenced-bean-class" >
     <xsl:element name="referenced-bean-class" >
       <xsl:value-of select="text()" />
+    </xsl:element>
+  </xsl:template>
+  
+  <xsl:template match="//javaee:application-extension">
+    <xsl:element name="application-extension">
+      <xsl:copy-of select="*"/>
     </xsl:element>
   </xsl:template>
 
