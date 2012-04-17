@@ -159,11 +159,17 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     // make abstract superclass classes abstract and package private
     if (createSuperclass)
     {
-      // remove all of the access modifiers to make this package provate
-      modifiers &= ~(Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED);
+      // we would really like to make this package private, but because of a bug in the Java
+      // Introspection code, a get on a final method of a public class inherited from a
+      // package private class actually refers to the package private class.  The result
+      // is that invoking it blows up.  Therefore, instead of making the class package private,
+      // we have to make it public. GRRR.
+    
+      // remove all of the access modifiers to make this package private
+      modifiers &= ~(Modifier.PRIVATE | Modifier.PROTECTED); // Modifier.PUBLIC
       
-      // force abstract on
-      modifiers |= Modifier.ABSTRACT;
+      // force abstract on as well as public, due to stupid bug
+      modifiers |= Modifier.ABSTRACT | Modifier.PUBLIC;
     }
     else
     {
@@ -549,7 +555,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       ComponentBean component,
       String overrideClassName,
       int modifiers) throws IOException
-  {
+  {    
     String className;
         
     if (overrideClassName != null)

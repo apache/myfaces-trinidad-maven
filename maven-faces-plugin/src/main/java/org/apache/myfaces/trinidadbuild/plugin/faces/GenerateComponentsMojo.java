@@ -250,6 +250,7 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
 
           outClassName     = "Partial" + className;
           outFullClassName = Util.getPackageFromFullClass(fullClassName) + '.' + outClassName;
+          
           defaultConstructorModifier = 0; // package pivate
           
           // copy the file template to the destination directory
