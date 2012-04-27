@@ -131,6 +131,8 @@ public final class XIncludeFilter extends XMLFilterImpl
     try
     {
       SAXParserFactory saxFactory = SAXParserFactory.newInstance();
+      saxFactory.setNamespaceAware(true);
+
       SAXParser saxParser = saxFactory.newSAXParser();
       XMLReader reader = saxParser.getXMLReader();
       if (xpointer != null)
