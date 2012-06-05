@@ -1089,20 +1089,20 @@
     namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
     and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin'
     and namespace-uri() !='http://java.sun.com/xml/ns/javaee/faces/design-time-metadata']">
-    <xsl:copy-of select="*"/>
+    <xsl:copy-of select="."/>
   </xsl:template>
 
   <xsl:template match="mfp:component-metadata/*[
     namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
     and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin']">
-    <xsl:copy-of select="*"/>
+    <xsl:copy-of select="."/>
   </xsl:template>
 
   <xsl:template match="fmd:global-metadata/*[
     namespace-uri() != 'http://java.sun.com/xml/ns/javaee'
     and namespace-uri() !='http://myfaces.apache.org/maven-faces-plugin'
     and namespace-uri() !='http://java.sun.com/xml/ns/javaee/faces/design-time-metadata']">
-    <xsl:copy-of select="*"/>
+    <xsl:copy-of select="."/>
   </xsl:template>
 
   <xsl:template match="//*[
