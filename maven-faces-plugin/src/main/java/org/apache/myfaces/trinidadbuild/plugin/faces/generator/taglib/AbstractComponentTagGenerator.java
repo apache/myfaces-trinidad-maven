@@ -130,6 +130,14 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
     // TODO: add support for source template
 
     int modifiers = component.getTagClassModifiers();
+
+    // If there is no source template but there is a sub-class, then make the generate class
+    // abstract.
+    if (template == null && hasTemplate)
+    {
+      modifiers |= Modifier.ABSTRACT;
+    }
+
     String classStart = Modifier.toString(modifiers);
 
     out.println("/**");
