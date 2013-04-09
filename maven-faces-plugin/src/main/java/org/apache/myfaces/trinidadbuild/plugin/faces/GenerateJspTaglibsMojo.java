@@ -72,6 +72,7 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ValidatorBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.ComponentFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.ConverterFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.SourceTemplate;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.ValidatorFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
@@ -112,25 +113,26 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
   // hook for custom component tag java content
   protected void writeCustomComponentTagHandlerContent(
-      PrettyWriter  out,
-      ComponentBean component) throws IOException
+   @SuppressWarnings("unused") PrettyWriter  out,
+   @SuppressWarnings("unused") ComponentBean component
+    ) throws IOException
   {
   }
 
   // hook for custom component tag java imports
   protected void addCustomComponentTagHandlerImports(
-      Set           imports,
-      ComponentBean component)
+    @SuppressWarnings("unused") Set           imports,
+    @SuppressWarnings("unused") ComponentBean component)
   {
   }
 
   // hook for custom component descriptor content
   protected void writeCustomComponentTagDescriptorContent(
-      XMLStreamWriter  stream,
-      ComponentBean    component)throws XMLStreamException
+   @SuppressWarnings("unused") XMLStreamWriter  stream,
+   @SuppressWarnings("unused") ComponentBean    component
+    )throws XMLStreamException
   {
   }
-
 
   /**
    * Generates tag library descriptors for parsed component metadata.
@@ -184,7 +186,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
           stream.writeStartElement("xi", "include",
                                    XIncludeFilter.XINCLUDE_NAMESPACE);
           stream.writeNamespace("xi", XIncludeFilter.XINCLUDE_NAMESPACE);
-          stream.writeAttribute("href", configFile.toURL().toExternalForm());
+          stream.writeAttribute("href", configFile.toURI().toURL().toExternalForm());
           stream.writeAttribute("xpointer", "/taglib/*");
           stream.writeEndElement();
           while (components.hasNext())
@@ -213,7 +215,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
           saxFactory.setValidating(false);
           SAXParser saxParser = saxFactory.newSAXParser();
           XMLReader mergedReader = saxParser.getXMLReader();
-          mergedReader = new XIncludeFilter(mergedReader, configFile.toURL());
+          mergedReader = new XIncludeFilter(mergedReader, configFile.toURI().toURL());
           // even with validating=false, DTD is still downloaded so that
           // any entities contained in the document can be expanded.
           // the following disables that behavior, also saving the time
@@ -799,7 +801,6 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
   class ComponentTagHandlerGenerator
   {
-
     private Set initComponentList(ComponentBean component,
                                   String fullSuperclassName)
     {
@@ -836,9 +837,30 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
       String fullClassName = component.getTagClass();
       try
       {
+        String className = Util.getClassFromFullClass(fullClassName);
+        String packageName = Util.getPackageFromFullClass(fullClassName);
+
+        TemplateFile templateFile = new TemplateFile(fullClassName, packageName, className);
+        boolean hasTemplate = templateFile.exists();
+        SourceTemplate sourceTemplate = null;
+        String overrideClassName = null;
+        String sourcePath = templateFile.getSourcePath();
+
+        if (hasTemplate)
+        {
+          className = templateFile.getClassName();
+          fullClassName = templateFile.getFullClassName();
+          overrideClassName = className;
+
+          if (!templateFile.isSubclass())
+          {
+            // Merged template use case
+            sourceTemplate = new SourceTemplate(templateFile.getFile());
+          }
+        }
+
         getLog().debug("Generating " + fullClassName);
 
-        String sourcePath = Util.convertClassToSourcePath(fullClassName, ".java");
         File targetFile = new File(generatedSourceDirectory, sourcePath);
 
         targetFile.getParentFile().mkdirs();
@@ -854,10 +876,8 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
           generator = new MyFacesComponentTagGenerator(!JsfVersion.isJSF11(jsfVersion));
         }
 
-        getLog().debug("Generating " + fullClassName+", with generator: "+generator.getClass().getName());
-
-        String className = Util.getClassFromFullClass(fullClassName);
-        String packageName = Util.getPackageFromFullClass(fullClassName);
+        getLog().debug("Generating " + fullClassName + ", with generator: " +
+                       generator.getClass().getName());
 
         // header/copyright
         writePreamble(out);
@@ -872,16 +892,18 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         {
           superclassName = fullSuperclassName;
         }
+
         String componentFullClass = component.getComponentClass();
         String componentClass = Util.getClassFromFullClass(componentFullClass);
 
-        generator.writeImports(out, null, packageName, fullSuperclassName, superclassName, componentList);
+        generator.writeImports(out, null, packageName, fullSuperclassName, superclassName,
+          componentList);
 
-        generator.writeClassBegin(out, className, superclassName, component, null, false);
+        generator.writeClassBegin(out, className, superclassName, component,
+          sourceTemplate, hasTemplate);
 
         int modifiers = component.getTagClassModifiers();
-        generator.writeConstructor(out, component, null, modifiers);
-
+        generator.writeConstructor(out, component, overrideClassName, modifiers);
 
         if (!Modifier.isAbstract(modifiers))
         {
@@ -907,6 +929,15 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         fw.write(buf.toString());
         fw.close();
         targetFile.setReadOnly();
+
+        if (templateFile.isSubclass())
+        {
+          // If there is a sub-class, copy the file to the directory in the compiler path
+          File destFile = new File(generatedSourceDirectory, templateFile.getOriginalSourcePath());
+
+          Util.copyFile(templateFile.getFile(), destFile);
+          destFile.setReadOnly();
+        }
       }
       catch (Throwable e)
       {
@@ -921,14 +952,17 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
       ComponentBean component)
     {
       String tagClass = component.getTagClass();
+
+      TemplateFile templateFile = new TemplateFile(tagClass);
       String sourcePath = Util.convertClassToSourcePath(tagClass, ".java");
-      String templatePath = Util.convertClassToSourcePath(tagClass, "Template.java");
       File targetFile = new File(generatedSourceDirectory, sourcePath);
-      File templateFile = new File(templateSourceDirectory, templatePath);
+
+      long templateFileModified = templateFile.lastModified();
+      long targetLastMoified = targetFile.lastModified();
 
       // accept if templateFile is newer or component has been modified
-      return (templateFile.lastModified() > targetFile.lastModified() ||
-              component.isModifiedSince(targetFile.lastModified()));
+      return templateFileModified > targetLastMoified ||
+        component.isModifiedSince(targetLastMoified);
     }
   }
 
@@ -964,6 +998,109 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
       return (templateFile.lastModified() > targetFile.lastModified() ||
               validator.isModifiedSince(targetFile.lastModified()));
     }
+  }
+
+  private class TemplateFile
+  {
+    private TemplateFile(
+      String fullTagClassName)
+    {
+      this(fullTagClassName,
+        Util.getPackageFromFullClass(fullTagClassName),
+        Util.getClassFromFullClass(fullTagClassName));
+    }
+
+    private TemplateFile(
+      String fullTagClassName,
+      String packageName,
+      String tagClassName)
+    {
+      _originalSourcePath = Util.convertClassToSourcePath(fullTagClassName, ".java");
+      String templatePath = Util.convertClassToSourcePath(fullTagClassName, "Template.java");
+      File templateFile = new File(templateSourceDirectory, templatePath);
+      // New style, meaning that the template is named the same as the desired tag name and the
+      // generator creates the base class of the template with "Partial" pre-pended to the name:
+      File subclassFile = new File(templateSourceDirectory, _originalSourcePath);
+
+      boolean templateExists = templateFile.exists();
+      boolean subclassExists = subclassFile.exists();
+      if (templateExists && subclassExists)
+      {
+        throw new IllegalStateException(
+          String.format("Both a template tag file, '%s' and a subclass file, '%s' exists.",
+            templateFile, subclassFile));
+      }
+
+      _isSubclass = subclassExists;
+
+      _file = subclassExists ? subclassFile : templateExists ? templateFile : null;
+
+      if (_isSubclass)
+      {
+        _className = "Partial" + tagClassName;
+        _fullClassName = packageName + "." + _className;
+        _sourcePath = Util.convertClassToSourcePath(_fullClassName, ".java");
+      }
+      else
+      {
+        _className = tagClassName;
+        _fullClassName = fullTagClassName;
+        _sourcePath = _originalSourcePath;
+      }
+    }
+
+    final String getSourcePath()
+    {
+      return _sourcePath;
+    }
+
+    final boolean isSubclass()
+    {
+      return _isSubclass;
+    }
+
+    final boolean exists()
+    {
+      return _file != null;
+    }
+
+    final long lastModified()
+    {
+      if (_lastModified == -1)
+      {
+        _lastModified = _file == null ? 0 : _file.lastModified();
+      }
+
+      return _lastModified;
+    }
+
+    final File getFile()
+    {
+      return _file;
+    }
+
+    final String getClassName()
+    {
+      return _className;
+    }
+
+    final String getFullClassName()
+    {
+      return _fullClassName;
+    }
+
+    final String getOriginalSourcePath()
+    {
+      return _originalSourcePath;
+    }
+
+    private long _lastModified = -1;
+    final private String _className;
+    final private String _fullClassName;
+    final private String _sourcePath;
+    final private String _originalSourcePath;
+    final private File _file;
+    final private boolean _isSubclass;
   }
 
   /**
@@ -1025,6 +1162,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
    * @parameter
    * @deprecated
    */
+  @Deprecated
   protected boolean disableIdExpressions;
 
   /**
