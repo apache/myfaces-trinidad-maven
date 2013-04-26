@@ -61,9 +61,11 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
 
 
   @Override
-  public void writeImports(PrettyWriter out, SourceTemplate template, String packageName, String fullSuperclassName,
-                           String superclassName, Collection components)
+  public void writeImports(PrettyWriter out, SourceTemplate template, String packageName,
+    String fullSuperclassName, String superclassName, Collection components)
   {
+    // TODO: support SourceTemplate
+
     Set imports = new TreeSet();
 
     for (Iterator<ComponentBean> lIterator = components.iterator(); lIterator.hasNext();)
@@ -89,7 +91,6 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
         PropertyBean property = properties.next();
 
         String propertyClass = property.getPropertyClass();
-        String[] propertyClassParams = property.getPropertyClassParameters();
 
         if (propertyClass != null && property.isLiteralOnly())
         {
@@ -126,7 +127,17 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
                               SourceTemplate template,
                               boolean hasTemplate)
   {
+    // TODO: add support for source template
+
     int modifiers = component.getTagClassModifiers();
+
+    // If there is no source template but there is a sub-class, then make the generate class
+    // abstract.
+    if (template == null && hasTemplate)
+    {
+      modifiers |= Modifier.ABSTRACT;
+    }
+
     String classStart = Modifier.toString(modifiers);
 
     out.println("/**");
@@ -149,7 +160,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
                                int modifiers) throws IOException
   {
     String className;
-    
+
     if (overrideClassName != null)
     {
       className = overrideClassName;
@@ -159,7 +170,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
       String fullClassName = component.getTagClass();
       className = Util.getClassFromFullClass(fullClassName);
     }
-    
+
     out.println();
     out.println("/**");
     // TODO: restore this correctly phrased comment (tense vs. command)

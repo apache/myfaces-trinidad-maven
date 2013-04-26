@@ -19,6 +19,11 @@
 package org.apache.myfaces.trinidadbuild.plugin.faces.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import java.nio.channels.FileChannel;
 
 import java.util.Collections;
 import java.util.Set;
@@ -347,7 +352,52 @@ public class Util
         return null;
     }
 
-    static private void _buildPropertyClass(StringBuffer buffer, String type)
+
+  /**
+   * Copies the contents of sourceFile to destFile
+   * @param sourceFile
+   * @param destFile
+   * @throws IOException
+   */
+  static public void copyFile(
+    File sourceFile,
+    File destFile
+    ) throws IOException
+  {
+    // make sure that the directories exist
+    destFile.getParentFile().mkdirs();
+
+    if (!destFile.exists())
+    {
+      destFile.createNewFile();
+    }
+    else
+    {
+      // make sure we can copy over the file
+      destFile.setWritable(true);
+    }
+
+    FileChannel source = null;
+    FileChannel destination = null;
+
+    try
+    {
+      source = new FileInputStream(sourceFile).getChannel();
+      destination = new FileOutputStream(destFile).getChannel();
+
+      destination.transferFrom(source, 0, source.size());
+    }
+    finally
+    {
+      if (source != null)
+        source.close();
+
+      if (destination != null)
+        destination.close();
+    }
+  }
+
+  static private void _buildPropertyClass(StringBuffer buffer, String type)
   {
     Matcher matcher = _GENERIC_TYPE.matcher(type);
     if(matcher.matches())

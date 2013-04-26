@@ -19,15 +19,11 @@
 package org.apache.myfaces.trinidadbuild.plugin.faces;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 
 import java.lang.reflect.Modifier;
-
-import java.nio.channels.FileChannel;
 
 import java.util.Iterator;
 
@@ -115,48 +111,6 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
   }
 
   /**
-   * Copies the contents of sourceFile to destFile
-   * @param sourceFile
-   * @param destFile
-   * @throws IOException
-   */
-  private static void _copyFile(File sourceFile, File destFile) throws IOException
-  {
-    // make sure that the directories exist
-    destFile.getParentFile().mkdirs();
-
-    if (!destFile.exists())
-    {
-      destFile.createNewFile();
-    }
-    else
-    {
-      // make sure we can copy over the file
-      destFile.setWritable(true);
-    }
-   
-    FileChannel source = null;
-    FileChannel destination = null;
-    
-    try
-    {
-      source      = new FileInputStream(sourceFile).getChannel();
-      destination = new FileOutputStream(destFile).getChannel();
-      
-      destination.transferFrom(source, 0, source.size());
-    }
-    finally
-    {
-      if (source != null)
-        source.close();
-      
-      if (destination != null)
-       destination.close();
-    }
-  }
-
-
-  /**
    * Generates a parsed component.
    *
    * @param component  the parsed component metadata
@@ -185,7 +139,7 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
     {
       getLog().debug("Generating " + fullClassName +
                      ", with generator: " + generator.getClass().getName());
-      
+
       StringWriter sw = new StringWriter();
       PrettyWriter out = new PrettyWriter(sw);
 
@@ -223,7 +177,7 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
         // Handle both the case where we have the old-style FooTemplate.java that will be
         // flattened into a single class Foo and the new style Foo.java subclass of
         // PartialFoo, in which case we generate the package-private PartialFoo class.
-        
+
         // Use template file if it exists
         String templatePath = Util.convertClassToSourcePath(fullClassName, "Template.java");
         File templateFile = new File(templateSourceDirectory, templatePath);
@@ -232,31 +186,31 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
         String subclassPath = Util.convertClassToSourcePath(fullClassName, ".java");
         File subclassFile = new File(templateSourceDirectory, subclassPath);
         boolean hasSubclass = subclassFile.exists();
-    
+
         // we should never have both the tempalte and the subclass
         if (hasTemplate && hasSubclass)
           throw new IllegalStateException("Both old style " + templatePath + " and new style " +
                                           subclassPath + " component templates exist!");
-        
+
         SourceTemplate template = null;
-        
+
         String outClassName;
         String outFullClassName;
         int    defaultConstructorModifier;
-        
+
         if (hasSubclass)
         {
           getLog().debug("Using subclass " + subclassPath);
 
           outClassName     = "Partial" + className;
           outFullClassName = Util.getPackageFromFullClass(fullClassName) + '.' + outClassName;
-          
+
           defaultConstructorModifier = 0; // package pivate
-          
+
           // copy the file template to the destination directory
           File destFile = new File(generatedSourceDirectory, subclassPath);
-            
-          _copyFile(subclassFile, destFile);
+
+          Util.copyFile(subclassFile, destFile);
           destFile.setReadOnly();
         }
         else
@@ -264,13 +218,13 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
           outClassName               = className;
           outFullClassName           = fullClassName;
           defaultConstructorModifier = Modifier.PUBLIC;
-          
+
           if (hasTemplate)
           {
             getLog().debug("Using template " + templatePath);
             template = new SourceTemplate(templateFile);
             template.substitute(className + "Template", className);
-            template.readPreface();            
+            template.readPreface();
           }
         }
 
