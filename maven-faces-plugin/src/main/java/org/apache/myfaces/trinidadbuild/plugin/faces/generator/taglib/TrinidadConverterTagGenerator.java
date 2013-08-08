@@ -114,13 +114,21 @@ public class TrinidadConverterTagGenerator extends AbstractConverterTagGenerator
         out.println("else");
         out.println("{");
         out.indent();
+
         if ("StringArray".equals(propType))
         {
           out.println("try");
           out.println("{");
         }
 
-        out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(null));");
+        if ("Enum".equals (propType))
+        {
+          out.println(propClass + " value = Enum.valueOf(" + propClass + ".class, " + propVar + ".getExpressionString());");
+        }
+        else 
+        {
+          out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(null));");
+        }
         String setMethod = Util.getPrefixedPropertyName("set", propName);
         out.println("converter." + setMethod + "(value);");
         if ("StringArray".equals(propType))
@@ -158,7 +166,15 @@ public class TrinidadConverterTagGenerator extends AbstractConverterTagGenerator
           out.println("try");
           out.println("{");
         }
-        out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ");");
+        
+        if ("Enum".equals (propType))
+        {
+          out.println(propClass + " value = Enum.valueOf(" + propClass + ".class, " + propVar + ");");
+        }
+        else
+        {
+          out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ");");
+        }
         String setMethod = Util.getPrefixedPropertyName("set", propName);
         out.println("converter." + setMethod + "(value);");
         if ("StringArray".equals(propType))

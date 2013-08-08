@@ -19,19 +19,21 @@
 package org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib;
 
 import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.ClassLoaderUtils;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.AbstractTagBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.generator.GeneratorHelper;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Collections;
 
 public abstract class AbstractTagGenerator {
@@ -234,7 +236,29 @@ public abstract class AbstractTagGenerator {
 
   protected String resolveType(String className)
   {
-    return (String)_RESOLVABLE_TYPES.get(className);
+    String type = (String)_RESOLVABLE_TYPES.get(className);
+    
+    if (type != null)
+      return (String)_RESOLVABLE_TYPES.get(className);
+    
+    try 
+    {
+      // Enums may be set using String, add those as discovered.
+      if (ClassLoaderUtils.loadClass (className).isEnum())
+      {
+        _RESOLVABLE_TYPES .put (className, "Enum");
+        return "Enum";
+      }          
+    }
+    catch (LinkageError le)    
+    {
+      getLog().info("Linkage error resolving type " + className, le);
+    }
+    catch (ClassNotFoundException ce)
+    {
+      getLog().info ("ClassNotFound error resolving type " + className, ce);
+    }
+   return null; 
   }
 
   // TODO: for everything but Locale, String[], Date, and TimeZone,
@@ -242,7 +266,7 @@ public abstract class AbstractTagGenerator {
   // not need any of the "TagUtils" functions
   private Map<String, String> _createResolvableTypes()
   {
-    Map<String, String> resolvableTypes = new HashMap<String, String>();
+    Map<String, String> resolvableTypes = new ConcurrentHashMap<String, String>();
 
     resolvableTypes.put("boolean", "Boolean");
     resolvableTypes.put("char", "Character");
@@ -256,9 +280,8 @@ public abstract class AbstractTagGenerator {
     resolvableTypes.put("java.lang.String[]", "StringArray");
     resolvableTypes.put("java.util.TimeZone", "TimeZone");
 
-    return Collections.unmodifiableMap(resolvableTypes);
+    return (resolvableTypes);
   }
 
-  final private Map _RESOLVABLE_TYPES = _createResolvableTypes();
-
+  private Map _RESOLVABLE_TYPES = _createResolvableTypes();
 }
