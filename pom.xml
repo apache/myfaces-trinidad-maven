@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.myfaces</groupId>
     <artifactId>myfaces</artifactId>
-    <version>10</version>
+    <version>14</version>
   </parent>
 
   <groupId>org.apache.myfaces.trinidadbuild</groupId>
@@ -138,9 +138,16 @@
           </execution>
         </executions>
       </plugin>
-    </plugins>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>default/myfaces-checks-minimal.xml</configLocation>
+          <headerLocation>default/myfaces-header.txt</headerLocation>
+        </configuration>
+      </plugin>
+     </plugins>
     <pluginManagement>
-      <plugins>
+     <plugins>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <configuration>
