@@ -25,7 +25,7 @@
 
   <groupId>org.apache.myfaces.trinidadbuild</groupId>
   <artifactId>maven-plugin-parent</artifactId>
-  <version>2.0.8-SNAPSHOT</version>
+  <version>2.0.8</version>
   <packaging>pom</packaging>
   <name>Apache Trinidad Maven Plugin Parent</name>
 
@@ -185,9 +185,9 @@
   </reporting>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/myfaces/trinidad-maven/branches/2.0.x-branch</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/myfaces/trinidad-maven/branches/2.0.x-branch</developerConnection>
-    <url>http://svn.apache.org/viewvc/myfaces/trinidad-maven/branches/2.0.x-branch</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/myfaces/trinidad-maven/tags/maven-plugin-parent-2.0.8</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/myfaces/trinidad-maven/tags/maven-plugin-parent-2.0.8</developerConnection>
+    <url>http://svn.apache.org/viewvc/myfaces/trinidad-maven/tags/maven-plugin-parent-2.0.8</url>
   </scm>
 
   <modules>
