@@ -185,9 +185,9 @@
   </reporting>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/myfaces/trinidad-maven/branches/2.0.x-branch</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/myfaces/trinidad-maven/branches/2.0.x-branch</developerConnection>
-    <url>http://svn.apache.org/viewvc/myfaces/trinidad-maven/branches/2.0.x-branch</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/myfaces/trinidad-maven/trunk</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/myfaces/trinidad-maven/trunk</developerConnection>
+    <url>http://svn.apache.org/viewvc/myfaces/trinidad-maven/trunk</url>
   </scm>
 
   <modules>
