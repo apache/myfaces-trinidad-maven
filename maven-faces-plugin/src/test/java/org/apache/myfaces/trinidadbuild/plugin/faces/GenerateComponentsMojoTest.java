@@ -69,19 +69,7 @@ public class GenerateComponentsMojoTest extends AbstractMojoTestCase
   {
     _mojo.execute();
   }
-/*
-  public void testSkipAPI() throws MojoExecutionException
-  {
-    setMojoField(_mojo, "resourcePath",
-                           "META-INF/maven-faces-plugin/testSkipAPI.lst");
-    _mojo.execute();
-
-    File targetFile = new File(_genSrcDir,
-                               "javax/faces/component/UINamingContainer.java");
-    if (targetFile.exists())
-      fail("JavaServer Faces API component generated");
-  }
-*/
+  
   public void testGenerate() throws MojoExecutionException, MojoFailureException
   {
     setMojoField(_mojo, "resourcePath",
