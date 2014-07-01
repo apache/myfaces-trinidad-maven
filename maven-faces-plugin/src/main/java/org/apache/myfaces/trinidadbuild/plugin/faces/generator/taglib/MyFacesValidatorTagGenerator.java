@@ -98,7 +98,7 @@ public class MyFacesValidatorTagGenerator extends AbstractValidatorTagGenerator 
           out.println("{");
         }
 
-        out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(null));");
+        out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(FacesContext.getCurrentInstance().getELContext()));");
         String setMethod = Util.getPrefixedPropertyName("set", propName);
         out.println("validator." + setMethod + "(value);");
         if ("StringArray".equals(propType))

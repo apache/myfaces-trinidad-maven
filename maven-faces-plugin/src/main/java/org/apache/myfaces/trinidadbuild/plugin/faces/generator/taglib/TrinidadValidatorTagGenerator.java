@@ -66,7 +66,7 @@ public class TrinidadValidatorTagGenerator extends AbstractValidatorTagGenerator
     addImportsFromPropertes(validator, imports);
     return imports;
   }
-  
+
   @Override
   protected void writeClass(PrettyWriter out, AbstractTagBean abstractTag)
   {
@@ -106,13 +106,13 @@ public class TrinidadValidatorTagGenerator extends AbstractValidatorTagGenerator
       out.unindent();
       out.println("}");
       String propType = null;
-      if ("Date".equals (propClass)) 
+      if ("Date".equals (propClass))
       {
-        propType = resolveDateType(propFullClass, property.getUseMaxTime());                        
+        propType = resolveDateType(propFullClass, property.getUseMaxTime());
       }
-      else 
+      else
       {
-        propType = resolveType(propFullClass);            
+        propType = resolveType(propFullClass);
       }
       if (propType != null)
       {
@@ -125,7 +125,7 @@ public class TrinidadValidatorTagGenerator extends AbstractValidatorTagGenerator
           out.println("{");
         }
 
-        out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(null));");
+        out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(FacesContext.getCurrentInstance().getELContext()));");
         String setMethod = Util.getPrefixedPropertyName("set", propName);
         out.println("validator." + setMethod + "(value);");
         if ("StringArray".equals(propType))
@@ -153,13 +153,13 @@ public class TrinidadValidatorTagGenerator extends AbstractValidatorTagGenerator
       out.unindent();
       out.println("}");
       String propType = null;
-      if ("Date".equals (propClass)) 
+      if ("Date".equals (propClass))
       {
-        propType = resolveDateType(propFullClass, property.getUseMaxTime());                        
+        propType = resolveDateType(propFullClass, property.getUseMaxTime());
       }
-      else 
+      else
       {
-        propType = resolveType(propFullClass);            
+        propType = resolveType(propFullClass);
       }
       if (propType != null)
       {

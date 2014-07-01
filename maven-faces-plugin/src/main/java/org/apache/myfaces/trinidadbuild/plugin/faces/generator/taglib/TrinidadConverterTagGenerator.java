@@ -125,9 +125,9 @@ public class TrinidadConverterTagGenerator extends AbstractConverterTagGenerator
         {
           out.println(propClass + " value = Enum.valueOf(" + propClass + ".class, " + propVar + ".getExpressionString());");
         }
-        else 
+        else
         {
-          out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(null));");
+          out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(FacesContext.getCurrentInstance().getELContext()));");
         }
         String setMethod = Util.getPrefixedPropertyName("set", propName);
         out.println("converter." + setMethod + "(value);");
@@ -166,7 +166,7 @@ public class TrinidadConverterTagGenerator extends AbstractConverterTagGenerator
           out.println("try");
           out.println("{");
         }
-        
+
         if ("Enum".equals (propType))
         {
           out.println(propClass + " value = Enum.valueOf(" + propClass + ".class, " + propVar + ");");

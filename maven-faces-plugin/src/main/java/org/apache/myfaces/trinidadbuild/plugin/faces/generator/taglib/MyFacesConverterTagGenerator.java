@@ -103,7 +103,7 @@ public class MyFacesConverterTagGenerator extends AbstractConverterTagGenerator 
           out.println("{");
         }
 
-        out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(null));");
+        out.println(propClass + " value = TagUtils.get" + propType + "(" + propVar + ".getValue(FacesContext.getCurrentInstance().getELContext()));");
         String setMethod = Util.getPrefixedPropertyName("set", propName);
         out.println("converter." + setMethod + "(value);");
         if ("StringArray".equals(propType))

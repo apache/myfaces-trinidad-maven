@@ -46,7 +46,7 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
   {
     _is12 = is12;
   }
-  
+
   protected boolean is12()
   {
     return _is12;
@@ -62,6 +62,8 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
     {
       imports.add("javax.el.ValueExpression");
     }
+
+    imports.add("javax.faces.context.FacesContext");
 
     Iterator properties = component.properties();
     properties = new FilteredIterator(properties, new TagAttributeFilter());
@@ -285,7 +287,7 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
   {
     String propName = property.getPropertyName();
     String propVar = "_" + propName;
-    
+
     out.println("if (" + propVar + " != null) ");
     out.println("{");
     out.indent();
@@ -471,7 +473,7 @@ public class MyFacesComponentTagGenerator extends AbstractComponentTagGenerator
       out.println("else");
       out.println("{");
       out.indent();
-      out.println("Object val = " + propVar + ".getValue(null);");
+      out.println("Object val = " + propVar + ".getValue(FacesContext.getCurrentInstance().getELContext());");
       out.println("if (val != null)");
       out.indent();
       out.println("bean.setProperty(" + componentClass + "." + propKey + ",");
