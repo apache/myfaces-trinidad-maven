@@ -31,6 +31,7 @@ import java.net.URLClassLoader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -68,11 +69,8 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacetBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ScreenshotBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ValidatorBean;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.ComponentFilter;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.ConverterFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Filter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.PropertyFilter;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.ValidatorFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
 
 import org.codehaus.doxia.sink.Sink;
@@ -101,7 +99,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     factory.setSiteDirectory(getOutputDirectory());
     setSinkFactory(factory);
 
-    processIndex(project, resourcePath);
+    processIndex(project);
     try
     {
       _generateTagDocs();
@@ -125,14 +123,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     // components Iterator will be used when actually writing out the tag doc
     // compIter Iterator will be used when creating the maps of component relationships
     Iterator<ComponentBean> components = facesConfig.components();
-    components = new FilteredIterator(components, new SkipFilter());
-    components = new FilteredIterator(components, new ComponentTagFilter());
-    components = new FilteredIterator(components, new ComponentNamespaceFilter());
+    components = new FilteredIterator<ComponentBean>(components, new SkipFilter());
+    components = new FilteredIterator<ComponentBean>(components, new ComponentTagFilter());
+    components = new FilteredIterator<ComponentBean>(components, new ComponentNamespaceFilter());
 
     Iterator<ComponentBean> compIter = facesConfig.components();
-    compIter = new FilteredIterator(compIter, new SkipFilter());
-    compIter = new FilteredIterator(compIter, new ComponentTagFilter());
-    compIter = new FilteredIterator(compIter, new ComponentNamespaceFilter());
+    compIter = new FilteredIterator<ComponentBean>(compIter, new SkipFilter());
+    compIter = new FilteredIterator<ComponentBean>(compIter, new ComponentTagFilter());
+    compIter = new FilteredIterator<ComponentBean>(compIter, new ComponentNamespaceFilter());
 
     // compTypeMap holds a map of compononent types to tag names that implement that component type
     // The map is built using getComponentType method on the component bean to determine the
@@ -190,12 +188,12 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
     Iterator<ValidatorBean> validators = facesConfig.validators();
-    validators = new FilteredIterator(validators, new ValidatorTagFilter());
-    validators = new FilteredIterator(validators, new ValidatorNamespaceFilter());
+    validators = new FilteredIterator<ValidatorBean>(validators, new ValidatorTagFilter());
+    validators = new FilteredIterator<ValidatorBean>(validators, new ValidatorNamespaceFilter());
 
     Iterator<ConverterBean> converters = facesConfig.converters();
-    converters = new FilteredIterator(converters, new ConverterTagFilter());
-    converters = new FilteredIterator(converters, new ConverterNamespaceFilter());
+    converters = new FilteredIterator<ConverterBean>(converters, new ConverterTagFilter());
+    converters = new FilteredIterator<ConverterBean>(converters, new ConverterNamespaceFilter());
 
     // =-=AEW Note that only updating out-of-date components, etc. is
     // permanently tricky, even if we had proper detection in place,
@@ -208,9 +206,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
     */
 
-    Set componentPages = new TreeSet();
-    Set converterPages = new TreeSet();
-    Set validatorPages = new TreeSet();
+    Set<String> componentPages = new TreeSet<String>();
+    Set<String> converterPages = new TreeSet<String>();
+    Set<String> validatorPages = new TreeSet<String>();
 
     int count = 0;
     while (components.hasNext())
@@ -242,7 +240,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
 
-    Set otherPages = _gatherOtherTags();
+    Set<String> otherPages = _gatherOtherTags();
 
     getLog().info("Generated " + count + " page(s)");
 
@@ -259,23 +257,23 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     sink.sectionTitle1_();
     sink.section1();
 
-    for (Iterator<Map.Entry> i = taglibs.entrySet().iterator(); i.hasNext(); )
+    for (Iterator<Map.Entry<String, String>> i = taglibs.entrySet().iterator(); i.hasNext(); )
     {
-      Map.Entry entry = i.next();
+      Map.Entry<String, String> entry = i.next();
       sink.paragraph();
 
       sink.bold();
       sink.text("Short name:");
       sink.bold_();
       sink.nonBreakingSpace();
-      sink.text(entry.getKey().toString());
+      sink.text(entry.getKey());
       sink.lineBreak();
 
       sink.bold();
       sink.text("Namespace:");
       sink.bold_();
       sink.nonBreakingSpace();
-      sink.text(entry.getValue().toString());
+      sink.text(entry.getValue());
       sink.lineBreak();
 
       sink.paragraph_();
@@ -291,9 +289,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     sink.body_();
   }
 
-  private Set _gatherOtherTags()
+  private Set<String> _gatherOtherTags()
   {
-    TreeSet set = new TreeSet();
+    Set<String> set = new TreeSet<String>();
     String subDir =
       _platformAgnosticPath(_platformAgnosticPath("xdoc/" +
                                                   _DOC_SUBDIRECTORY));
@@ -428,7 +426,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     return formatted;
   }
 
-  private void _writeIndexSection(Sink sink, Set pages, String title)
+  private void _writeIndexSection(Sink sink, Set<String> pages, String title)
   {
     if (pages.isEmpty())
       return;
@@ -489,11 +487,11 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     if (namespace == null)
       return null;
 
-    for (Iterator<Map.Entry> i = taglibs.entrySet().iterator(); i.hasNext(); )
+    for (Iterator<Map.Entry<String, String>> i = taglibs.entrySet().iterator(); i.hasNext(); )
     {
-      Map.Entry entry = i.next();
+      Map.Entry<String, String> entry = i.next();
       if (namespace.equals(entry.getValue()))
-        return (String) entry.getKey();
+        return entry.getKey();
     }
 
     return "unknown";
@@ -858,13 +856,15 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   }
 
 
-  private class GroupComparator implements Comparator
+  private class GroupComparator implements Comparator<String>
   {
-    public int compare(Object o1, Object o2)
+    @Override
+    public int compare(String o1, String o2)
     {
       return _getGroupIndex(o1) - _getGroupIndex(o2);
     }
 
+    @Override
     public boolean equals(Object o)
     {
       return (o instanceof GroupComparator);
@@ -873,9 +873,6 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     private int _getGroupIndex(Object o)
     {
       String s = (o == null) ? null : o.toString();
-
-
-
 
       if ("message".equalsIgnoreCase(s))
       {
@@ -902,9 +899,9 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   private void _writeComponentAttributes(Writer out, ComponentBean bean) throws IOException
   {
     // Sort the names
-    TreeSet<String> attributes = new TreeSet<String>();
+    Collection<String> attributes = new TreeSet<String>();
     Iterator<PropertyBean> attrs = bean.properties(true);
-    attrs = new FilteredIterator(attrs, new NonHiddenFilter());
+    attrs = new FilteredIterator<PropertyBean>(attrs, new NonHiddenFilter());
 
     while (attrs.hasNext())
     {
@@ -922,7 +919,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       list.add(bean.findProperty(attrName, true));
     }
 
-    TreeSet<String> groups = new TreeSet<String>(new GroupComparator());
+    Set<String> groups = new TreeSet<String>(new GroupComparator());
     /* No current support for grouping
     // Make sure "null" is the representative for unknown groups
     Iterator iter = attributes.iterator();
@@ -952,7 +949,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   private void _writeConverterAttributes(Writer out, ConverterBean bean) throws IOException
   {
     // Sort the names
-    TreeSet attributes = new TreeSet();
+    Collection<String> attributes = new TreeSet<String>();
     Iterator<PropertyBean> attrs = bean.properties();
     while (attrs.hasNext())
     {
@@ -962,7 +959,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
     // Now get a list of PropertyBeans
-    List list = new ArrayList();
+    List<PropertyBean> list = new ArrayList<PropertyBean>();
     Iterator<String> iter = attributes.iterator();
     while (iter.hasNext())
     {
@@ -981,7 +978,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   private void _writeValidatorAttributes(Writer out, ValidatorBean bean) throws IOException
   {
     // Sort the names
-    TreeSet attributes = new TreeSet();
+    Collection<String> attributes = new TreeSet<String>();
     Iterator<PropertyBean> attrs = bean.properties();
     while (attrs.hasNext())
     {
@@ -991,7 +988,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
 
     // Now get a list of PropertyBeans
-    List list = new ArrayList();
+    List<PropertyBean> list = new ArrayList<PropertyBean>();
     Iterator<String> iter = attributes.iterator();
     while (iter.hasNext())
     {
@@ -1279,7 +1276,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   private void _writeComponentFacets(Writer out, ComponentBean bean, Map<String, List<QName>> compTypeMap) throws IOException
   {
     // Sort the facets
-    TreeSet facetNames = new TreeSet();
+    Collection<String> facetNames = new TreeSet<String>();
     Iterator<FacetBean> iter = bean.facets(true);
     while (iter.hasNext())
     {
@@ -1596,8 +1593,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   }
 
   protected void processIndex(
-    MavenProject project,
-    String       resourcePath) throws MavenReportException
+    MavenProject project) throws MavenReportException
   {
     _facesConfig = new FacesConfigBean();
 
@@ -1627,14 +1623,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
   }
 
 
-  protected List getMasterConfigs(
+  protected List<URL> getMasterConfigs(
     MavenProject project) throws MavenReportException
   {
     String resourcePath = "META-INF/maven-faces-plugin/faces-config.xml";
     return getCompileDependencyResources(project, resourcePath);
   }
 
-  protected List getCompileDependencyResources(
+  protected List<URL> getCompileDependencyResources(
     MavenProject project,
     String       resourcePath) throws MavenReportException
   {
@@ -1642,7 +1638,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     {
       ClassLoader cl = createCompileClassLoader(project);
       Enumeration e = cl.getResources(resourcePath);
-      List urls = new ArrayList();
+      List<URL> urls = new ArrayList<URL>();
       while (e.hasMoreElements())
       {
         URL url = (URL)e.nextElement();
@@ -1664,7 +1660,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     try
     {
       // 1. read master faces-config.xml resources
-      List masters = getMasterConfigs(project);
+      List<URL> masters = getMasterConfigs(project);
       if (masters.isEmpty())
       {
         getLog().warn("Master faces-config.xml not found");
@@ -1672,7 +1668,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
       }
       else
       {
-        List entries = new LinkedList();
+        List<URL> entries = new LinkedList<URL>();
 
         SAXParserFactory spf = SAXParserFactory.newInstance();
         spf.setNamespaceAware(true);
@@ -1697,7 +1693,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
           digester.parse(url.openStream());
         }
 
-        return (URL[])entries.toArray(new URL[0]);
+        return entries.toArray(new URL[entries.size()]);
       }
     }
     catch (ParserConfigurationException e)
@@ -1722,7 +1718,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
 
     try
     {
-      List classpathElements = project.getCompileClasspathElements();
+      List<String> classpathElements = project.getCompileClasspathElements();
       if (!classpathElements.isEmpty())
       {
         String[] entries = (String[]) classpathElements.toArray(new String[0]);
@@ -1760,10 +1756,10 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
-  static protected class SkipFilter extends ComponentFilter
+  static protected class SkipFilter implements Filter<ComponentBean>
   {
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       String componentType = component.getComponentType();
 
@@ -1773,14 +1769,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
-  private class ComponentNamespaceFilter extends ComponentFilter
+  private class ComponentNamespaceFilter implements Filter<ComponentBean>
   {
     public ComponentNamespaceFilter()
     {
     }
 
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       if (component.getTagName() == null)
         return false;
@@ -1789,14 +1785,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
-  private class ValidatorNamespaceFilter extends ValidatorFilter
+  private class ValidatorNamespaceFilter implements Filter<ValidatorBean>
   {
     public ValidatorNamespaceFilter()
     {
     }
 
-    protected boolean accept(
-      ValidatorBean component)
+    @Override
+    public boolean accept(ValidatorBean component)
     {
       if (component.getTagName() == null)
         return false;
@@ -1805,14 +1801,14 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
-  private class ConverterNamespaceFilter extends ConverterFilter
+  private class ConverterNamespaceFilter implements Filter<ConverterBean>
   {
     public ConverterNamespaceFilter()
     {
     }
 
-    protected boolean accept(
-      ConverterBean component)
+    @Override
+    public boolean accept(ConverterBean component)
     {
       if (component.getTagName() == null)
         return false;
@@ -1821,46 +1817,46 @@ public class TagdocReport extends AbstractMavenMultiPageReport
     }
   }
 
-  static final protected class TagAttributeFilter extends PropertyFilter
+  static final protected class TagAttributeFilter implements Filter<PropertyBean>
   {
-    protected boolean accept(
-      PropertyBean property)
+    @Override
+    public boolean accept(PropertyBean property)
     {
       return (!property.isTagAttributeExcluded());
     }
   }
 
-  static final protected class ComponentTagFilter extends ComponentFilter
+  static final protected class ComponentTagFilter implements Filter<ComponentBean>
   {
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       return (component.getTagName() != null);
     }
   }
 
-  static final protected class ConverterTagFilter extends ConverterFilter
+  static final protected class ConverterTagFilter implements Filter<ConverterBean>
   {
-    protected boolean accept(
-      ConverterBean converter)
+    @Override
+    public boolean accept(ConverterBean converter)
     {
       return (converter.getTagClass() != null);
     }
   }
 
-  static final protected class ValidatorTagFilter extends ValidatorFilter
+  static final protected class ValidatorTagFilter implements Filter<ValidatorBean>
   {
-    protected boolean accept(
-      ValidatorBean validator)
+    @Override
+    public boolean accept(ValidatorBean validator)
     {
       return (validator.getTagClass() != null);
     }
   }
 
-  final protected static class NonHiddenFilter extends PropertyFilter
+  final protected static class NonHiddenFilter implements Filter<PropertyBean>
   {
-    protected boolean accept(
-        PropertyBean property)
+    @Override
+    public boolean accept(PropertyBean property)
     {
       return (!property.isHidden());
     }
@@ -1904,7 +1900,7 @@ public class TagdocReport extends AbstractMavenMultiPageReport
    * @parameter
    * @required
    */
-  private Map taglibs;
+  private Map<String, String> taglibs;
 
   /**
    * @parameter expression="META-INF/maven-faces-plugin/faces-config.xml"

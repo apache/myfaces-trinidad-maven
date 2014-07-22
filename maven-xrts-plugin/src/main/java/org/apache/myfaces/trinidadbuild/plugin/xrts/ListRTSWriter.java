@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Map;
-//import java.util.StringTokenizer;
 
 
 /**
@@ -53,7 +52,8 @@ public class ListRTSWriter implements RTSWriter
    * @param meta a <code>Map</code> of parsed non-resource data
    * (e.g., authors).
    */
-  public void startBundle(Map parms, Map meta)
+  @Override
+  public void startBundle(Map<String, ?> parms, Map<String, ?> meta)
     throws Throwable
   {
     File outFile = (File)parms.get("outFile");
@@ -139,12 +139,15 @@ public class ListRTSWriter implements RTSWriter
     
   }
 
-  protected void writeImports(Map parms, Map meta)
+  protected void writeImports(@SuppressWarnings("unused") Map<String, ?> parms,
+                              @SuppressWarnings("unused") Map<String, ?> meta)
      throws Throwable
   {
+    // do nothing
   }
 
-  public void writeString(Map parms, Map meta, String key,
+  @Override
+  public void writeString(Map<String, ?> parms, Map<String, ?> meta, String key,
     String value) throws Throwable
   {
     _pw.println("    {\"" + UnicodeEscapes.convert(key) + "\", \"" +
@@ -161,7 +164,8 @@ public class ListRTSWriter implements RTSWriter
    * @param meta a <code>Map</code> of parsed non-resource data
    * (e.g., authors).
    */
-  public void endBundle(Map parms, Map meta) throws Throwable
+  @Override
+  public void endBundle(Map<String, ?> parms, Map<String, ?> meta) throws Throwable
   {
     _pw.println("    };");
     _pw.println("  }");

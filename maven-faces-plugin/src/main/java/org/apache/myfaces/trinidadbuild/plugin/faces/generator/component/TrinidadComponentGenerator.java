@@ -32,8 +32,8 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Filter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.PropertyFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 
 
@@ -44,20 +44,22 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     super(log, is12);
   }
 
-  protected void addSpecificImports(Set imports, ComponentBean component)
+  @Override
+  protected void addSpecificImports(Set<String> imports, ComponentBean component)
   {
     // FacesBean is always needed to define the TYPE
 
     imports.add("org.apache.myfaces.trinidad.bean.FacesBean");
 
     Iterator<PropertyBean> properties = component.properties();
-    properties = new FilteredIterator(properties, new NonVirtualFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new NonVirtualFilter());
+    
     // PropertyKey only needed if there are properties
     if (properties.hasNext())
     {
       imports.add("org.apache.myfaces.trinidad.bean.PropertyKey");
 
-      PropertyFilter resolvable = new ResolvableTypeFilter();
+      Filter<PropertyBean> resolvable = new ResolvableTypeFilter();
       while (properties.hasNext())
       {
         PropertyBean property = properties.next();
@@ -75,6 +77,7 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     }
   }
 
+  @Override
   protected void writeConstructorContent(PrettyWriter out,
                                          ComponentBean component,
                                          int modifiers,
@@ -83,6 +86,7 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     out.println("super(" + rendererType + ");");
   }
 
+  @Override
   protected void writePropertyListMethods(PrettyWriter out, PropertyBean property, Collection gnoreList)
   {
     // nothing
@@ -100,8 +104,8 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
 
     //  component property keys
     Iterator<PropertyBean> properties = component.properties();
-    properties = new FilteredIterator(properties, new NonVirtualFilter());
-    properties = new FilteredIterator(properties, new NonOverriddenFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new NonVirtualFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new NonOverriddenFilter());
 
     while (properties.hasNext())
     {
@@ -182,6 +186,7 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     }
   }
 
+  @Override
   protected void writePropertyDeclaration(PrettyWriter out, PropertyBean property) throws IOException
   {
     // nothing by default
@@ -192,11 +197,13 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
    *
    * @return true if the getters/setters are final
    */
+  @Override
   protected boolean isAccessorMethodFinal()
   {
     return true;
   }
 
+  @Override
   protected void writePropertySetterMethodBody(PrettyWriter out,
                                                PropertyBean property,
                                                String propertyClass) throws IOException
@@ -227,6 +234,7 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     }
   }
 
+  @Override
   protected void writePropertyGetterMethodBody(
       PrettyWriter out,
       PropertyBean property) throws IOException
@@ -275,11 +283,13 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
     }
   }
 
+  @Override
   public void writeStateManagementMethods(PrettyWriter out, ComponentBean component) throws IOException
   {
     // nothing to do here
   }
 
+  @Override
   public void writePropertyListMethods(
       PrettyWriter out,
       PropertyBean property) throws IOException
@@ -445,7 +455,7 @@ public class TrinidadComponentGenerator extends AbstractComponentGenerator
   private String _getPropertyCapabilities(
       PropertyBean property)
   {
-    List caps = new ArrayList();
+    List<String> caps = new ArrayList<String>();
 
     if (property.isMethodBinding() ||
         property.isLiteralOnly())

@@ -19,7 +19,7 @@
 package org.apache.myfaces.trinidadbuild.plugin.faces.generator.taglib;
 
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.PropertyFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Filter;
 
 /**
  * TODO: comment this!
@@ -27,10 +27,10 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.util.PropertyFilter;
  * @author Bruno Aranda (latest modification by $Author$)
  * @version $Revision$ $Date$
  */
-final public class TagAttributeFilter extends PropertyFilter
+public final class TagAttributeFilter implements Filter<PropertyBean>
 {
-  protected boolean accept(
-      PropertyBean property)
+  @Override
+  public boolean accept(PropertyBean property)
   {
     return (!property.isTagAttributeExcluded());
   }

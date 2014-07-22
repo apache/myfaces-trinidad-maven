@@ -32,8 +32,9 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.generator.GeneratorHelper;
 import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
+
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Filter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.PropertyFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.SourceTemplate;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 
@@ -54,7 +55,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
                            String superclassName,
                            ComponentBean component)
   {
-    Collection components = new HashSet();
+    Collection<ComponentBean> components = new HashSet<ComponentBean>();
     components.add(component);
     writeImports(out, template, packageName, fullSuperclassName, superclassName, components);
   }
@@ -62,17 +63,17 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
 
   @Override
   public void writeImports(PrettyWriter out, SourceTemplate template, String packageName,
-    String fullSuperclassName, String superclassName, Collection components)
+    String fullSuperclassName, String superclassName, Collection<ComponentBean> components)
   {
     // TODO: support SourceTemplate
 
-    Set imports = new TreeSet();
+    Set<String> imports = new TreeSet<String>();
 
     for (Iterator<ComponentBean> lIterator = components.iterator(); lIterator.hasNext();)
     {
       ComponentBean component = lIterator.next();
       Iterator<PropertyBean> properties = component.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
+      properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
 
       // TODO: remove these imports
       // FIXME: Actually last 2 can be kept when not abstract
@@ -229,11 +230,11 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
                                    ComponentBean component) throws IOException
   {
     Iterator<PropertyBean> properties = component.properties();
-    properties = new FilteredIterator(properties, new TagAttributeFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
     if (isSetterMethodFinal())
     {
       // Do not generate property methods if they are final and the properties are overrides
-      properties = new FilteredIterator(properties, new NonOverriddenFilter());
+      properties = new FilteredIterator<PropertyBean>(properties, new NonOverriddenFilter());
     }
 
     while (properties.hasNext())
@@ -255,7 +256,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
   }
 
   @Override
-  public void writePropertyMembers(PrettyWriter out, Collection components) throws IOException
+  public void writePropertyMembers(PrettyWriter out, Collection<ComponentBean> components) throws IOException
   {
     for (Iterator<ComponentBean> lIterator = components.iterator(); lIterator.hasNext();)
     {
@@ -267,7 +268,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
   public void writeReleaseMethod(PrettyWriter out,
                                  ComponentBean component) throws IOException
   {
-    Collection components = new HashSet();
+    Collection<ComponentBean> components = new HashSet<ComponentBean>();
     components.add(component);
     writeReleaseMethod(out, components);
   }
@@ -275,14 +276,14 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
 
   @Override
   public void writeReleaseMethod(
-    PrettyWriter out, Collection components) throws IOException
+    PrettyWriter out, Collection<ComponentBean> components) throws IOException
   {
-    Collection all = new HashSet();
+    Collection<PropertyBean> all = new HashSet<PropertyBean>();
     boolean special = false;
-    for (Iterator lIterator = components.iterator(); lIterator.hasNext();)
+    for (Iterator<ComponentBean> lIterator = components.iterator(); lIterator.hasNext();)
     {
-      ComponentBean component = (ComponentBean) lIterator.next();
-      Iterator prop = component.properties();
+      ComponentBean component = lIterator.next();
+      Iterator<PropertyBean> prop = component.properties();
       // TODO: remove special case for UIXFormTag
       special |= "org.apache.myfaces.trinidadinternal.taglib.UIXFormTag".equals(component.getTagClass());
       while (prop.hasNext())
@@ -291,9 +292,9 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
       }
     }
 
-    Iterator properties = all.iterator();
-    properties = new FilteredIterator(properties, new TagAttributeFilter());
-    properties = new FilteredIterator(properties, new NonOverriddenFilter());
+    Iterator<PropertyBean> properties = all.iterator();
+    properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new NonOverriddenFilter());
 
     if (properties.hasNext() || special)
     {
@@ -305,7 +306,7 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
       out.println("super.release();");
       while (properties.hasNext())
       {
-        PropertyBean property = (PropertyBean) properties.next();
+        PropertyBean property = properties.next();
         String propName = property.getPropertyName();
         String propVar = "_" + propName;
         out.print(propVar + " = ");
@@ -322,9 +323,8 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
     }
   }
 
-  protected void addSpecificImports(
-      Set imports,
-      ComponentBean component)
+  protected void addSpecificImports(@SuppressWarnings("unused") Set<String> imports,
+                                    @SuppressWarnings("unused") ComponentBean component)
   {
     // nothing by default
   }
@@ -342,12 +342,12 @@ public abstract class AbstractComponentTagGenerator implements ComponentTagGener
 
   protected abstract void writeSetPropertyMethodBody(PrettyWriter out,
                                                      String componentClass,
-                                                     Iterator properties) throws IOException;
+                                                  Iterator<PropertyBean> properties) throws IOException;
 
-  protected static class NonOverriddenFilter
-    extends PropertyFilter
+  protected static class NonOverriddenFilter implements Filter<PropertyBean>
   {
-    protected boolean accept(
+    @Override
+    public boolean accept(
       PropertyBean property)
     {
       return (!property.isOverride());

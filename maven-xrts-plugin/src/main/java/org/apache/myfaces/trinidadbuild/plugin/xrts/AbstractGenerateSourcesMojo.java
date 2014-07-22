@@ -21,7 +21,6 @@ package org.apache.myfaces.trinidadbuild.plugin.xrts;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -95,15 +94,15 @@ abstract public class AbstractGenerateSourcesMojo extends AbstractMojo
       if (xrtsFiles.length > 0)
       {
         RTSWriter writer = getRTSWriter();
-        Map params = new HashMap();
+        Map<String, Object> params = new HashMap<String, Object>();
 
-        List dirtyXRTS = new LinkedList(Arrays.asList(xrtsFiles));
+        List<String> dirtyXRTS = new LinkedList<String>(Arrays.asList(xrtsFiles));
         SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setValidating(false);
 
-        for (Iterator i=dirtyXRTS.iterator(); i.hasNext();)
+        for (Iterator<String> i = dirtyXRTS.iterator(); i.hasNext();)
         {
-          String xrtsFile = (String)i.next();
+          String xrtsFile = i.next();
           File targetFile = getTargetFile(xrtsFile);
           if (targetFile.exists())
           {
@@ -123,9 +122,9 @@ abstract public class AbstractGenerateSourcesMojo extends AbstractMojo
         {
           getLog().info("Generating " + dirtyXRTS.size() + " XRTS bundles to " + getTargetDirectory());
 
-          for (Iterator i=dirtyXRTS.iterator(); i.hasNext();)
+          for (Iterator<String> i = dirtyXRTS.iterator(); i.hasNext();)
           {
-            String xrtsFile = (String)i.next();
+            String xrtsFile = i.next();
             File sourceFile = getSourceFile(xrtsFile);
             File targetFile = getTargetFile(xrtsFile);
             String baseName = getBasename(xrtsFile);

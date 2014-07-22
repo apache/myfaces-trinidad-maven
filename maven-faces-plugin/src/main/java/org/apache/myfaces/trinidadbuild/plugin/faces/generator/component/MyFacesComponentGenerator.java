@@ -44,8 +44,8 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
     super(log, is12);
   }
 
-
-  protected void addSpecificImports(Set imports, ComponentBean component)
+  @Override
+  protected void addSpecificImports(Set<String> imports, ComponentBean component)
   {
     imports.add("javax.faces.context.FacesContext");
     imports.add("javax.el.ValueExpression");
@@ -62,6 +62,7 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
     }
   }
 
+  @Override
   public void writePropertyDeclaration(PrettyWriter out,
                                        PropertyBean property) throws IOException
   {
@@ -83,6 +84,7 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
     }
   }
 
+  @Override
   public void writeStateManagementMethods(PrettyWriter out,
                                           ComponentBean component) throws IOException
   {
@@ -95,6 +97,7 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
     writeRestoreState(out, component);
   }
 
+  @Override
   public void writePropertyListMethods(
       PrettyWriter out,
       PropertyBean property) throws IOException
@@ -102,11 +105,13 @@ public class MyFacesComponentGenerator extends AbstractComponentGenerator
     // nothing
   }
 
+  @Override
   protected void writeConstructorContent(PrettyWriter out, ComponentBean component, int modifiers, String rendererType) throws IOException
   {
     out.println("setRendererType(" + rendererType + ");");
   }
 
+  @Override
   protected void writePropertyListMethods(PrettyWriter out, PropertyBean property, Collection ignoreList)
   {
     String propName = property.getPropertyName();

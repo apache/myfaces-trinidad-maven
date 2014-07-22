@@ -21,32 +21,35 @@ package org.apache.myfaces.trinidadbuild.plugin.faces.util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class FilteredIterator implements Iterator
+public class FilteredIterator<T> implements Iterator<T>
 {
   public FilteredIterator(
-    Iterator iter,
-    Filter   filter)
+    Iterator<T> iter,
+    Filter<T>   filter)
   {
     _iter = iter;
     _filter = filter;
     _advance();
   }
 
+  @Override
   public boolean hasNext()
   {
     return (_next != null);
   }
 
-  public Object next()
+  @Override
+  public T next()
   {
     if (_next == null)
       throw new NoSuchElementException();
 
-    Object obj = _next;
+    T obj = _next;
     _advance();
     return obj;
   }
 
+  @Override
   public void remove()
   {
     throw new UnsupportedOperationException();
@@ -56,7 +59,7 @@ public class FilteredIterator implements Iterator
   {
     while (_iter.hasNext())
     {
-      Object obj = _iter.next();
+      T obj = _iter.next();
       if (_filter.accept(obj))
       {
         _next = obj;
@@ -67,7 +70,7 @@ public class FilteredIterator implements Iterator
     _next = null;
   }
 
-  private final Iterator _iter;
-  private final Filter _filter;
-  private Object _next;
+  private final Iterator<T> _iter;
+  private final Filter<T> _filter;
+  private T _next;
 }

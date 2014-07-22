@@ -69,12 +69,10 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.MethodSignatureBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ValidatorBean;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.ComponentFilter;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.ConverterFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Filter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.SourceTemplate;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.ValidatorFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
 
 import org.codehaus.plexus.util.FileUtils;
@@ -146,22 +144,22 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
       // taglibs map syntax requires distinct shortNames,
       // which is a Good Thing!
-      for (Iterator<Map.Entry> i = taglibs.entrySet().iterator(); i.hasNext(); )
+      for (Iterator<Map.Entry<String, String>> i = taglibs.entrySet().iterator(); i.hasNext(); )
       {
-        Map.Entry entry = i.next();
-        String shortName = (String)entry.getKey();
-        String namespaceURI = (String)entry.getValue();
+        Map.Entry<String, String> entry = i.next();
+        String shortName = entry.getKey();
+        String namespaceURI = entry.getValue();
 
         FacesConfigBean facesConfig = getFacesConfig();
-        Iterator components = facesConfig.components();
-        components = new FilteredIterator(components, new SkipFilter());
-        components = new FilteredIterator(components, new ComponentTagLibraryFilter(namespaceURI));
+        Iterator<ComponentBean> components = facesConfig.components();
+        components = new FilteredIterator<ComponentBean>(components, new SkipFilter());
+        components = new FilteredIterator<ComponentBean>(components, new ComponentTagLibraryFilter(namespaceURI));
 
-        Iterator validators = facesConfig.validators();
-        validators = new FilteredIterator(validators, new ValidatorTagLibraryFilter(namespaceURI));
+        Iterator<ValidatorBean> validators = facesConfig.validators();
+        validators = new FilteredIterator<ValidatorBean>(validators, new ValidatorTagLibraryFilter(namespaceURI));
 
-        Iterator converters = facesConfig.converters();
-        converters = new FilteredIterator(converters, new ConverterTagLibraryFilter(namespaceURI));
+        Iterator<ConverterBean> converters = facesConfig.converters();
+        converters = new FilteredIterator<ConverterBean>(converters, new ConverterTagLibraryFilter(namespaceURI));
 
         String targetPath = "META-INF/" + shortName + ".tld";
         File targetFile = new File(generatedResourcesDirectory, targetPath);
@@ -191,17 +189,17 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
           stream.writeEndElement();
           while (components.hasNext())
           {
-            ComponentBean component = (ComponentBean)components.next();
+            ComponentBean component = components.next();
             _writeTag(stream, component);
           }
           while (converters.hasNext())
           {
-            ConverterBean converter = (ConverterBean)converters.next();
+            ConverterBean converter = converters.next();
             _writeTag(stream, converter);
           }
           while (validators.hasNext())
           {
-            ValidatorBean validator = (ValidatorBean)validators.next();
+            ValidatorBean validator = validators.next();
             _writeTag(stream, validator);
           }
           _writeEndTagLibrary(stream);
@@ -260,17 +258,17 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
           _writeStartTagLibrary(stream, !JsfVersion.isJSF11(jsfVersion) ? "2.1" : "1.2", shortName, namespaceURI);
           while (components.hasNext())
           {
-            ComponentBean component = (ComponentBean)components.next();
+            ComponentBean component = components.next();
             _writeTag(stream, component);
           }
           while (converters.hasNext())
           {
-            ConverterBean converter = (ConverterBean)converters.next();
+            ConverterBean converter = converters.next();
             _writeTag(stream, converter);
           }
           while (validators.hasNext())
           {
-            ValidatorBean validator = (ValidatorBean)validators.next();
+            ValidatorBean validator = validators.next();
             _writeTag(stream, validator);
           }
           _writeEndTagLibrary(stream);
@@ -433,11 +431,11 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
       stream.writeEndElement();
     }
 
-    Iterator properties = component.properties(true);
-    properties = new FilteredIterator(properties, new TagAttributeFilter());
+    Iterator<PropertyBean> properties = component.properties(true);
+    properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
     while (properties.hasNext())
     {
-      PropertyBean property = (PropertyBean)properties.next();
+      PropertyBean property = properties.next();
       writeTagAttribute(stream,
                          property.getPropertyName(),
                          property.getDescription(),
@@ -496,7 +494,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     writeTagAttribute(stream, "id", "the identifier for the converter", null, null);
 
     Iterator<PropertyBean> properties = converter.properties();
-    properties = new FilteredIterator(properties, new TagAttributeFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
     while (properties.hasNext())
     {
       PropertyBean property = properties.next();
@@ -708,7 +706,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     writeTagAttribute(stream, "id", "the identifier for the validator", null, null);
 
     Iterator<PropertyBean> properties = validator.properties();
-    properties = new FilteredIterator(properties, new TagAttributeFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
     while (properties.hasNext())
     {
       PropertyBean property = properties.next();
@@ -738,25 +736,25 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     }
     else
     {
-      Iterator components = facesConfig.components();
-      components = new FilteredIterator(components, new SkipFilter());
-      components = new FilteredIterator(components, new ComponentTagFilter());
-      components = new FilteredIterator(components, new ComponentTagClassFilter(packageContains));
+      Iterator<ComponentBean> components = facesConfig.components();
+      components = new FilteredIterator<ComponentBean>(components, new SkipFilter());
+      components = new FilteredIterator<ComponentBean>(components, new ComponentTagFilter());
+      components = new FilteredIterator<ComponentBean>(components, new ComponentTagClassFilter(packageContains));
 
-      Iterator validators = facesConfig.validators();
-      validators = new FilteredIterator(validators, new ValidatorTagFilter());
-      validators = new FilteredIterator(validators, new ValidatorTagClassFilter(packageContains));
+      Iterator<ValidatorBean> validators = facesConfig.validators();
+      validators = new FilteredIterator<ValidatorBean>(validators, new ValidatorTagFilter());
+      validators = new FilteredIterator<ValidatorBean>(validators, new ValidatorTagClassFilter(packageContains));
 
-      Iterator converters = facesConfig.converters();
-      converters = new FilteredIterator(converters, new ConverterTagFilter());
-      converters = new FilteredIterator(converters, new ConverterTagClassFilter(packageContains));
+      Iterator<ConverterBean> converters = facesConfig.converters();
+      converters = new FilteredIterator<ConverterBean>(converters, new ConverterTagFilter());
+      converters = new FilteredIterator<ConverterBean>(converters, new ConverterTagClassFilter(packageContains));
 
       // incremental unless forced
       if (!force)
       {
-        components = new FilteredIterator(components, new IfComponentModifiedFilter());
-        converters = new FilteredIterator(converters, new IfConverterModifiedFilter());
-        validators = new FilteredIterator(validators, new IfValidatorModifiedFilter());
+        components = new FilteredIterator<ComponentBean>(components, new IfComponentModifiedFilter());
+        converters = new FilteredIterator<ConverterBean>(converters, new IfConverterModifiedFilter());
+        validators = new FilteredIterator<ValidatorBean>(validators, new IfValidatorModifiedFilter());
       }
 
       if (!components.hasNext() && !converters.hasNext() && !validators.hasNext())
@@ -781,17 +779,17 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
         int count = 0;
         while (components.hasNext())
         {
-          componentGen.generateTagHandler((ComponentBean)components.next());
+          componentGen.generateTagHandler(components.next());
           count++;
         }
         while (converters.hasNext())
         {
-          converterGen.generateTagHandler((ConverterBean)converters.next(), generatedSourceDirectory);
+          converterGen.generateTagHandler(converters.next(), generatedSourceDirectory);
           count++;
         }
         while (validators.hasNext())
         {
-          validatorGen.generateTagHandler((ValidatorBean)validators.next(), generatedSourceDirectory);
+          validatorGen.generateTagHandler(validators.next(), generatedSourceDirectory);
           count++;
         }
         getLog().info("Generated " + count + " JSP tag(s)");
@@ -801,10 +799,10 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
 
   class ComponentTagHandlerGenerator
   {
-    private Set initComponentList(ComponentBean component,
+    private Set<ComponentBean> initComponentList(ComponentBean component,
                                   String fullSuperclassName)
     {
-      Set componentList = new HashSet();
+      Set<ComponentBean> componentList = new HashSet<ComponentBean>();
       componentList.add(component);
 
       ComponentBean lBean = component;
@@ -822,7 +820,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     public void generateTagHandler(ComponentBean component)
     {
       ComponentTagGenerator generator;
-      Set componentList;
+      Set<ComponentBean> componentList;
 
       String fullSuperclassName = component.findJspTagSuperclass();
       if (fullSuperclassName == null)
@@ -946,10 +944,10 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     }
   }
 
-  private class IfComponentModifiedFilter extends ComponentFilter
+  private class IfComponentModifiedFilter implements Filter<ComponentBean>
   {
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       String tagClass = component.getTagClass();
 
@@ -966,10 +964,10 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     }
   }
 
-  private class IfConverterModifiedFilter extends ConverterFilter
+  private class IfConverterModifiedFilter implements Filter<ConverterBean>
   {
-    protected boolean accept(
-      ConverterBean converter)
+    @Override
+    public boolean accept(ConverterBean converter)
     {
       String tagClass = converter.getTagClass();
       String sourcePath = Util.convertClassToSourcePath(tagClass, ".java");
@@ -983,10 +981,10 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     }
   }
 
-  private class IfValidatorModifiedFilter extends ValidatorFilter
+  private class IfValidatorModifiedFilter implements Filter<ValidatorBean>
   {
-    protected boolean accept(
-      ValidatorBean validator)
+    @Override
+    public boolean accept(ValidatorBean validator)
     {
       String tagClass = validator.getTagClass();
       String sourcePath = Util.convertClassToSourcePath(tagClass, ".java");
@@ -1114,7 +1112,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
    * @parameter
    * @required
    */
-  protected Map taglibs;
+  protected Map<String, String> taglibs;
 
   /**
    * @parameter expression="META-INF/maven-faces-plugin/faces-config.xml"
@@ -1205,7 +1203,7 @@ public class GenerateJspTaglibsMojo extends AbstractFacesMojo
     "          xpointer CDATA #IMPLIED>\n" +
     "]>\n";
 
-  static final private Set _CAN_COERCE = new HashSet();
+  static final private Set<String> _CAN_COERCE = new HashSet<String>();
   static
   {
     // What?  Can't coerce Strings?  How could that be?  Well, take a look at:

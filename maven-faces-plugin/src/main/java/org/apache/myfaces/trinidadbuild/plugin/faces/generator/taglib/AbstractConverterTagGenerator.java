@@ -88,7 +88,7 @@ public abstract class AbstractConverterTagGenerator extends AbstractTagGenerator
     ConverterBean converter) throws IOException
   {
     Iterator<PropertyBean> properties = converter.properties();
-    properties = new FilteredIterator(properties, new TagAttributeFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
     if (properties.hasNext())
     {
       String converterFullClass = converter.getConverterClass();
@@ -114,8 +114,8 @@ public abstract class AbstractConverterTagGenerator extends AbstractTagGenerator
     PrettyWriter  out,
     ConverterBean converter) throws IOException
   {
-    Iterator properties = converter.properties();
-    properties = new FilteredIterator(properties, new TagAttributeFilter());
+    Iterator<PropertyBean> properties = converter.properties();
+    properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
     
     String converterFullClass = converter.getConverterClass();
     String converterClass = Util.getClassFromFullClass(converterFullClass);

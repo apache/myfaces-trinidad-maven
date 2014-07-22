@@ -426,7 +426,7 @@ public class Util
 
   static private Set _createPrimitiveTypesSet()
   {
-    Set primitives = new TreeSet();
+    Set<String> primitives = new TreeSet<String>();
     for (int i=0; i < _PRIMITIVE_TYPES.length; i++)
     {
       String type = _PRIMITIVE_TYPES[i];
@@ -438,7 +438,7 @@ public class Util
 
   static private Set _createReservedWordsSet()
   {
-    Set reserved = new TreeSet();
+    Set<String> reserved = new TreeSet<String>();
     for (int i=0; i < _RESERVED_WORDS.length; i++)
     {
       String keyword = _RESERVED_WORDS[i];

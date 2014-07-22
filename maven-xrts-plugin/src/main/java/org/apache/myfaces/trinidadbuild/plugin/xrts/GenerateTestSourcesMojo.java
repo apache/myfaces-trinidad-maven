@@ -66,31 +66,37 @@ public class GenerateTestSourcesMojo extends AbstractGenerateSourcesMojo
    */
   private File targetDirectory;
 
+  @Override
   protected String[] getDefaultLocales()
   {
     return defaultLocales;
   }
 
+  @Override
   protected String[] getExcludes()
   {
     return testExcludes;
   }
 
+  @Override
   protected void addCompileSourceRoot() throws IOException
   {
     project.addTestCompileSourceRoot(targetDirectory.getCanonicalPath());
   }
 
+  @Override
   protected String getTargetType()
   {
     return targetType;
   }
 
+  @Override
   protected File getSourceDirectory()
   {
     return testSourceDirectory;
   }
 
+  @Override
   protected File getTargetDirectory()
   {
     return targetDirectory;

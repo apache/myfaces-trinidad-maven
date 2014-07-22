@@ -55,11 +55,8 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ConverterBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigParser;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ValidatorBean;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.AttributeFilter;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.ComponentFilter;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.ConverterFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Filter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.ValidatorFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.XIncludeFilter;
 
 import org.codehaus.plexus.util.FileUtils;
@@ -70,7 +67,7 @@ import org.xml.sax.SAXException;
 
 abstract public class AbstractFacesMojo extends AbstractMojo
 {
-  protected List getCompileDependencyResources(
+  protected List<URL> getCompileDependencyResources(
     MavenProject project,
     String       resourcePath) throws MojoExecutionException
   {
@@ -78,7 +75,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     {
       ClassLoader cl = createCompileClassLoader(project);
       Enumeration e = cl.getResources(resourcePath);
-      List urls = new ArrayList();
+      List<URL> urls = new ArrayList<URL>();
       while (e.hasMoreElements())
       {
         URL url = (URL)e.nextElement();
@@ -98,7 +95,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     MavenProject project,
     String       resourceRoot)
   {
-    List resources = project.getBuild().getResources();
+    List<Resource> resources = project.getBuild().getResources();
     Resource resource = new Resource();
     resource.setDirectory(resourceRoot);
     resources.add(resource);
@@ -108,21 +105,23 @@ abstract public class AbstractFacesMojo extends AbstractMojo
    * @deprecated
    */
   protected URL[] readIndex(
-    MavenProject project,
-    String       resourcePath) throws MojoExecutionException
+    MavenProject project, @SuppressWarnings("unused") String resourcePath) throws MojoExecutionException
   {
     return readIndex(project);
   }
 
-  protected List getMasterConfigs(
+  protected List<URL> getMasterConfigs(
     MavenProject project) throws MojoExecutionException
   {
     if (localResource != null)
     {
-      List urls = new ArrayList();
-      try {
+      List<URL> urls = new ArrayList<URL>();
+      try
+      {
         urls.add(localResource.toURL());
-      } catch (MalformedURLException e) {
+      }
+      catch (MalformedURLException e)
+      {
         getLog().error("", e);
       }
       return urls;
@@ -140,7 +139,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     try
     {
       // 1. read master faces-config.xml resources
-      List masters = getMasterConfigs(project);
+      List<URL> masters = getMasterConfigs(project);
       if (masters.isEmpty())
       {
         getLog().warn("Master faces-config.xml not found");
@@ -148,14 +147,14 @@ abstract public class AbstractFacesMojo extends AbstractMojo
       }
       else
       {
-        List entries = new LinkedList();
+        List<URL> entries = new LinkedList<URL>();
 
         SAXParserFactory spf = SAXParserFactory.newInstance();
         spf.setNamespaceAware(true);
         // requires JAXP 1.3, in JavaSE 5.0
         // spf.setXIncludeAware(false);
 
-        for (Iterator<URL> i=masters.iterator(); i.hasNext();)
+        for (Iterator<URL> i = masters.iterator(); i.hasNext();)
         {
           URL url = i.next();
           Digester digester = new Digester(spf.newSAXParser());
@@ -173,7 +172,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
           digester.parse(url.openStream());
         }
 
-        return (URL[])entries.toArray(new URL[0]);
+        return entries.toArray(new URL[entries.size()]);
       }
     }
     catch (ParserConfigurationException e)
@@ -370,10 +369,13 @@ abstract public class AbstractFacesMojo extends AbstractMojo
 
     try
     {
-      List classpathElements = project.getCompileClasspathElements();
-      if (!classpathElements.isEmpty())
+      List<String> classpathElements = project.getCompileClasspathElements();
+      
+      int classpathElementCount = classpathElements.size();
+      
+      if (classpathElementCount > 0)
       {
-        String[] entries = (String[])classpathElements.toArray(new String[0]);
+        String[] entries = classpathElements.toArray(new String[classpathElementCount]);
         URL[] urls = new URL[entries.length];
         for (int i=0; i < urls.length; i++)
         {
@@ -394,10 +396,10 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     return cl;
   }
 
-  protected class SkipFilter extends ComponentFilter
+  protected class SkipFilter implements Filter<ComponentBean>
   {
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       String componentType = component.getComponentType();
 
@@ -408,7 +410,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     }
   }
 
-  static final protected class ComponentTypeFilter extends ComponentFilter
+  static final protected class ComponentTypeFilter implements Filter<ComponentBean>
   {
     public ComponentTypeFilter(
       String typePrefix)
@@ -416,16 +418,17 @@ abstract public class AbstractFacesMojo extends AbstractMojo
       _typePrefix = typePrefix;
     }
 
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       String componentType = component.getComponentType();
       return (componentType.startsWith(_typePrefix));
     }
-     private final String _typePrefix;
+    
+    private final String _typePrefix;
   }
 
-  static final protected class ComponentClassFilter extends ComponentFilter
+  static final protected class ComponentClassFilter implements Filter<ComponentBean>
   {
     public ComponentClassFilter(
       String packageContains)
@@ -433,8 +436,8 @@ abstract public class AbstractFacesMojo extends AbstractMojo
       _packageContains = packageContains;
     }
 
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       String componentClass = component.getComponentClass();
       String packageName = Util.getPackageFromFullClass(componentClass);
@@ -446,7 +449,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     private final String _packageContains;
   }
 
-  static final protected class ComponentTagClassFilter extends ComponentFilter
+  static final protected class ComponentTagClassFilter implements Filter<ComponentBean>
   {
     public ComponentTagClassFilter(
       String packageContains)
@@ -454,8 +457,8 @@ abstract public class AbstractFacesMojo extends AbstractMojo
       _packageContains = packageContains;
     }
 
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       String tagClass = component.getTagClass();
       String packageName = Util.getPackageFromFullClass(tagClass);
@@ -467,7 +470,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     private final String _packageContains;
   }
 
-  static final protected class ConverterTagClassFilter extends ConverterFilter
+  static final protected class ConverterTagClassFilter implements Filter<ConverterBean>
   {
     public ConverterTagClassFilter(
       String packageContains)
@@ -475,8 +478,8 @@ abstract public class AbstractFacesMojo extends AbstractMojo
       _packageContains = packageContains;
     }
 
-    protected boolean accept(
-      ConverterBean converter)
+    @Override
+    public boolean accept(ConverterBean converter)
     {
       String tagClass = converter.getTagClass();
       String packageName = Util.getPackageFromFullClass(tagClass);
@@ -488,7 +491,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     private final String _packageContains;
   }
 
-  static final protected class ValidatorTagClassFilter extends ValidatorFilter
+  static final protected class ValidatorTagClassFilter implements Filter<ValidatorBean>
   {
     public ValidatorTagClassFilter(
       String packageContains)
@@ -496,8 +499,8 @@ abstract public class AbstractFacesMojo extends AbstractMojo
       _packageContains = packageContains;
     }
 
-    protected boolean accept(
-      ValidatorBean validator)
+    @Override
+    public boolean accept(ValidatorBean validator)
     {
       String tagClass = validator.getTagClass();
       String packageName = Util.getPackageFromFullClass(tagClass);
@@ -511,34 +514,34 @@ abstract public class AbstractFacesMojo extends AbstractMojo
 
 
 
-  static final protected class ComponentTagFilter extends ComponentFilter
+  static final protected class ComponentTagFilter implements Filter<ComponentBean>
   {
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       return (component.getTagClass() != null);
     }
   }
 
-  static final protected class ConverterTagFilter extends ConverterFilter
+  static final protected class ConverterTagFilter implements Filter<ConverterBean>
   {
-    protected boolean accept(
-      ConverterBean converter)
+    @Override
+    public boolean accept(ConverterBean converter)
     {
       return (converter.getTagClass() != null);
     }
   }
 
-  static final protected class ValidatorTagFilter extends ValidatorFilter
+  static final protected class ValidatorTagFilter implements Filter<ValidatorBean>
   {
-    protected boolean accept(
-      ValidatorBean validator)
+    @Override
+    public boolean accept(ValidatorBean validator)
     {
       return (validator.getTagClass() != null);
     }
   }
 
-  static final protected class ComponentTagLibraryFilter extends ComponentFilter
+  static final protected class ComponentTagLibraryFilter implements Filter<ComponentBean>
   {
     public ComponentTagLibraryFilter(
       String namespaceURI)
@@ -554,8 +557,8 @@ abstract public class AbstractFacesMojo extends AbstractMojo
       _requireTagClass = requireTagClass;
     }
 
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       QName tagName = component.getTagName();
       String tagClass = component.getTagClass();
@@ -571,7 +574,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     private final boolean _requireTagClass;
   }
 
-  static final protected class ValidatorTagLibraryFilter extends ValidatorFilter
+  static final protected class ValidatorTagLibraryFilter implements Filter<ValidatorBean>
   {
     public ValidatorTagLibraryFilter(
       String namespaceURI)
@@ -587,8 +590,8 @@ abstract public class AbstractFacesMojo extends AbstractMojo
       _requireTagClass = requireTagClass;
     }
 
-    protected boolean accept(
-      ValidatorBean validator)
+    @Override
+    public boolean accept(ValidatorBean validator)
     {
       QName tagName = validator.getTagName();
       String tagClass = validator.getTagClass();
@@ -604,7 +607,7 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     private final boolean _requireTagClass;
   }
 
-  static final protected class ConverterTagLibraryFilter extends ConverterFilter
+  static final protected class ConverterTagLibraryFilter implements Filter<ConverterBean>
   {
     public ConverterTagLibraryFilter(
       String namespaceURI)
@@ -620,8 +623,8 @@ abstract public class AbstractFacesMojo extends AbstractMojo
       _requireTagClass = requireTagClass;
     }
 
-    protected boolean accept(
-      ConverterBean converter)
+    @Override
+    public boolean accept(ConverterBean converter)
     {
       QName tagName = converter.getTagName();
       String tagClass = converter.getTagClass();
@@ -637,10 +640,10 @@ abstract public class AbstractFacesMojo extends AbstractMojo
     private final boolean _requireTagClass;
   }
 
-  static protected class VirtualAttributeFilter extends AttributeFilter
+  static protected class VirtualAttributeFilter implements Filter<AttributeBean>
   {
-    protected boolean accept(
-      AttributeBean attribute)
+    @Override
+    public boolean accept(AttributeBean attribute)
     {
       return !attribute.isVirtual();
     }

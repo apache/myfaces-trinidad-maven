@@ -1057,7 +1057,7 @@ public class ComponentBean extends AbstractTagBean
     {
       ComponentBean parent = resolveSupertype();
       if (parent != null)
-        events = new CompoundIterator(events, parent.events(true));
+        events = new CompoundIterator<EventRefBean>(events, parent.events(true));
     }
     return events;
   }
@@ -1243,9 +1243,9 @@ public class ComponentBean extends AbstractTagBean
   private String  _defaultEventName;
   private boolean _namingContainer;
   private boolean _children = true;
-  private Map<String, PropertyBean> _properties;
-  private Map<String, FacetBean>    _facets;
-  private Map<String, EventRefBean>    _events;
+  private final Map<String, PropertyBean> _properties;
+  private final Map<String, FacetBean>    _facets;
+  private final Map<String, EventRefBean>    _events;
   private int     _componentClassModifiers;
   private int     _tagClassModifiers;
   private String[] _unsupportedAgents = new String[0];

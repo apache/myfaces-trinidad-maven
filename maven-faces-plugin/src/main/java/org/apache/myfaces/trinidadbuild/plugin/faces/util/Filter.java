@@ -18,8 +18,8 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.util;
 
-public interface Filter
+public interface Filter<T>
 {
   abstract public boolean accept(
-    Object obj);
+    T obj);
 }

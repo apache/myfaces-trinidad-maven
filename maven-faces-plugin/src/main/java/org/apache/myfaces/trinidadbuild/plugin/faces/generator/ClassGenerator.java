@@ -47,7 +47,7 @@ public interface ClassGenerator
       String packageName,
       String fullSuperclassName,
       String superclassName,
-      Collection components);
+      Collection<ComponentBean> components);
 
   void writeClassBegin(
       PrettyWriter out,

@@ -36,7 +36,7 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.generator.component.Trinida
 import org.apache.myfaces.trinidadbuild.plugin.faces.io.PrettyWriter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.ComponentBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacesConfigBean;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.ComponentFilter;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Filter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.SourceTemplate;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
@@ -86,13 +86,13 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
         getLog().warn("Event listener methods will not be generated");
 
       Iterator<ComponentBean> components = facesConfig.components();
-      components = new FilteredIterator(components, new SkipFilter());
-      components = new FilteredIterator(components,
+      components = new FilteredIterator<ComponentBean>(components, new SkipFilter());
+      components = new FilteredIterator<ComponentBean>(components,
                                         new ComponentTypeFilter(typePrefix));
 
       // incremental unless forced
       if (!force)
-        components = new FilteredIterator(components, new IfModifiedFilter());
+        components = new FilteredIterator<ComponentBean>(components, new IfModifiedFilter());
 
       if (!components.hasNext())
       {
@@ -315,10 +315,10 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
     }
   }
 
-  private class IfModifiedFilter extends ComponentFilter
+  private class IfModifiedFilter implements Filter<ComponentBean>
   {
-    protected boolean accept(
-      ComponentBean component)
+    @Override
+    public boolean accept(ComponentBean component)
     {
       String componentClass = component.getComponentClass();
       String sourcePath = Util.convertClassToSourcePath(componentClass, ".java");

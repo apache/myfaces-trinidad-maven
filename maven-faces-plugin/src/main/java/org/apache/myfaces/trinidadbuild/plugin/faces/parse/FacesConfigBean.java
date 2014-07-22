@@ -214,7 +214,7 @@ public class FacesConfigBean extends ObjectBean
   public EventBean findEvent(
     String eventType)
   {
-    return (EventBean)_events.get(eventType);
+    return _events.get(eventType);
   }
 
   /**
@@ -269,7 +269,7 @@ public class FacesConfigBean extends ObjectBean
   public RenderKitBean findRenderKit(
     String renderKitId)
   {
-    return (RenderKitBean)_renderKits.get(renderKitId);
+    return _renderKits.get(renderKitId);
   }
 
   /**

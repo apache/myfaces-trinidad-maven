@@ -42,8 +42,8 @@ import org.apache.myfaces.trinidadbuild.plugin.faces.parse.EventBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.EventRefBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.FacetBean;
 import org.apache.myfaces.trinidadbuild.plugin.faces.parse.PropertyBean;
+import org.apache.myfaces.trinidadbuild.plugin.faces.util.Filter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.FilteredIterator;
-import org.apache.myfaces.trinidadbuild.plugin.faces.util.PropertyFilter;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.SourceTemplate;
 import org.apache.myfaces.trinidadbuild.plugin.faces.util.Util;
 
@@ -186,7 +186,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     out.println(classStart + " class " + className +
         " extends " + superclassName);
 
-    Set interfaces = new HashSet();
+    Set<String> interfaces = new HashSet<String>();
     if (template != null)
       interfaces.addAll(template.getImplements());
 
@@ -214,7 +214,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
 
     if (!interfaces.isEmpty())
     {
-      Set implementsSet = new HashSet();
+      Set<String> implementsSet = new HashSet<String>();
       for (Iterator iter = interfaces.iterator(); iter.hasNext();)
       {
         String fcqn = (String) iter.next();
@@ -269,7 +269,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       String superclassName,
       ComponentBean component)
   {
-    Set imports = new TreeSet();
+    Set<String> imports = new TreeSet<String>();
 
     // Use the template imports
     if (template != null)
@@ -292,7 +292,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     }
 
     Iterator<PropertyBean> properties = component.properties();
-    properties = new FilteredIterator(properties, new NonVirtualFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new NonVirtualFilter());
     // PropertyKey only needed if there are properties
     if (properties.hasNext())
     {
@@ -366,14 +366,13 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     GeneratorHelper.writeImports(out, packageName, imports);
   }
 
-  protected void addSpecificImports(
-      Set imports,
-      ComponentBean component)
+  protected void addSpecificImports(@SuppressWarnings("unused") Set<String> imports,
+                                    @SuppressWarnings("unused") ComponentBean component)
   {
     // nothing by default
   }
 
-  public void addGenericImports(Set imports, String type)
+  public void addGenericImports(Set<String> imports, String type)
   {
     Matcher matcher = _GENERIC_TYPE.matcher(type);
     if (matcher.matches())
@@ -422,7 +421,7 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
   {
     //  component property keys
     Iterator<PropertyBean> properties = component.properties();
-    properties = new FilteredIterator(properties, new NonVirtualFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new NonVirtualFilter());
     while (properties.hasNext())
     {
       PropertyBean property = properties.next();
@@ -672,11 +671,11 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
       throws IOException
   {
     Iterator<PropertyBean> properties = component.properties();
-    properties = new FilteredIterator(properties, new NonVirtualFilter());
+    properties = new FilteredIterator<PropertyBean>(properties, new NonVirtualFilter());
     if (isAccessorMethodFinal())
     {
       // Do not generate property methods if they are final and the properties are overrides
-      properties = new FilteredIterator(properties, new NonOverriddenFilter());
+      properties = new FilteredIterator<PropertyBean>(properties, new NonOverriddenFilter());
     }
     while (properties.hasNext())
     {
@@ -1220,11 +1219,10 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
    return buff.toString();
   }
 
-  protected class ResolvableTypeFilter extends PropertyFilter
+  protected class ResolvableTypeFilter implements Filter<PropertyBean>
   {
     @Override
-    protected boolean accept(
-        PropertyBean property)
+    public boolean accept(PropertyBean property)
     {
       String propertyClass = property.getPropertyClass();
       String resolvableType = resolveType(propertyClass);
@@ -1232,22 +1230,19 @@ public abstract class AbstractComponentGenerator implements ComponentGenerator
     }
   }
 
-  protected class NonVirtualFilter extends PropertyFilter
+  protected class NonVirtualFilter implements Filter<PropertyBean>
   {
     @Override
-    protected boolean accept(
-        PropertyBean property)
+    public boolean accept(PropertyBean property)
     {
       return (!property.isVirtual());
     }
   }
 
-  protected static class NonOverriddenFilter
-    extends PropertyFilter
+  protected static class NonOverriddenFilter implements Filter<PropertyBean>
   {
     @Override
-    protected boolean accept(
-      PropertyBean property)
+    public boolean accept(PropertyBean property)
     {
       return (!property.isOverride());
     }

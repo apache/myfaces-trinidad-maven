@@ -40,13 +40,13 @@ public interface ComponentTagGenerator extends ClassGenerator
 
   void writeSetPropertiesMethod(PrettyWriter out,
                                 String componentClass,
-                                Collection components) throws IOException;
+                                Collection<ComponentBean> components) throws IOException;
 
   void writeReleaseMethod(PrettyWriter out,
                           ComponentBean component) throws IOException;
 
   void writeReleaseMethod(PrettyWriter out,
-                          Collection components) throws IOException;
+                          Collection<ComponentBean> components) throws IOException;
 
   void writeGetComponentType(PrettyWriter out,
                              ComponentBean component) throws IOException;
@@ -58,5 +58,5 @@ public interface ComponentTagGenerator extends ClassGenerator
                             ComponentBean component) throws IOException;
 
   void writePropertyMembers(PrettyWriter out,
-                            Collection components) throws IOException;
+                            Collection<ComponentBean> components) throws IOException;
 }

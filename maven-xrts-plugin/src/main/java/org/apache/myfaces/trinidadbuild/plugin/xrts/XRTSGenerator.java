@@ -23,9 +23,6 @@ import java.util.Map;
 import javax.xml.parsers.SAXParser;
 
 import org.xml.sax.InputSource;
-import org.xml.sax.Parser;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * The <code>XRTSGenerator</code> class is a online facility (as opposed to the
@@ -49,7 +46,7 @@ public final class XRTSGenerator
    *
    */
   public static void generate(SAXParser parser, InputSource is, RTSWriter rtsw,
-    Map parms) throws Throwable
+    Map<String, ?> parms) throws Throwable
   {
     XRTSParser rtsp = new XRTSParser(rtsw, parms);
     parser.parse(is, rtsp);

@@ -18,7 +18,6 @@
  */
 package org.apache.myfaces.trinidadbuild.plugin.faces.parse;
 
-import java.lang.Comparable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

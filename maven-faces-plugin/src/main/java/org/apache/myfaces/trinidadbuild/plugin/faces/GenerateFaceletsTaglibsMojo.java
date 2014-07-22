@@ -92,15 +92,18 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
         String namespaceURI = (String)entry.getValue();
 
         FacesConfigBean facesConfig = getFacesConfig();
-        Iterator components = facesConfig.components();
-        components = new FilteredIterator(components, new SkipFilter());
-        components = new FilteredIterator(components, new ComponentTagLibraryFilter(namespaceURI, false));
+        Iterator<ComponentBean> components = facesConfig.components();
+        components = new FilteredIterator<ComponentBean>(components, new SkipFilter());
+        components = new FilteredIterator<ComponentBean>(components,
+                                                        new ComponentTagLibraryFilter(namespaceURI, false));
 
-        Iterator validators = facesConfig.validators();
-        validators = new FilteredIterator(validators, new ValidatorTagLibraryFilter(namespaceURI, false));
+        Iterator<ValidatorBean> validators = facesConfig.validators();
+        validators = new FilteredIterator<ValidatorBean>(validators,
+                                                         new ValidatorTagLibraryFilter(namespaceURI, false));
 
-        Iterator converters = facesConfig.converters();
-        converters = new FilteredIterator(converters, new ConverterTagLibraryFilter(namespaceURI, false));
+        Iterator<ConverterBean> converters = facesConfig.converters();
+        converters = new FilteredIterator<ConverterBean>(converters,
+                                                         new ConverterTagLibraryFilter(namespaceURI, false));
 
 
         String targetPath = "META-INF/" + shortName + ".taglib.xml";
@@ -340,11 +343,11 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
 
     if (isJSF20PLus)
     {
-      Iterator properties = component.properties(true);
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
+      Iterator<PropertyBean> properties = component.properties(true);
+      properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
       while (properties.hasNext())
       {
-        PropertyBean property = (PropertyBean)properties.next();
+        PropertyBean property = properties.next();
         writeTagAttribute(stream,
                            property.getPropertyName(),
                            property.getDescription(),
@@ -408,11 +411,11 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
       // validators need an id attribute
       writeTagAttribute(stream, "id", "the identifier for the validator", null, null);
 
-      Iterator properties = validator.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
+      Iterator<PropertyBean> properties = validator.properties();
+      properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
       while (properties.hasNext())
       {
-        PropertyBean property = (PropertyBean)properties.next();
+        PropertyBean property = properties.next();
         writeTagAttribute(stream,
                            property.getPropertyName(),
                            property.getDescription(),
@@ -476,11 +479,11 @@ public class GenerateFaceletsTaglibsMojo extends AbstractFacesMojo
       // converters need an id attribute
       writeTagAttribute(stream, "id", "the identifier for the converter", null, null);
 
-      Iterator properties = converter.properties();
-      properties = new FilteredIterator(properties, new TagAttributeFilter());
+      Iterator<PropertyBean> properties = converter.properties();
+      properties = new FilteredIterator<PropertyBean>(properties, new TagAttributeFilter());
       while (properties.hasNext())
       {
-        PropertyBean property = (PropertyBean)properties.next();
+        PropertyBean property = properties.next();
         writeTagAttribute(stream,
                            property.getPropertyName(),
                            property.getDescription(),

@@ -39,13 +39,13 @@ public interface RTSWriter
 {
 
   /**
-   * Writes the <file or other output header(s).
+   * Writes the file or other output header(s).
    *
    * @param parms a <code>Map</code> of command line parameters.
    * @param meta a <code>Map</code> of parsed non-resource data
    * (e.g., package).
    */
-  public void startBundle(Map parms, Map meta)
+  public void startBundle(Map<String, ?> parms, Map<String, ?> meta)
     throws Throwable;
 
   /**
@@ -67,7 +67,7 @@ public interface RTSWriter
    * @param key a <code>String</code> key.
    * @param value a <code>String</code> value.
    */
-  public void writeString(Map parms, Map meta, String key,
+  public void writeString(Map<String, ?> parms, Map<String, ?> meta, String key,
     String value) throws Throwable;
 
   /**
@@ -77,6 +77,6 @@ public interface RTSWriter
    * @param meta a <code>Map</code> of parsed non-resource data
    * (e.g., package).
    */
-  public void endBundle(Map parms, Map meta) throws Throwable;
+  public void endBundle(Map<String, ?> parms, Map<String, ?> meta) throws Throwable;
 
 }

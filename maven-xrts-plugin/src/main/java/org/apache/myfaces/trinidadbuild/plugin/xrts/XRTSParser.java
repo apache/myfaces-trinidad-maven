@@ -22,14 +22,11 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.List;
 
 import org.xml.sax.AttributeList;
 import org.xml.sax.HandlerBase;
-import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * */
@@ -44,7 +41,7 @@ final class XRTSParser extends HandlerBase
   {
   }
 
-  public XRTSParser(RTSWriter bw, Map parms)
+  public XRTSParser(RTSWriter bw, Map<String, ?> parms)
   {
     _bundleWriter = bw;
     _parms = parms;
@@ -58,6 +55,7 @@ final class XRTSParser extends HandlerBase
    *
    * @param locator A locator for all SAX document events.
    */
+  @Override
   public void setDocumentLocator (Locator locator)
   {
     _locator = locator;
@@ -78,6 +76,7 @@ final class XRTSParser extends HandlerBase
    * Receive notification of the end of the document.
    * SAX Parser event for finding the end of an XML-based RTS document
    */
+  @Override
   public void endDocument() throws SAXException
   {
 //    System.out.println("EndDocument");
@@ -97,6 +96,7 @@ final class XRTSParser extends HandlerBase
    * @param name the element type name.
    * @param attributes the specified or defaulted attributes.
    */
+  @Override
   public void startElement(String name, AttributeList atts) throws SAXException
   {
     _nestingLevel++;
@@ -144,6 +144,7 @@ final class XRTSParser extends HandlerBase
    * Receive notification of the end of an element.
    * @param name the element type name.
    */
+  @Override
   public void endElement(String name) throws SAXException
   {
     if ((_nestingLevel == 2) && name.equals("resource"))
@@ -169,6 +170,7 @@ final class XRTSParser extends HandlerBase
    * @param start the start position in the character array.
    * @param length the number of characters to use from the character array.
    */
+  @Override
   public void ignorableWhitespace(char[] cbuf, int start, int len)
     throws SAXException
   {
@@ -182,6 +184,7 @@ final class XRTSParser extends HandlerBase
    * @param start the start position in the character array.
    * @param length the number of characters to use from the character array.
    */
+  @Override
   public void characters(char[] cbuf, int start, int len) throws SAXException
   {
     if (_nestingLevel == 2)
@@ -200,7 +203,7 @@ final class XRTSParser extends HandlerBase
   private Set<String> _uniqKeys = new HashSet<String>();
 
   private RTSWriter _bundleWriter;
-  private Map _parms;
+  private Map<String, ?> _parms;
 
   private int _nestingLevel = 0;
   private boolean _startDoc = false;

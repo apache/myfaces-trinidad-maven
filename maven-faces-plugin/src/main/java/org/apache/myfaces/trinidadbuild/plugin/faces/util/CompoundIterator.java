@@ -25,38 +25,41 @@ import java.util.NoSuchElementException;
  * CompoundIterator consumes the initial iterator before
  * observing the next iterator.
  */
-public class CompoundIterator implements Iterator
+public class CompoundIterator<T> implements Iterator<T>
 {
   public CompoundIterator(
-    Iterator primary,
-    Iterator secondary)
+    Iterator<T> primary,
+    Iterator<T> secondary)
   {
     this(new Iterator[] {primary, secondary});
   }
 
   public CompoundIterator(
-    Iterator[] iterators)
+    Iterator<T>[] iterators)
   {
     _iterators = iterators;
     _index = 0;
     _advance();
   }
 
+  @Override
   public boolean hasNext()
   {
     return (_next != null);
   }
 
-  public Object next()
+  @Override
+  public T next()
   {
     if (_next == null)
       throw new NoSuchElementException();
 
-    Object obj = _next;
+    T obj = _next;
     _advance();
     return obj;
   }
 
+  @Override
   public void remove()
   {
     throw new UnsupportedOperationException();
@@ -64,7 +67,7 @@ public class CompoundIterator implements Iterator
 
   private void _advance()
   {
-    Iterator current = _iterators[_index];
+    Iterator<T> current = _iterators[_index];
     if (current != null && !current.hasNext())
     {
       _index ++;
@@ -74,7 +77,7 @@ public class CompoundIterator implements Iterator
     _next = (current != null && current.hasNext()) ? current.next() : null;
   }
 
-  private Object _next;
-  private Iterator[] _iterators;
+  private final Iterator<T>[] _iterators;
+  private T _next;
   private int _index;
 }

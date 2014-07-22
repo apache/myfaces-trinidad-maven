@@ -19,20 +19,21 @@
 package org.apache.myfaces.trinidadbuild.plugin.faces.util;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * SortedIterator presents the elements of another iterator in a sorted order.
  */
-public class SortedIterator implements Iterator
+public class SortedIterator<T extends Comparable<? super T>> implements Iterator<T>
 {
   public SortedIterator(
-    Iterator unsorted)
+    Iterator<T> unsorted)
   {
      // this implementation just pulls the entire contents into a list --
      // it will be awkward if the unsorted iterator is infinite
-     ArrayList sortedList = new ArrayList();
+     List<T> sortedList = new ArrayList<T>();
      while(unsorted.hasNext())
      {
        sortedList.add(unsorted.next());
@@ -41,21 +42,23 @@ public class SortedIterator implements Iterator
      _sorted = sortedList.iterator();
   }
 
+  @Override
   public boolean hasNext()
   {
     return _sorted.hasNext();
   }
 
-  public Object next()
+  @Override
+  public T next()
   {
     return _sorted.next();
   }
 
+  @Override
   public void remove()
   {
     throw new UnsupportedOperationException();
   }
 
-  private final Iterator _sorted;
-
+  private final Iterator<T> _sorted;
 }
