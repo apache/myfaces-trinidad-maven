@@ -35,8 +35,8 @@
   </issueManagement>
 
   <ciManagement>
-    <system>continuum</system>
-    <url>http://myfaces.zones.apache.org:8080/continuum</url>
+    <system>jenkins</system>
+    <url>https://builds.apache.org/view/M-R/view/MyFaces/</url>
     <notifiers>
       <notifier>
         <type>mail</type>
