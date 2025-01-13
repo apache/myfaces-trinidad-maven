@@ -188,7 +188,7 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
         File subclassFile = new File(templateSourceDirectory, subclassPath);
         boolean hasSubclass = subclassFile.exists();
 
-        // we should never have both the tempalte and the subclass
+        // we should never have both the template and the subclass
         if (hasTemplate && hasSubclass)
           throw new IllegalStateException("Both old style " + templatePath + " and new style " +
                                           subclassPath + " component templates exist!");
@@ -206,7 +206,7 @@ public class GenerateComponentsMojo extends AbstractFacesMojo
           outClassName     = "Partial" + className;
           outFullClassName = Util.getPackageFromFullClass(fullClassName) + '.' + outClassName;
 
-          defaultConstructorModifier = 0; // package pivate
+          defaultConstructorModifier = 0; // package private
 
           // copy the file template to the destination directory
           File destFile = new File(generatedSourceDirectory, subclassPath);
